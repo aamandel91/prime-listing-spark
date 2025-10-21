@@ -15,6 +15,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, SlidersHorizontal, MapPin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import BedsFilter from "@/components/search/BedsFilter";
+import BathsFilter from "@/components/search/BathsFilter";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -554,32 +556,9 @@ const Listings = () => {
                 </SelectContent>
               </Select>
               
-              <Select value={minBeds} onValueChange={setMinBeds}>
-                <SelectTrigger className="md:w-32 h-12">
-                  <SelectValue placeholder="Beds" />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  <SelectItem value="any">Any</SelectItem>
-                  <SelectItem value="1">1+</SelectItem>
-                  <SelectItem value="2">2+</SelectItem>
-                  <SelectItem value="3">3+</SelectItem>
-                  <SelectItem value="4">4+</SelectItem>
-                  <SelectItem value="5">5+</SelectItem>
-                </SelectContent>
-              </Select>
+              <BedsFilter value={minBeds} onChange={setMinBeds} />
               
-              <Select value={minBaths} onValueChange={setMinBaths}>
-                <SelectTrigger className="md:w-32 h-12">
-                  <SelectValue placeholder="Baths" />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  <SelectItem value="any">Any</SelectItem>
-                  <SelectItem value="1">1+</SelectItem>
-                  <SelectItem value="2">2+</SelectItem>
-                  <SelectItem value="3">3+</SelectItem>
-                  <SelectItem value="4">4+</SelectItem>
-                </SelectContent>
-              </Select>
+              <BathsFilter value={minBaths} onChange={setMinBaths} />
 
               <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <DialogTrigger asChild>

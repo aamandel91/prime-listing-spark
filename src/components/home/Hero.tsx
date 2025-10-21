@@ -1,13 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BedsFilter from "@/components/search/BedsFilter";
+import BathsFilter from "@/components/search/BathsFilter";
 
 const Hero = () => {
   const [activeTab, setActiveTab] = useState("buying");
+  const navigate = useNavigate();
+  
+  // Search form states
+  const [location, setLocation] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [beds, setBeds] = useState("any");
+  const [baths, setBaths] = useState("any");
+  
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (location) params.set("location", location);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (beds && beds !== "any") params.set("beds", beds);
+    if (baths && baths !== "any") params.set("baths", baths);
+    
+    navigate(`/listings?${params.toString()}`);
+  };
 
   return (
     <section className="relative min-h-[700px] flex items-center justify-center overflow-hidden">
@@ -69,9 +90,12 @@ const Hero = () => {
                     <Input
                       placeholder="Enter Location, Zip, Address or MLS #"
                       className="pl-10 h-12 border-0 focus-visible:ring-1"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
-                  <Select>
+                  <Select value={minPrice} onValueChange={setMinPrice}>
                     <SelectTrigger className="md:w-40 h-12">
                       <SelectValue placeholder="Min Price" />
                     </SelectTrigger>
@@ -84,7 +108,7 @@ const Hero = () => {
                       <SelectItem value="1000000">$1,000,000</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select>
+                  <Select value={maxPrice} onValueChange={setMaxPrice}>
                     <SelectTrigger className="md:w-40 h-12">
                       <SelectValue placeholder="Max Price" />
                     </SelectTrigger>
@@ -97,12 +121,15 @@ const Hero = () => {
                       <SelectItem value="0">No Max</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Link to="/listings">
-                    <Button className="h-12 w-full md:w-auto px-8 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
-                      <Search className="w-5 h-5 mr-2" />
-                      Search Homes
-                    </Button>
-                  </Link>
+                  <BedsFilter value={beds} onChange={setBeds} />
+                  <BathsFilter value={baths} onChange={setBaths} />
+                  <Button 
+                    className="h-12 w-full md:w-auto px-8 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                    onClick={handleSearch}
+                  >
+                    <Search className="w-5 h-5 mr-2" />
+                    Search Homes
+                  </Button>
                 </div>
                 <Button variant="link" className="text-primary hover:text-primary/80 mt-4">
                   Search Properties Near Me
