@@ -9,6 +9,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import AdvancedSearch from "./pages/AdvancedSearch";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/neighborhood/:neighborhoodSlug" element={<CityTemplate />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPost />} />
+            <Route path="/advanced-search" element={<AdvancedSearch />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

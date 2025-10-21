@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Search, MapPin, Map, Building2, DollarSign } from "lucide-react";
+import { Menu, X, Home, MapPin, Map, Building2, DollarSign } from "lucide-react";
+import SearchDropdown from "./SearchDropdown";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const leftLinks = [
-    { to: "/listings", label: "Search", icon: Search },
     { to: "/cities", label: "Cities", icon: MapPin },
     { to: "/counties", label: "Counties", icon: Map },
     { to: "/property-types", label: "Property Type", icon: Building2 },
@@ -25,6 +25,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Left Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
+            <SearchDropdown />
             {leftLinks.map((link) => (
               <Link key={link.to} to={link.to}>
                 <Button variant="ghost" className="text-foreground hover:text-primary">
@@ -66,6 +67,13 @@ const Navbar = () => {
         {isOpen && (
           <div className="lg:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col space-y-2">
+              <Link
+                to="/advanced-search"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
+              >
+                <span className="text-foreground">Search</span>
+              </Link>
               {leftLinks.map((link) => (
                 <Link
                   key={link.to}
