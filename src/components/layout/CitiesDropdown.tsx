@@ -49,12 +49,10 @@ const CitiesDropdown = () => {
   return (
     <NavigationMenu>
       <NavigationMenuItem>
-        <NavigationMenuTrigger asChild>
-          <Link to="/cities">
-            <Button variant="ghost" className="text-foreground hover:text-primary">
-              Cities
-            </Button>
-          </Link>
+        <NavigationMenuTrigger className="bg-transparent hover:bg-transparent">
+          <Button variant="ghost" className="text-foreground hover:text-primary p-0">
+            Cities
+          </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <div className="grid grid-cols-3 gap-8 p-6 w-[800px] bg-background">

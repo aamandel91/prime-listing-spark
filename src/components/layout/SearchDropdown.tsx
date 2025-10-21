@@ -30,12 +30,10 @@ const SearchDropdown = () => {
   return (
     <NavigationMenu>
       <NavigationMenuItem>
-        <NavigationMenuTrigger asChild>
-          <Link to="/advanced-search">
-            <Button variant="ghost" className="text-foreground hover:text-primary">
-              Search
-            </Button>
-          </Link>
+        <NavigationMenuTrigger className="bg-transparent hover:bg-transparent">
+          <Button variant="ghost" className="text-foreground hover:text-primary p-0">
+            Search
+          </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background">
