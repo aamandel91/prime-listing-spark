@@ -38,7 +38,7 @@ const SearchDropdown = () => {
           </Link>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="grid grid-cols-2 gap-8 p-6 w-[600px]">
+          <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background">
             {/* Search By Region */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Search By Region</h3>
