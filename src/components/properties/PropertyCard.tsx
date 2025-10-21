@@ -105,22 +105,18 @@ const PropertyCard = ({
             {formatPrice(price)}
           </div>
           
-          <div className="flex items-center gap-4 mb-3">
-            <div className="flex items-center gap-1">
-              <BedDouble className="w-5 h-5 text-muted-foreground" />
-              <span className="font-semibold text-foreground">{beds}</span>
-              <span className="text-sm text-muted-foreground">bd</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Bath className="w-5 h-5 text-muted-foreground" />
-              <span className="font-semibold text-foreground">{baths}</span>
-              <span className="text-sm text-muted-foreground">ba</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Square className="w-5 h-5 text-muted-foreground" />
-              <span className="font-semibold text-foreground">{sqft.toLocaleString()}</span>
-              <span className="text-sm text-muted-foreground">sqft</span>
-            </div>
+          <div className="flex items-center gap-2 mb-3 text-sm">
+            <span className="text-foreground">
+              <span className="font-bold">{beds}</span> bds
+            </span>
+            <span className="text-muted-foreground">|</span>
+            <span className="text-foreground">
+              <span className="font-bold">{baths}</span> ba
+            </span>
+            <span className="text-muted-foreground">|</span>
+            <span className="text-foreground">
+              <span className="font-bold">{sqft.toLocaleString()}</span> sqft
+            </span>
           </div>
 
           <div className="text-sm text-muted-foreground mb-2">
