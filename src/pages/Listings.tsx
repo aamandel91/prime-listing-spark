@@ -583,13 +583,13 @@ const Listings = () => {
 
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Map - Left Side (40%) */}
-          <div className="hidden lg:block w-2/5 h-[calc(100vh-180px)] sticky top-[180px]">
+          {/* Map - Left Side (50%) */}
+          <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px]">
             <PropertyMap properties={properties} />
           </div>
 
-          {/* Results - Right Side (60%) */}
-          <div className="w-full lg:w-3/5 overflow-y-auto">
+          {/* Results - Right Side (50%) */}
+          <div className="w-full lg:w-1/2 overflow-y-auto">
             <div className="p-6">
               <BreadcrumbSEO items={breadcrumbItems} />
               
@@ -615,7 +615,7 @@ const Listings = () => {
               </div>
 
               {/* Property Cards - 2 Column Grid */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {properties.map((property) => (
                   <PropertyCard key={property.id} {...property} />
                 ))}
