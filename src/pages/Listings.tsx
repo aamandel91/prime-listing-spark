@@ -526,7 +526,7 @@ const Listings = () => {
       
       <main className="flex-1 flex flex-col">
         {/* Top Search Bar */}
-        <div className="bg-background border-b border-border sticky top-16 z-40">
+        <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-col md:flex-row gap-3">
               <div className="flex-1 relative">
