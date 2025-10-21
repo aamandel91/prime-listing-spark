@@ -233,184 +233,196 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-              {/* Left column - Images and details */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Image gallery */}
-                <div className="grid grid-cols-5 gap-2">
-                  <div className="col-span-3 relative rounded-lg overflow-hidden aspect-video">
-                    <img
-                      src={property.images[currentImageIndex]}
-                      alt={property.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                      <span className="font-semibold text-sm">For sale</span>
-                    </div>
+            <div className="p-4 md:p-6">
+              {/* Image gallery */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
+                <div className="md:col-span-2 relative rounded-lg overflow-hidden aspect-video md:aspect-[16/10]">
+                  <img
+                    src={property.images[currentImageIndex]}
+                    alt={property.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                    <span className="font-semibold text-sm">For sale</span>
                   </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute bottom-4 right-4"
+                  >
+                    View all 14 Photos
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
                   {property.images.slice(1, 5).map((img, idx) => (
                     <div 
                       key={idx}
-                      className="relative rounded-lg overflow-hidden aspect-square cursor-pointer"
+                      className="relative rounded-lg overflow-hidden aspect-video md:aspect-square cursor-pointer"
                       onClick={() => setCurrentImageIndex(idx + 1)}
                     >
                       <img src={img} alt={`View ${idx + 2}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
-
-                {/* Price and stats */}
-                <div>
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="text-3xl font-bold">{formatPrice(property.price)}</div>
-                    <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">
-                      {property.status.toUpperCase()}
-                    </Badge>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-                      <Bed className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Beds</span>
-                      <span className="font-bold">{property.beds}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-                      <Bath className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Baths</span>
-                      <span className="font-bold">{property.baths}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-                      <Square className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Sqft</span>
-                      <span className="font-bold">{property.sqft.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Additional details */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3">
-                    <Ruler className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Acres</div>
-                      <div className="font-semibold">{property.acres}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Year</div>
-                      <div className="font-semibold">{property.yearBuilt}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Days on Site</div>
-                      <div className="font-semibold">{property.daysOnSite}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <DollarSign className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Per Square Foot</div>
-                      <div className="font-semibold">${property.pricePerSqFt}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Description */}
-                <div>
-                  <h3 className="text-xl font-bold mb-3">Description</h3>
-                  <p className="text-muted-foreground leading-relaxed">{property.description}</p>
-                </div>
               </div>
 
-              {/* Right column - CTA */}
-              <div className="space-y-4">
-                <Card className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Request a Tour</h3>
-                  
-                  {/* Date Selection */}
-                  <div className="mb-4">
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      {tourDates.slice(0, 3).map((date, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedDate(date.fullDate)}
-                          className={`flex-shrink-0 flex flex-col items-center justify-center p-3 rounded-lg border-2 min-w-[80px] transition-colors ${
-                            selectedDate === date.fullDate
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
-                          <div className="text-xs font-medium text-muted-foreground">{date.dayOfWeek}</div>
-                          <div className={`text-2xl font-bold ${
-                            selectedDate === date.fullDate ? 'text-primary' : 'text-foreground'
-                          }`}>{date.day}</div>
-                          <div className="text-xs font-medium text-muted-foreground">{date.month}</div>
-                        </button>
-                      ))}
+              {/* Property header */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Title and price */}
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2">{property.address}</h1>
+                    <p className="text-lg text-muted-foreground mb-4">
+                      {property.city}, {property.state} {property.zip}
+                    </p>
+                    
+                    <div className="flex flex-wrap items-center gap-4 mb-6">
+                      <div className="text-3xl font-bold">{formatPrice(property.price)}</div>
+                      <Badge className="bg-primary/20 text-primary hover:bg-primary/30 border-0 text-sm px-3 py-1">
+                        {property.status.toUpperCase()}
+                      </Badge>
+                      <div className="flex items-center gap-4 text-base">
+                        <div className="flex items-center gap-1">
+                          <Bed className="w-5 h-5" />
+                          <span>Beds {property.beds}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Bath className="w-5 h-5" />
+                          <span>Baths {property.baths}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Square className="w-5 h-5" />
+                          <span>Sqft {property.sqft.toLocaleString()}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Tour Type */}
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <button
-                      onClick={() => setTourType("in-person")}
-                      className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-colors ${
-                        tourType === "in-person"
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <Home className={`w-5 h-5 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className="font-semibold text-sm">In person</span>
-                    </button>
-                    <button
-                      onClick={() => setTourType("video")}
-                      className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-colors ${
-                        tourType === "video"
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <Video className={`w-5 h-5 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className="font-semibold text-sm">Video</span>
-                    </button>
-                  </div>
-
-                  <Button className="w-full mb-2">Request Tour</Button>
-                  <p className="text-xs text-muted-foreground text-center mb-4">
-                    Tour for free, no strings attached
-                  </p>
-
-                  <Separator className="my-4" />
-
-                  <Button variant="outline" className="w-full border-2">
-                    Start an Offer
-                  </Button>
-                </Card>
-
-                {/* Contact */}
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-primary" />
+                    {/* CTA buttons - mobile */}
+                    <div className="flex flex-col sm:flex-row gap-3 mb-6 lg:hidden">
+                      <Button className="flex-1" size="lg">Request a Tour</Button>
+                      <Button variant="outline" className="flex-1" size="lg">Ask a Question</Button>
                     </div>
-                    <div>
-                      <div className="font-semibold">Call Us</div>
-                      <a href="tel:919-249-8536" className="text-sm text-primary hover:underline">
+                    <div className="flex items-center gap-2 text-primary mb-6 lg:hidden">
+                      <Phone className="w-5 h-5" />
+                      <a href="tel:919-249-8536" className="text-lg font-semibold hover:underline">
                         919-249-8536
                       </a>
                     </div>
                   </div>
-                </Card>
+
+                  {/* Property details grid */}
+                  <div className="bg-muted/30 rounded-lg p-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Acres</div>
+                        <div className="font-semibold">{property.acres}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Year</div>
+                        <div className="font-semibold">{property.yearBuilt}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Days on Site</div>
+                        <div className="font-semibold">{property.daysOnSite}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Property Type</div>
+                        <div className="font-semibold">{property.propertyType}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Sub Type</div>
+                        <div className="font-semibold">{property.subType}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Per Square Foot</div>
+                        <div className="font-semibold">${property.pricePerSqFt}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Date Listed</div>
+                        <div className="font-semibold">{property.dateListed}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Description of {property.address}</h2>
+                    <div className="space-y-3">
+                      <p className="text-muted-foreground leading-relaxed">
+                        <span className="font-semibold text-foreground">Listing details for {property.address}:</span> {property.description}
+                      </p>
+                      <Button variant="link" className="px-0 text-primary">
+                        View More
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-4">
+                      Listing Updated: {property.dateListed}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right sidebar - desktop only */}
+                <div className="hidden lg:block space-y-6">
+                  {/* CTA buttons */}
+                  <div className="space-y-3">
+                    <Button className="w-full" size="lg">Request a Tour</Button>
+                    <Button variant="outline" className="w-full" size="lg">Ask a Question</Button>
+                    <div className="flex items-center gap-2 text-primary justify-center">
+                      <Phone className="w-5 h-5" />
+                      <a href="tel:919-249-8536" className="text-lg font-semibold hover:underline">
+                        919-249-8536
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Home Details card */}
+                  <Card className="p-6">
+                    <h3 className="text-xl font-bold mb-4">Home Details</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {property.address}, {property.city}, {property.state} {property.zip}
+                    </p>
+                    
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Status</span>
+                        <span className="font-semibold">{property.status}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">MLS #ID</span>
+                        <span className="font-semibold">{property.mlsId}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Price</span>
+                        <span className="font-semibold">{formatPrice(property.price)}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Bedrooms</span>
+                        <span className="font-semibold">{property.beds}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Bathrooms</span>
+                        <span className="font-semibold">{property.baths}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Square Footage</span>
+                        <span className="font-semibold">{property.sqft.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Acres</span>
+                        <span className="font-semibold">{property.acres}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Year</span>
+                        <span className="font-semibold">{property.yearBuilt}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-muted-foreground">Days on Site</span>
+                        <span className="font-semibold">{property.daysOnSite}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
