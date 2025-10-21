@@ -5,7 +5,7 @@ import CTASection from "@/components/home/CTASection";
 import PropertyTypes from "@/components/home/PropertyTypes";
 import PopularSearches from "@/components/home/PopularSearches";
 import ExploreListings from "@/components/home/ExploreListings";
-import FeaturedProperties from "@/components/home/FeaturedProperties";
+import RecentBlogs from "@/components/home/RecentBlogs";
 
 const Index = () => {
   return (
@@ -18,7 +18,7 @@ const Index = () => {
         <PropertyTypes />
         <PopularSearches />
         <ExploreListings />
-        <FeaturedProperties />
+        <RecentBlogs />
       </main>
 
       <Footer />
