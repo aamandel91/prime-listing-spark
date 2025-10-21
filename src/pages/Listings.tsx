@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyMap from "@/components/map/PropertyMap";
+import { PropertyDetailModal } from "@/components/properties/PropertyDetailModal";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import PriceFilter from "@/components/search/PriceFilter";
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   
   // Filter states - Initialize from URL params
   const [location, setLocation] = useState(searchParams.get("location") || "");
@@ -622,7 +624,11 @@ const Listings = () => {
               {filteredProperties.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {filteredProperties.map((property) => (
-                    <PropertyCard key={property.id} {...property} />
+                    <PropertyCard 
+                      key={property.id} 
+                      {...property} 
+                      onOpenModal={setSelectedPropertyId}
+                    />
                   ))}
                 </div>
               ) : (
@@ -648,6 +654,15 @@ const Listings = () => {
           </div>
         </div>
       </main>
+
+      {/* Property Detail Modal */}
+      {selectedPropertyId && (
+        <PropertyDetailModal
+          isOpen={!!selectedPropertyId}
+          onClose={() => setSelectedPropertyId(null)}
+          propertyId={selectedPropertyId}
+        />
+      )}
 
       <Footer />
     </div>
