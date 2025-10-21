@@ -267,6 +267,21 @@ export default function PropertyDetail() {
           </div>
         </div>
 
+        {/* Mortgage Prequalification CTA */}
+        <div className="flex items-center justify-center gap-2 py-3 text-lg">
+          <span className="text-muted-foreground">Est. {formatPrice(2482)}/mo</span>
+          <span className="text-muted-foreground">-</span>
+          <button 
+            onClick={() => setIsContactDialogOpen(true)}
+            className="text-primary font-semibold hover:underline"
+          >
+            Get prequalified
+          </button>
+          <button className="text-muted-foreground hover:text-foreground">
+            ⓘ
+          </button>
+        </div>
+
         <Separator />
 
         {/* Additional Property Info Grid */}
@@ -329,161 +344,6 @@ export default function PropertyDetail() {
           <h2 className="text-2xl font-bold mb-4">Description of {property.address}</h2>
           <p className="text-muted-foreground leading-relaxed">{property.description}</p>
         </div>
-
-        <Separator />
-
-        {/* Thinking of Buying - Tour Scheduling CTA */}
-        <Card className="border-2">
-          <div className="p-6">
-            <h2 className="text-3xl font-bold mb-6">Thinking of buying?</h2>
-            
-            {/* Date Selection */}
-            <div className="mb-6">
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {tourDates.map((date, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedDate(date.fullDate)}
-                    className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-lg border-2 min-w-[100px] transition-colors ${
-                      selectedDate === date.fullDate
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-muted-foreground">{date.dayOfWeek}</div>
-                    <div className={`text-3xl font-bold ${
-                      selectedDate === date.fullDate ? 'text-primary' : 'text-foreground'
-                    }`}>{date.day}</div>
-                    <div className="text-sm font-medium text-muted-foreground">{date.month}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tour Type Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
-                onClick={() => setTourType("in-person")}
-                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
-                  tourType === "in-person"
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className="font-semibold">Tour in person</span>
-              </button>
-              <button
-                onClick={() => setTourType("video")}
-                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
-                  tourType === "video"
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className="font-semibold">Tour via video chat</span>
-              </button>
-            </div>
-
-            {/* Request Showing Button */}
-            <Button 
-              className="w-full h-14 text-lg mb-2"
-              size="lg"
-              onClick={() => setIsContactDialogOpen(true)}
-            >
-              Request showing
-            </Button>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Tour for free, no strings attached
-            </p>
-
-            {/* OR Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-background px-4 text-lg font-semibold text-muted-foreground">OR</span>
-              </div>
-            </div>
-
-            {/* Start an Offer Button */}
-            <Button 
-              variant="outline" 
-              className="w-full h-14 text-lg mb-2 border-2"
-              size="lg"
-              onClick={() => setIsContactDialogOpen(true)}
-            >
-              Start an offer
-            </Button>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Make a winning offer with the help of a local agent
-            </p>
-
-            {/* Ask a Question Link */}
-            <div className="text-center">
-              <Button 
-                variant="link" 
-                className="text-primary text-lg font-semibold"
-                onClick={() => setIsContactDialogOpen(true)}
-              >
-                Ask a question
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Open Houses Section */}
-        <Card className="border-2">
-          <div className="p-6">
-            <h2 className="text-3xl font-bold mb-6">Open houses</h2>
-            
-            {/* No Open Houses Message */}
-            <div className="flex items-start gap-3 mb-6 p-4 bg-muted/30 rounded-lg">
-              <Calendar className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-1" />
-              <p className="text-lg text-muted-foreground">No upcoming open houses</p>
-            </div>
-
-            {/* Schedule Tour */}
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold">Schedule a tour today</h3>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Tour with FloridaHomeFinder and one of our agents will be there to answer all your questions.
-              </p>
-
-              {/* Sample Tour Times */}
-              <div className="border-2 rounded-lg p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Home className="w-6 h-6 text-primary" />
-                  <div>
-                    <div className="font-semibold">Wednesday, Oct 22</div>
-                    <div className="flex items-center gap-2 text-primary font-medium">
-                      <span>9am</span>
-                      <span>•</span>
-                      <span>10am</span>
-                      <span>•</span>
-                      <span>11am</span>
-                      <span>•</span>
-                      <button className="hover:underline">Check for more</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Schedule Button */}
-              <Button 
-                className="w-full h-14 text-lg"
-                size="lg"
-                onClick={() => setIsContactDialogOpen(true)}
-              >
-                Schedule a tour
-              </Button>
-            </div>
-          </div>
-        </Card>
 
         <Separator />
 
@@ -660,6 +520,161 @@ export default function PropertyDetail() {
                 <h4 className="font-semibold mb-2">Source</h4>
                 <p className="text-sm text-muted-foreground">{property.source}</p>
               </div>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Thinking of Buying - Tour Scheduling CTA */}
+        <Card className="border-2">
+          <div className="p-6">
+            <h2 className="text-3xl font-bold mb-6">Thinking of buying?</h2>
+            
+            {/* Date Selection */}
+            <div className="mb-6">
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {tourDates.map((date, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedDate(date.fullDate)}
+                    className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-lg border-2 min-w-[100px] transition-colors ${
+                      selectedDate === date.fullDate
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-sm font-medium text-muted-foreground">{date.dayOfWeek}</div>
+                    <div className={`text-3xl font-bold ${
+                      selectedDate === date.fullDate ? 'text-primary' : 'text-foreground'
+                    }`}>{date.day}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{date.month}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tour Type Selection */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <button
+                onClick={() => setTourType("in-person")}
+                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
+                  tourType === "in-person"
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold">Tour in person</span>
+              </button>
+              <button
+                onClick={() => setTourType("video")}
+                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
+                  tourType === "video"
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold">Tour via video chat</span>
+              </button>
+            </div>
+
+            {/* Request Showing Button */}
+            <Button 
+              className="w-full h-14 text-lg mb-2"
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
+              Request showing
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Tour for free, no strings attached
+            </p>
+
+            {/* OR Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-lg font-semibold text-muted-foreground">OR</span>
+              </div>
+            </div>
+
+            {/* Start an Offer Button */}
+            <Button 
+              variant="outline" 
+              className="w-full h-14 text-lg mb-2 border-2"
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
+              Start an offer
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Make a winning offer with the help of a local agent
+            </p>
+
+            {/* Get Pre-approved Link */}
+            <div className="text-center">
+              <Button 
+                variant="link" 
+                className="text-primary text-lg font-semibold"
+                onClick={() => setIsContactDialogOpen(true)}
+              >
+                Get pre-approved
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Open Houses Section */}
+        <Card className="border-2">
+          <div className="p-6">
+            <h2 className="text-3xl font-bold mb-6">Open houses</h2>
+            
+            {/* No Open Houses Message */}
+            <div className="flex items-start gap-3 mb-6 p-4 bg-muted/30 rounded-lg">
+              <Calendar className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-1" />
+              <p className="text-lg text-muted-foreground">No upcoming open houses</p>
+            </div>
+
+            {/* Schedule Tour */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold">Schedule a tour today</h3>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Tour with FloridaHomeFinder and one of our agents will be there to answer all your questions.
+              </p>
+
+              {/* Sample Tour Times */}
+              <div className="border-2 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Home className="w-6 h-6 text-primary" />
+                  <div>
+                    <div className="font-semibold">Wednesday, Oct 22</div>
+                    <div className="flex items-center gap-2 text-primary font-medium">
+                      <span>9am</span>
+                      <span>•</span>
+                      <span>10am</span>
+                      <span>•</span>
+                      <span>11am</span>
+                      <span>•</span>
+                      <button className="hover:underline">Check for more</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule Button */}
+              <Button 
+                className="w-full h-14 text-lg"
+                size="lg"
+                onClick={() => setIsContactDialogOpen(true)}
+              >
+                Schedule a tour
+              </Button>
             </div>
           </div>
         </Card>
