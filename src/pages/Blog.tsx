@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Calendar, ArrowRight, Search } from "lucide-react";
 
 const Blog = () => {
@@ -120,8 +122,72 @@ const Blog = () => {
     setCurrentPage(1);
   };
 
+  // SEO Content
+  const pageTitle = "Real Estate Blog - Tips, Market Insights & Guides | FloridaHomeFinder";
+  const pageDescription = "Expert real estate insights, market trends, buying guides, and selling tips for Florida homebuyers and sellers. Stay informed with our comprehensive blog articles.";
+  const pageUrl = `${window.location.origin}/blog`;
+
+  // Structured data for Blog
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "FloridaHomeFinder Real Estate Blog",
+    "description": pageDescription,
+    "url": pageUrl,
+    "publisher": {
+      "@type": "Organization",
+      "name": "FloridaHomeFinder"
+    }
+  };
+
+  // Structured data for ItemList of blog posts
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": paginatedBlogs.map((blog, index) => ({
+      "@type": "ListItem",
+      "position": startIndex + index + 1,
+      "item": {
+        "@type": "BlogPosting",
+        "headline": blog.title,
+        "description": blog.excerpt,
+        "author": {
+          "@type": "Person",
+          "name": blog.author
+        },
+        "datePublished": blog.date,
+        "url": `${window.location.origin}/blog/${blog.id}`
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Open Graph tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(blogSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(itemListSchema)}
+        </script>
+      </Helmet>
+      
       <Navbar />
       
       <main className="flex-1">
@@ -169,6 +235,9 @@ const Blog = () => {
         {/* Blog Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4">
+            {/* Breadcrumbs */}
+            <BreadcrumbSEO items={[{ label: "Blog", href: "/blog" }]} />
+            
             {/* Results count */}
             <div className="mb-6 text-center">
               <p className="text-muted-foreground">

@@ -1,10 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { MapPin, TrendingUp, Building2, School, DollarSign } from "lucide-react";
 
 // City data mapping
@@ -171,8 +173,74 @@ const CityTemplate = () => {
     },
   ], [cityData]);
 
+  // SEO Content
+  const pageTitle = `${cityData.name} Real Estate & Homes for Sale | ${cityData.state}`;
+  const pageDescription = `Find homes for sale in ${cityData.name}, ${cityData.state}. Browse ${cityData.stats.activeListings} active listings with a median price of ${cityData.stats.medianPrice}. ${cityData.description.substring(0, 100)}...`;
+  const pageUrl = `${window.location.origin}/city/${(citySlug || neighborhoodSlug || 'fayetteville').toLowerCase()}`;
+
+  // Structured data for Place/City
+  const placeSchema = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "name": `${cityData.name}, ${cityData.state}`,
+    "description": cityData.description,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": cityData.name,
+      "addressRegion": cityData.state,
+      "addressCountry": "US"
+    }
+  };
+
+  // Structured data for ItemList of properties
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": featuredProperties.map((property, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": property.title,
+        "description": `${property.beds} bed, ${property.baths} bath home in ${cityData.name}`,
+        "offers": {
+          "@type": "Offer",
+          "price": property.price,
+          "priceCurrency": "USD"
+        }
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Open Graph tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={cityData.heroImage} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={cityData.heroImage} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(placeSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(itemListSchema)}
+        </script>
+      </Helmet>
+      
       <Navbar />
 
       <main className="flex-1">
@@ -201,6 +269,13 @@ const CityTemplate = () => {
         </section>
 
         <div className="container mx-auto px-4 py-12">
+          {/* Breadcrumbs */}
+          <BreadcrumbSEO 
+            items={[
+              { label: cityData.name, href: `/city/${(citySlug || neighborhoodSlug || 'fayetteville').toLowerCase()}` }
+            ]} 
+          />
+          
           {/* City Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             <Card className="p-6 text-center">

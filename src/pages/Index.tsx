@@ -10,6 +10,33 @@ import RecentBlogs from "@/components/home/RecentBlogs";
 import FloridaResourceSection from "@/components/home/FloridaResourceSection";
 
 const Index = () => {
+  // Structured data for Organization and WebSite
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "name": "FloridaHomeFinder",
+    "description": "Florida's premier real estate search platform for homes, condos, and properties",
+    "url": window.location.origin,
+    "logo": `${window.location.origin}/favicon.ico`,
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "FL",
+      "addressCountry": "US"
+    }
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "FloridaHomeFinder",
+    "url": window.location.origin,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${window.location.origin}/listings?location={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
@@ -30,6 +57,14 @@ const Index = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Florida Homes & Real Estate for Sale | FloridaHomeFinder.com" />
         <meta name="twitter:description" content="Search Florida homes, condos, and properties for sale. Your #1 Florida real estate resource." />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(organizationSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
+        </script>
       </Helmet>
 
       <Navbar />

@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Calendar, User, ArrowLeft, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
 
 const BlogPost = () => {
@@ -109,8 +111,68 @@ const BlogPost = () => {
     }
   };
 
+  // SEO Content
+  const pageTitle = `${blog.title} | FloridaHomeFinder Blog`;
+  const pageDescription = blog.excerpt;
+  const pageUrl = `${window.location.origin}/blog/${id}`;
+
+  // Structured data for Article
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": blog.title,
+    "description": blog.excerpt,
+    "image": blog.image,
+    "datePublished": blog.date,
+    "author": {
+      "@type": "Person",
+      "name": blog.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "FloridaHomeFinder",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${window.location.origin}/favicon.ico`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": pageUrl
+    },
+    "articleSection": blog.category,
+    "keywords": `${blog.category}, Florida real estate, home buying, real estate tips`
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Open Graph tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={blog.image} />
+        <meta property="article:published_time" content={blog.date} />
+        <meta property="article:author" content={blog.author} />
+        <meta property="article:section" content={blog.category} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={blog.image} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(articleSchema)}
+        </script>
+      </Helmet>
+      
       <Navbar />
       
       <main className="flex-1">
@@ -136,6 +198,15 @@ const BlogPost = () => {
         {/* Article Content */}
         <article className="container mx-auto px-4 max-w-4xl -mt-20 relative z-10">
           <Card className="p-8 md:p-12">
+            {/* Breadcrumbs */}
+            <BreadcrumbSEO 
+              items={[
+                { label: "Blog", href: "/blog" },
+                { label: blog.category, href: `/blog?category=${encodeURIComponent(blog.category)}` },
+                { label: blog.title, href: `/blog/${id}` }
+              ]} 
+            />
+            
             {/* Category Badge */}
             <div className="mb-4">
               <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-semibold">

@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import {
   ChevronLeft,
   ChevronRight,
@@ -154,21 +156,96 @@ export default function PropertyDetail() {
     }
   };
 
+  // SEO Content
+  const pageTitle = `${property.address}, ${property.city}, ${property.state} ${property.zip} | ${formatPrice(property.price)}`;
+  const pageDescription = `${property.beds} bed, ${property.baths} bath ${property.subType} for sale at ${formatPrice(property.price)}. ${property.sqft.toLocaleString()} sqft on ${property.acres} acres in ${property.subdivision}. MLS# ${property.mlsId}. ${property.description.substring(0, 100)}...`;
+  const pageUrl = `${window.location.origin}/property/${id}`;
+
+  // Structured data for Product/RealEstateProperty
+  const propertySchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": property.address,
+    "description": property.description,
+    "image": property.images,
+    "offers": {
+      "@type": "Offer",
+      "price": property.price,
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": pageUrl
+    },
+    "brand": {
+      "@type": "Organization",
+      "name": property.listingAgent.company
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5",
+      "reviewCount": "1"
+    },
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "Number of Bedrooms",
+        "value": property.beds
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Number of Bathrooms",
+        "value": property.baths
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Floor Size",
+        "value": property.sqft,
+        "unitCode": "FTK"
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Year Built",
+        "value": property.yearBuilt
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Open Graph tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={property.images[0]} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={property.images[0]} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(propertySchema)}
+        </script>
+      </Helmet>
+      
       <Navbar />
       
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4 max-w-4xl">
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <Link to="/" className="hover:underline">Home</Link>
-          <ChevronRightIcon className="w-4 h-4" />
-          <Link to={`/city/${property.city.toLowerCase()}`} className="hover:underline">{property.city}</Link>
-          <ChevronRightIcon className="w-4 h-4" />
-          <Link to={`/subdivision/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="hover:underline">{property.subdivision}</Link>
-          <ChevronRightIcon className="w-4 h-4" />
-          <span className="text-muted-foreground">{property.address}</span>
-        </div>
+        <BreadcrumbSEO 
+          items={[
+            { label: property.city, href: `/city/${property.city.toLowerCase()}` },
+            { label: property.subdivision, href: `/listings?subdivision=${encodeURIComponent(property.subdivision)}` },
+            { label: property.address, href: `/property/${id}` }
+          ]} 
+        />
       </div>
       
       {/* Hero Image with Overlay Controls */}
