@@ -235,11 +235,11 @@ const Listings = () => {
     }
 
     // Filter by price range
-    if (minPrice) {
+    if (minPrice && minPrice !== "0") {
       const min = parseInt(minPrice);
       filtered = filtered.filter(p => p.price >= min);
     }
-    if (maxPrice) {
+    if (maxPrice && maxPrice !== "0") {
       const max = parseInt(maxPrice);
       filtered = filtered.filter(p => p.price <= max);
     }

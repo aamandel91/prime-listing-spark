@@ -17,7 +17,7 @@ const PriceFilter = ({ minValue, maxValue, onMinChange, onMaxChange }: PriceFilt
   const [selectedMax, setSelectedMax] = useState(maxValue || "");
 
   const minPriceOptions = [
-    { value: "", label: "No min" },
+    { value: "0", label: "No min" },
     { value: "100000", label: "$100,000" },
     { value: "200000", label: "$200,000" },
     { value: "300000", label: "$300,000" },
@@ -33,7 +33,7 @@ const PriceFilter = ({ minValue, maxValue, onMinChange, onMaxChange }: PriceFilt
   ];
 
   const maxPriceOptions = [
-    { value: "", label: "No max" },
+    { value: "0", label: "No max" },
     { value: "100000", label: "$100,000" },
     { value: "200000", label: "$200,000" },
     { value: "300000", label: "$300,000" },
@@ -56,23 +56,31 @@ const PriceFilter = ({ minValue, maxValue, onMinChange, onMaxChange }: PriceFilt
   };
 
   const getDisplayValue = () => {
-    if (!selectedMin && !selectedMax) return "Price";
+    if (!selectedMin || selectedMin === "0") {
+      if (!selectedMax || selectedMax === "0") return "Price";
+    }
     
     const formatPrice = (value: string) => {
-      if (!value) return "";
+      if (!value || value === "0") return "";
       const num = parseInt(value);
       if (num >= 1000000) return `$${num / 1000000}M`;
       if (num >= 1000) return `$${num / 1000}K`;
       return `$${num}`;
     };
 
-    if (selectedMin && selectedMax) {
-      return `${formatPrice(selectedMin)} - ${formatPrice(selectedMax)}`;
+    const minFormatted = formatPrice(selectedMin);
+    const maxFormatted = formatPrice(selectedMax);
+
+    if (minFormatted && maxFormatted) {
+      return `${minFormatted} - ${maxFormatted}`;
     }
-    if (selectedMin) {
-      return `${formatPrice(selectedMin)}+`;
+    if (minFormatted) {
+      return `${minFormatted}+`;
     }
-    return `Up to ${formatPrice(selectedMax)}`;
+    if (maxFormatted) {
+      return `Up to ${maxFormatted}`;
+    }
+    return "Price";
   };
 
   return (
