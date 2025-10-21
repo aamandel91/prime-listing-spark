@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { useMemo } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
@@ -6,77 +7,169 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, TrendingUp, Building2, School, DollarSign } from "lucide-react";
 
-const CityTemplate = () => {
-  const { citySlug } = useParams();
-  
-  // Mock data - will be dynamically generated
-  const cityData = {
-    name: "Beverly Hills",
-    state: "CA",
-    description: "Beverly Hills is a prestigious city known for luxury real estate, world-class shopping on Rodeo Drive, and stunning hillside properties. The community offers excellent schools, beautiful parks, and a safe, family-friendly environment.",
+// City data mapping
+const CITY_DATA: Record<string, {
+  name: string;
+  state: string;
+  description: string;
+  stats: {
+    medianPrice: string;
+    activeListings: number;
+    avgDaysOnMarket: number;
+    schools: string;
+  };
+  neighborhoods: Array<{ name: string; slug: string; avgPrice: string }>;
+  propertyTypes: Array<{ type: string; count: number }>;
+  heroImage: string;
+}> = {
+  "fayetteville": {
+    name: "Fayetteville",
+    state: "NC",
+    description: "Fayetteville is a thriving city in North Carolina, known for its military heritage with Fort Liberty nearby. The area offers diverse housing options from historic downtown properties to new suburban developments, excellent schools, growing job market, and affordable cost of living compared to other major NC cities.",
     stats: {
-      medianPrice: "$2,500,000",
-      activeListings: 234,
-      avgDaysOnMarket: 45,
-      schools: "9.5/10",
+      medianPrice: "$245,000",
+      activeListings: 456,
+      avgDaysOnMarket: 32,
+      schools: "7.8/10",
     },
     neighborhoods: [
-      { name: "Trousdale Estates", slug: "trousdale-estates", avgPrice: "$4.2M" },
-      { name: "Beverly Hills Flats", slug: "beverly-hills-flats", avgPrice: "$3.8M" },
-      { name: "Beverly Hills Post Office", slug: "bhpo", avgPrice: "$5.1M" },
+      { name: "The Hills At Stonegate", slug: "the-hills-at-stonegate", avgPrice: "$385K" },
+      { name: "Downtown Fayetteville", slug: "downtown-fayetteville", avgPrice: "$295K" },
+      { name: "Hope Mills", slug: "hope-mills", avgPrice: "$265K" },
     ],
     propertyTypes: [
-      { type: "Single Family", count: 156 },
-      { type: "Condos", count: 45 },
-      { type: "Townhomes", count: 23 },
-      { type: "Multi-Family", count: 10 },
+      { type: "Single Family", count: 298 },
+      { type: "Condos", count: 87 },
+      { type: "Townhomes", count: 45 },
+      { type: "Multi-Family", count: 26 },
     ],
-  };
+    heroImage: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=2000&q=80"
+  },
+  "miami": {
+    name: "Miami",
+    state: "FL",
+    description: "Miami is a vibrant coastal city known for its beautiful beaches, diverse culture, and thriving real estate market. From luxury waterfront condos to family-friendly suburban homes, Miami offers something for everyone with year-round sunshine, world-class dining, and excellent business opportunities.",
+    stats: {
+      medianPrice: "$565,000",
+      activeListings: 1234,
+      avgDaysOnMarket: 28,
+      schools: "8.2/10",
+    },
+    neighborhoods: [
+      { name: "Brickell", slug: "brickell", avgPrice: "$685K" },
+      { name: "Coconut Grove", slug: "coconut-grove", avgPrice: "$895K" },
+      { name: "Coral Gables", slug: "coral-gables", avgPrice: "$1.2M" },
+    ],
+    propertyTypes: [
+      { type: "Condos", count: 567 },
+      { type: "Single Family", count: 423 },
+      { type: "Townhomes", count: 156 },
+      { type: "Multi-Family", count: 88 },
+    ],
+    heroImage: "https://images.unsplash.com/photo-1506059612708-99d6c258160e?auto=format&fit=crop&w=2000&q=80"
+  },
+  "orlando": {
+    name: "Orlando",
+    state: "FL",
+    description: "Orlando is Central Florida's entertainment capital, home to world-famous theme parks and a rapidly growing real estate market. The area offers excellent schools, diverse neighborhoods, strong job growth in tech and tourism, and a family-friendly atmosphere with endless recreational opportunities.",
+    stats: {
+      medianPrice: "$385,000",
+      activeListings: 892,
+      avgDaysOnMarket: 35,
+      schools: "8.0/10",
+    },
+    neighborhoods: [
+      { name: "Winter Park", slug: "winter-park", avgPrice: "$595K" },
+      { name: "Lake Nona", slug: "lake-nona", avgPrice: "$485K" },
+      { name: "Dr. Phillips", slug: "dr-phillips", avgPrice: "$525K" },
+    ],
+    propertyTypes: [
+      { type: "Single Family", count: 512 },
+      { type: "Condos", count: 234 },
+      { type: "Townhomes", count: 98 },
+      { type: "Multi-Family", count: 48 },
+    ],
+    heroImage: "https://images.unsplash.com/photo-1527813972756-2890161e8c27?auto=format&fit=crop&w=2000&q=80"
+  },
+  "tampa": {
+    name: "Tampa",
+    state: "FL",
+    description: "Tampa combines urban sophistication with coastal charm on Florida's Gulf Coast. The city offers a booming real estate market with waterfront properties, historic neighborhoods, modern downtown condos, excellent restaurants, cultural attractions, and some of Florida's best beaches nearby.",
+    stats: {
+      medianPrice: "$425,000",
+      activeListings: 678,
+      avgDaysOnMarket: 30,
+      schools: "7.9/10",
+    },
+    neighborhoods: [
+      { name: "Hyde Park", slug: "hyde-park", avgPrice: "$685K" },
+      { name: "South Tampa", slug: "south-tampa", avgPrice: "$595K" },
+      { name: "Westshore", slug: "westshore", avgPrice: "$425K" },
+    ],
+    propertyTypes: [
+      { type: "Single Family", count: 387 },
+      { type: "Condos", count: 189 },
+      { type: "Townhomes", count: 76 },
+      { type: "Multi-Family", count: 26 },
+    ],
+    heroImage: "https://images.unsplash.com/photo-1590674899475-c0535ed7d44b?auto=format&fit=crop&w=2000&q=80"
+  },
+};
 
-  const featuredProperties = [
+const CityTemplate = () => {
+  const { citySlug, neighborhoodSlug } = useParams();
+  
+  // Get city data based on slug
+  const cityData = useMemo(() => {
+    const slug = (citySlug || neighborhoodSlug || "").toLowerCase();
+    return CITY_DATA[slug] || CITY_DATA["fayetteville"]; // Default to Fayetteville
+  }, [citySlug, neighborhoodSlug]);
+
+  // Sample properties - in a real app, these would be filtered by city
+  const featuredProperties = useMemo(() => [
     {
       id: "1",
-      title: "Modern Luxury Villa",
-      price: 1250000,
-      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
+      title: "Modern Family Home",
+      price: 379999,
+      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
       beds: 5,
-      baths: 4,
-      sqft: 4500,
-      address: "123 Luxury Lane",
-      city: "Beverly Hills",
-      state: "CA",
+      baths: 3,
+      sqft: 2469,
+      address: "505 Edwalton Way LOT 82",
+      city: cityData.name,
+      state: cityData.state,
       isHotProperty: true,
       status: null,
     },
     {
       id: "2",
-      title: "Contemporary Estate",
-      price: 2850000,
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-      beds: 6,
-      baths: 5,
-      sqft: 6200,
+      title: "Luxury Estate",
+      price: 425000,
+      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80",
+      beds: 4,
+      baths: 3,
+      sqft: 3200,
       address: "789 Estate Dr",
-      city: "Beverly Hills",
-      state: "CA",
+      city: cityData.name,
+      state: cityData.state,
       isHotProperty: true,
       status: "open-house" as const,
     },
     {
       id: "3",
-      title: "Hillside Masterpiece",
-      price: 4200000,
+      title: "Contemporary Living",
+      price: 359000,
       image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=800&q=80",
-      beds: 7,
-      baths: 6,
-      sqft: 8500,
-      address: "456 Summit Way",
-      city: "Beverly Hills",
-      state: "CA",
+      beds: 3,
+      baths: 2,
+      sqft: 2100,
+      address: "456 Modern Way",
+      city: cityData.name,
+      state: cityData.state,
       isHotProperty: false,
       status: null,
     },
-  ];
+  ], [cityData]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -87,7 +180,7 @@ const CityTemplate = () => {
         <section className="relative h-96 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
-              src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=2000&q=80"
+              src={cityData.heroImage}
               alt={`${cityData.name} cityscape`}
               className="w-full h-full object-cover"
             />
@@ -102,7 +195,7 @@ const CityTemplate = () => {
               </h1>
             </div>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Discover luxury homes and investment opportunities in one of California's most prestigious communities
+              Discover homes and investment opportunities in {cityData.name}
             </p>
           </div>
         </section>
@@ -156,7 +249,9 @@ const CityTemplate = () => {
               <h2 className="text-3xl font-bold text-primary">
                 Featured Properties in {cityData.name}
               </h2>
-              <Button variant="outline">View All Listings</Button>
+              <Link to={`/listings?city=${encodeURIComponent(cityData.name)}`}>
+                <Button variant="outline">View All Listings</Button>
+              </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProperties.map((property) => (
@@ -173,23 +268,25 @@ const CityTemplate = () => {
               </h2>
               <div className="space-y-4">
                 {cityData.neighborhoods.map((neighborhood) => (
-                  <a
+                  <Link
                     key={neighborhood.slug}
-                    href={`/neighborhood/${neighborhood.slug}`}
-                    className="flex justify-between items-center p-4 bg-secondary rounded-lg hover:bg-secondary/70 transition-colors"
+                    to={`/listings?subdivision=${encodeURIComponent(neighborhood.name)}`}
+                    className="flex justify-between items-center p-4 bg-secondary rounded-lg hover:bg-secondary/70 transition-colors block"
                   >
-                    <div>
-                      <div className="font-semibold text-foreground">
-                        {neighborhood.name}
+                    <div className="flex justify-between items-center w-full">
+                      <div>
+                        <div className="font-semibold text-foreground">
+                          {neighborhood.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Avg Price: {neighborhood.avgPrice}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        Avg Price: {neighborhood.avgPrice}
-                      </div>
+                      <Button variant="ghost" size="sm" asChild>
+                        <span>Explore</span>
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      Explore
-                    </Button>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </Card>
