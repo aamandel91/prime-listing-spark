@@ -29,6 +29,7 @@ import {
   MessageSquare,
   Send,
   ChevronRight as ChevronRightIcon,
+  Video,
 } from "lucide-react";
 
 export default function PropertyDetail() {
@@ -37,6 +38,8 @@ export default function PropertyDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
   const [comment, setComment] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
   const [contactForm, setContactForm] = useState({
     firstName: "",
     lastName: "",
@@ -44,6 +47,25 @@ export default function PropertyDetail() {
     phone: "",
     comments: `Hi, I am interested in ${id ? `property ${id}` : "this property"}`,
   });
+
+  // Generate next 7 days for tour scheduling
+  const getNextSevenDays = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      days.push({
+        dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+        day: date.getDate(),
+        month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+        fullDate: date.toISOString(),
+      });
+    }
+    return days;
+  };
+
+  const tourDates = getNextSevenDays();
 
   // Mock data - replace with actual API call
   const property = {
@@ -307,6 +329,161 @@ export default function PropertyDetail() {
           <h2 className="text-2xl font-bold mb-4">Description of {property.address}</h2>
           <p className="text-muted-foreground leading-relaxed">{property.description}</p>
         </div>
+
+        <Separator />
+
+        {/* Thinking of Buying - Tour Scheduling CTA */}
+        <Card className="border-2">
+          <div className="p-6">
+            <h2 className="text-3xl font-bold mb-6">Thinking of buying?</h2>
+            
+            {/* Date Selection */}
+            <div className="mb-6">
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {tourDates.map((date, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedDate(date.fullDate)}
+                    className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-lg border-2 min-w-[100px] transition-colors ${
+                      selectedDate === date.fullDate
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-sm font-medium text-muted-foreground">{date.dayOfWeek}</div>
+                    <div className={`text-3xl font-bold ${
+                      selectedDate === date.fullDate ? 'text-primary' : 'text-foreground'
+                    }`}>{date.day}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{date.month}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tour Type Selection */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <button
+                onClick={() => setTourType("in-person")}
+                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
+                  tourType === "in-person"
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold">Tour in person</span>
+              </button>
+              <button
+                onClick={() => setTourType("video")}
+                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
+                  tourType === "video"
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold">Tour via video chat</span>
+              </button>
+            </div>
+
+            {/* Request Showing Button */}
+            <Button 
+              className="w-full h-14 text-lg mb-2"
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
+              Request showing
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Tour for free, no strings attached
+            </p>
+
+            {/* OR Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-lg font-semibold text-muted-foreground">OR</span>
+              </div>
+            </div>
+
+            {/* Start an Offer Button */}
+            <Button 
+              variant="outline" 
+              className="w-full h-14 text-lg mb-2 border-2"
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
+              Start an offer
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Make a winning offer with the help of a local agent
+            </p>
+
+            {/* Ask a Question Link */}
+            <div className="text-center">
+              <Button 
+                variant="link" 
+                className="text-primary text-lg font-semibold"
+                onClick={() => setIsContactDialogOpen(true)}
+              >
+                Ask a question
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Open Houses Section */}
+        <Card className="border-2">
+          <div className="p-6">
+            <h2 className="text-3xl font-bold mb-6">Open houses</h2>
+            
+            {/* No Open Houses Message */}
+            <div className="flex items-start gap-3 mb-6 p-4 bg-muted/30 rounded-lg">
+              <Calendar className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-1" />
+              <p className="text-lg text-muted-foreground">No upcoming open houses</p>
+            </div>
+
+            {/* Schedule Tour */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold">Schedule a tour today</h3>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Tour with FloridaHomeFinder and one of our agents will be there to answer all your questions.
+              </p>
+
+              {/* Sample Tour Times */}
+              <div className="border-2 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Home className="w-6 h-6 text-primary" />
+                  <div>
+                    <div className="font-semibold">Wednesday, Oct 22</div>
+                    <div className="flex items-center gap-2 text-primary font-medium">
+                      <span>9am</span>
+                      <span>•</span>
+                      <span>10am</span>
+                      <span>•</span>
+                      <span>11am</span>
+                      <span>•</span>
+                      <button className="hover:underline">Check for more</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule Button */}
+              <Button 
+                className="w-full h-14 text-lg"
+                size="lg"
+                onClick={() => setIsContactDialogOpen(true)}
+              >
+                Schedule a tour
+              </Button>
+            </div>
+          </div>
+        </Card>
 
         <Separator />
 
