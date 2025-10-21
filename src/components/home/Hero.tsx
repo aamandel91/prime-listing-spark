@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BedsFilter from "@/components/search/BedsFilter";
-import BathsFilter from "@/components/search/BathsFilter";
+import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
+import PriceFilter from "@/components/search/PriceFilter";
 
 const Hero = () => {
   const [activeTab, setActiveTab] = useState("buying");
@@ -95,34 +94,18 @@ const Hero = () => {
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
-                  <Select value={minPrice} onValueChange={setMinPrice}>
-                    <SelectTrigger className="md:w-40 h-12">
-                      <SelectValue placeholder="Min Price" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">No Min</SelectItem>
-                      <SelectItem value="100000">$100,000</SelectItem>
-                      <SelectItem value="250000">$250,000</SelectItem>
-                      <SelectItem value="500000">$500,000</SelectItem>
-                      <SelectItem value="750000">$750,000</SelectItem>
-                      <SelectItem value="1000000">$1,000,000</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={maxPrice} onValueChange={setMaxPrice}>
-                    <SelectTrigger className="md:w-40 h-12">
-                      <SelectValue placeholder="Max Price" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="250000">$250,000</SelectItem>
-                      <SelectItem value="500000">$500,000</SelectItem>
-                      <SelectItem value="750000">$750,000</SelectItem>
-                      <SelectItem value="1000000">$1,000,000</SelectItem>
-                      <SelectItem value="2000000">$2,000,000</SelectItem>
-                      <SelectItem value="0">No Max</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <BedsFilter value={beds} onChange={setBeds} />
-                  <BathsFilter value={baths} onChange={setBaths} />
+                  <PriceFilter 
+                    minValue={minPrice} 
+                    maxValue={maxPrice}
+                    onMinChange={setMinPrice}
+                    onMaxChange={setMaxPrice}
+                  />
+                  <BedsAndBathsFilter 
+                    bedsValue={beds}
+                    bathsValue={baths}
+                    onBedsChange={setBeds}
+                    onBathsChange={setBaths}
+                  />
                   <Button 
                     className="h-12 w-full md:w-auto px-8 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
                     onClick={handleSearch}

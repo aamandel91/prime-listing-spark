@@ -15,8 +15,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, SlidersHorizontal, MapPin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import BedsFilter from "@/components/search/BedsFilter";
-import BathsFilter from "@/components/search/BathsFilter";
+import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
+import PriceFilter from "@/components/search/PriceFilter";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,7 +24,8 @@ const Listings = () => {
   
   // Filter states - Initialize from URL params
   const [location, setLocation] = useState(searchParams.get("location") || "");
-  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [minBeds, setMinBeds] = useState(searchParams.get("beds") || "");
   const [minBaths, setMinBaths] = useState(searchParams.get("baths") || "");
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
@@ -168,7 +169,8 @@ const Listings = () => {
   const updateSearchParams = () => {
     const params = new URLSearchParams();
     if (location) params.set("location", location);
-    if (priceRange) params.set("price", priceRange);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
     if (minBeds) params.set("beds", minBeds);
     if (minBaths) params.set("baths", minBaths);
     if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
@@ -183,7 +185,8 @@ const Listings = () => {
   // Clear all filters
   const clearFilters = () => {
     setLocation("");
-    setPriceRange("any");
+    setMinPrice("");
+    setMaxPrice("");
     setMinBeds("any");
     setMinBaths("any");
     setPropertyTypes([]);
@@ -232,13 +235,13 @@ const Listings = () => {
     }
 
     // Filter by price range
-    if (priceRange && priceRange !== "any") {
-      const [min, max] = priceRange.split("-").map(v => parseInt(v) * 1000);
-      if (max) {
-        filtered = filtered.filter(p => p.price >= min && p.price <= max);
-      } else {
-        filtered = filtered.filter(p => p.price >= min);
-      }
+    if (minPrice) {
+      const min = parseInt(minPrice);
+      filtered = filtered.filter(p => p.price >= min);
+    }
+    if (maxPrice) {
+      const max = parseInt(maxPrice);
+      filtered = filtered.filter(p => p.price <= max);
     }
 
     // Filter by minimum beds
@@ -306,7 +309,7 @@ const Listings = () => {
     }
 
     return filtered;
-  }, [location, selectedCity, priceRange, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties]);
+  }, [location, selectedCity, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties]);
 
   // Generate dynamic SEO content
   const seoContent = useMemo(() => {
@@ -542,23 +545,19 @@ const Listings = () => {
                 />
               </div>
               
-              <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="md:w-40 h-12">
-                  <SelectValue placeholder="Price" />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  <SelectItem value="any">Any Price</SelectItem>
-                  <SelectItem value="0-250">$0 - $250k</SelectItem>
-                  <SelectItem value="250-500">$250k - $500k</SelectItem>
-                  <SelectItem value="500-750">$500k - $750k</SelectItem>
-                  <SelectItem value="750-1000">$750k - $1M</SelectItem>
-                  <SelectItem value="1000-9999">$1M+</SelectItem>
-                </SelectContent>
-              </Select>
+              <PriceFilter 
+                minValue={minPrice} 
+                maxValue={maxPrice}
+                onMinChange={setMinPrice}
+                onMaxChange={setMaxPrice}
+              />
               
-              <BedsFilter value={minBeds} onChange={setMinBeds} />
-              
-              <BathsFilter value={minBaths} onChange={setMinBaths} />
+              <BedsAndBathsFilter 
+                bedsValue={minBeds}
+                bathsValue={minBaths}
+                onBedsChange={setMinBeds}
+                onBathsChange={setMinBaths}
+              />
 
               <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <DialogTrigger asChild>
