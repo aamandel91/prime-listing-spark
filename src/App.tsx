@@ -8,6 +8,7 @@ import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const App = () => {
             <Route path="/city/:citySlug" element={<CityTemplate />} />
             <Route path="/neighborhood/:neighborhoodSlug" element={<CityTemplate />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
