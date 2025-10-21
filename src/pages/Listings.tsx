@@ -181,16 +181,16 @@ const Listings = () => {
   // Clear all filters
   const clearFilters = () => {
     setLocation("");
-    setPriceRange("");
-    setMinBeds("");
-    setMinBaths("");
+    setPriceRange("any");
+    setMinBeds("any");
+    setMinBaths("any");
     setPropertyTypes([]);
     setMinSqft("");
     setMaxSqft("");
     setMinYear("");
     setMaxYear("");
     setFeatures([]);
-    setSelectedCity("");
+    setSelectedCity("all");
     setSortBy("newest");
     setSearchParams(new URLSearchParams());
   };
@@ -225,12 +225,12 @@ const Listings = () => {
     }
 
     // Filter by selected city from dropdown
-    if (selectedCity) {
+    if (selectedCity && selectedCity !== "all") {
       filtered = filtered.filter(p => p.city.toLowerCase() === selectedCity.toLowerCase());
     }
 
     // Filter by price range
-    if (priceRange) {
+    if (priceRange && priceRange !== "any") {
       const [min, max] = priceRange.split("-").map(v => parseInt(v) * 1000);
       if (max) {
         filtered = filtered.filter(p => p.price >= min && p.price <= max);
@@ -240,13 +240,13 @@ const Listings = () => {
     }
 
     // Filter by minimum beds
-    if (minBeds) {
+    if (minBeds && minBeds !== "any") {
       const beds = parseInt(minBeds);
       filtered = filtered.filter(p => p.beds >= beds);
     }
 
     // Filter by minimum baths
-    if (minBaths) {
+    if (minBaths && minBaths !== "any") {
       const baths = parseInt(minBaths);
       filtered = filtered.filter(p => p.baths >= baths);
     }
@@ -471,7 +471,7 @@ const Listings = () => {
                     <SelectValue placeholder="Select city" />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="all">All Cities</SelectItem>
                     <SelectItem value="Miami">Miami</SelectItem>
                     <SelectItem value="Fort Lauderdale">Fort Lauderdale</SelectItem>
                     <SelectItem value="Orlando">Orlando</SelectItem>
@@ -545,7 +545,7 @@ const Listings = () => {
                   <SelectValue placeholder="Price" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
-                  <SelectItem value="">Any Price</SelectItem>
+                  <SelectItem value="any">Any Price</SelectItem>
                   <SelectItem value="0-250">$0 - $250k</SelectItem>
                   <SelectItem value="250-500">$250k - $500k</SelectItem>
                   <SelectItem value="500-750">$500k - $750k</SelectItem>
@@ -559,7 +559,7 @@ const Listings = () => {
                   <SelectValue placeholder="Beds" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="any">Any</SelectItem>
                   <SelectItem value="1">1+</SelectItem>
                   <SelectItem value="2">2+</SelectItem>
                   <SelectItem value="3">3+</SelectItem>
@@ -573,7 +573,7 @@ const Listings = () => {
                   <SelectValue placeholder="Baths" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="any">Any</SelectItem>
                   <SelectItem value="1">1+</SelectItem>
                   <SelectItem value="2">2+</SelectItem>
                   <SelectItem value="3">3+</SelectItem>
