@@ -6,6 +6,7 @@ import PropertyTypes from "@/components/home/PropertyTypes";
 import PopularSearches from "@/components/home/PopularSearches";
 import ExploreListings from "@/components/home/ExploreListings";
 import RecentBlogs from "@/components/home/RecentBlogs";
+import FloridaResourceSection from "@/components/home/FloridaResourceSection";
 
 const Index = () => {
   return (
@@ -19,6 +20,7 @@ const Index = () => {
         <PopularSearches />
         <ExploreListings />
         <RecentBlogs />
+        <FloridaResourceSection />
       </main>
 
       <Footer />
