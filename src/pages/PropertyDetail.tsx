@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,12 +27,23 @@ import {
   Building,
   Ruler,
   MessageSquare,
+  Send,
+  ChevronRight as ChevronRightIcon,
 } from "lucide-react";
 
 export default function PropertyDetail() {
   const { id } = useParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [contactForm, setContactForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    comments: `Hi, I am interested in ${id ? `property ${id}` : "this property"}`,
+  });
 
   // Mock data - replace with actual API call
   const property = {
@@ -70,6 +84,21 @@ export default function PropertyDetail() {
       { label: "Garage Spaces", value: "2" },
       { label: "Foundation", value: "" },
     ],
+    hoaFeatures: [
+      { label: "Has HOA", value: "Yes" },
+      { label: "Services included", value: "None" },
+      { label: "HOA fee", value: "$450 Annually" },
+    ],
+    additionalInfo: [
+      { label: "Styles", value: "" },
+      { label: "Price per Sq Ft", value: "$154" },
+    ],
+    listingAgent: {
+      name: "LAUREN FURR",
+      phone: "336-501-0442",
+      company: "COLDWELL BANKER ADVANTAGE - FAYETTEVILLE",
+    },
+    source: "Triangle, MLS, MLS#: LP752128",
     images: [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
@@ -106,6 +135,19 @@ export default function PropertyDetail() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <Navbar />
+      
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="flex items-center gap-2 text-sm text-primary">
+          <Link to="/" className="hover:underline">Home</Link>
+          <ChevronRightIcon className="w-4 h-4" />
+          <Link to={`/city/${property.city.toLowerCase()}`} className="hover:underline">{property.city}</Link>
+          <ChevronRightIcon className="w-4 h-4" />
+          <Link to={`/subdivision/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="hover:underline">{property.subdivision}</Link>
+          <ChevronRightIcon className="w-4 h-4" />
+          <span className="text-muted-foreground">{property.address}</span>
+        </div>
+      </div>
       
       {/* Hero Image with Overlay Controls */}
       <div className="relative h-[60vh] md:h-[70vh] bg-muted">
@@ -394,16 +436,418 @@ export default function PropertyDetail() {
             </div>
           </div>
         </Card>
+
+        <Separator />
+
+        {/* HOA Section */}
+        <Card className="border-0 shadow-none bg-card">
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-6">HOA</h3>
+            
+            <div className="space-y-3">
+              {property.hoaFeatures.map((feature, index) => (
+                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">{feature.label}</span>
+                  <span className="font-semibold text-right max-w-[60%]">{feature.value || "—"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Additional Information Section */}
+        <Card className="border-0 shadow-none bg-card">
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-6">Additional Information</h3>
+            
+            <div className="space-y-3 mb-6">
+              {property.additionalInfo.map((info, index) => (
+                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">{info.label}</span>
+                  <span className="font-semibold text-right max-w-[60%]">{info.value || "—"}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <div>
+                <h4 className="font-semibold mb-2">Listed By</h4>
+                <p className="text-sm text-muted-foreground">
+                  {property.listingAgent.name}, {property.listingAgent.phone}, {property.listingAgent.company}
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Source</h4>
+                <p className="text-sm text-muted-foreground">{property.source}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Comments Section */}
+        <Card className="border-0 shadow-none bg-card">
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-6">Comments</h3>
+            
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Add a comment" 
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="flex-1"
+              />
+              <Button size="icon" className="rounded-full bg-primary hover:bg-primary/90">
+                <Send className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Location Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
+          <div className="bg-muted rounded-lg h-80 flex items-center justify-center mb-4">
+            <p className="text-muted-foreground">Map would be displayed here</p>
+          </div>
+          <Input placeholder="Enter your location" className="mb-2" />
+          <Button className="w-full">Get Directions</Button>
+        </div>
+
+        <Separator />
+
+        {/* Streetview Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Streetview of {property.address}, {property.city}, {property.state} {property.zip}</h2>
+          <div className="bg-muted rounded-lg h-80 flex items-center justify-center">
+            <p className="text-muted-foreground">Street View would be displayed here</p>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Mortgage Calculator */}
+        <Card className="border-0 shadow-none bg-card">
+          <div className="p-6">
+            <h3 className="text-2xl font-bold mb-6">Mortgage Calculator</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Listing Price</label>
+                <Input type="number" defaultValue={property.price} />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Down Payment</label>
+                <Input type="number" defaultValue={property.price * 0.1} />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Interest Rate</label>
+                <Input type="number" step="0.01" defaultValue="5.75" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Amortization</label>
+                <Input type="text" defaultValue="30 Years" readOnly />
+              </div>
+              <Button className="w-full">Calculate</Button>
+            </div>
+          </div>
+        </Card>
+
+        <Separator />
+
+        {/* Property Description with Links */}
+        <div className="text-sm text-muted-foreground leading-relaxed">
+          <p>
+            This beautiful 5 beds 3 baths home is located at <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span> and is listed for sale at {formatPrice(property.price)}. This home was built in {property.yearBuilt}, contains {property.sqft.toLocaleString()} square feet of living space, and sits on a {property.acres} acre lot. This residential home is priced at ${property.pricePerSqFt} per square foot.
+          </p>
+          <p className="mt-4">
+            If you'd like to request a tour or more information on <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span>, please call us at{" "}
+            <a href="tel:919-249-8536" className="text-primary font-semibold hover:underline">919-249-8536</a> so that we can assist you in your real estate search. To find homes like {property.address}, {property.city}, {property.state} {property.zip}, you can search{" "}
+            <Link to={`/city/${property.city.toLowerCase()}`} className="text-primary font-semibold hover:underline">homes for sale in {property.city}</Link>, or visit the neighborhood of{" "}
+            <Link to={`/subdivision/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary font-semibold hover:underline">{property.subdivision}</Link>, or by{" "}
+            <Link to={`/zip/${property.zip}`} className="text-primary font-semibold hover:underline">{property.zip}</Link>. We are here to help when you're ready to{" "}
+            <button onClick={() => setIsContactDialogOpen(true)} className="text-primary font-semibold hover:underline">contact us</button>!
+          </p>
+        </div>
+
+        <Separator />
+
+        {/* Schools Near Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Schools Near {property.address}, {property.city}, {property.state} {property.zip}</h2>
+          <Card className="border bg-card">
+            <div className="p-6">
+              <p className="text-sm mb-4">Schools in <span className="font-semibold">{property.address}</span></p>
+              
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
+                      <div className="text-xs font-semibold">RATING</div>
+                      <div className="text-lg font-bold">Above</div>
+                      <div className="text-lg font-bold">Avg</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-1">Howard L Hall Elementary</h4>
+                    <p className="text-sm text-muted-foreground mb-2">526 Andrews Road, Fayetteville NC 28311</p>
+                    <p className="text-sm text-muted-foreground">Public district, K-5 | 600 students</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
+                      <div className="text-xs font-semibold">RATING</div>
+                      <div className="text-lg font-bold">Above</div>
+                      <div className="text-lg font-bold">Avg</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-1">Reid Ross Classical Middle School</h4>
+                    <p className="text-sm text-muted-foreground mb-2">3200 Ramsey Street, Fayetteville NC 28301</p>
+                    <p className="text-sm text-muted-foreground">Public district, 6-8 | 226 students</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <Separator />
+
+        {/* Similar Properties Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Homes Similar to {property.address}, {property.city}, {property.state} {property.zip}</h2>
+          
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <Badge className="absolute top-2 left-2 bg-primary z-10">New - Just Now</Badge>
+                <img 
+                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
+                  alt="Similar property"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl font-bold">$349,999</span>
+                  <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">Active</Badge>
+                </div>
+                <div className="grid grid-cols-4 gap-2 mb-3 text-sm">
+                  <div>
+                    <div className="font-bold">4</div>
+                    <div className="text-muted-foreground">Beds</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">3</div>
+                    <div className="text-muted-foreground">Baths</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">2469</div>
+                    <div className="text-muted-foreground">Sqft</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">0.27</div>
+                    <div className="text-muted-foreground">Acres</div>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">501 Edwalton Way LOT 83, Fayetteville, NC 28311</p>
+                <p className="text-xs text-muted-foreground">MLS#: LP752129</p>
+              </div>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <Badge className="absolute top-2 left-2 bg-primary z-10">New - Just Now</Badge>
+                <img 
+                  src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80" 
+                  alt="Similar property"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl font-bold">$379,000</span>
+                  <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">Active</Badge>
+                </div>
+                <div className="grid grid-cols-4 gap-2 mb-3 text-sm">
+                  <div>
+                    <div className="font-bold">5</div>
+                    <div className="text-muted-foreground">Beds</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">3</div>
+                    <div className="text-muted-foreground">Baths</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">2519</div>
+                    <div className="text-muted-foreground">Sqft</div>
+                  </div>
+                  <div>
+                    <div className="font-bold">0.29</div>
+                    <div className="text-muted-foreground">Acres</div>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">503 Edwalton Way, Fayetteville, NC 28311</p>
+                <p className="text-xs text-muted-foreground">MLS#: LP752130</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Related Blogs Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Related Blogs</h2>
+          
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" 
+                alt="Blog post"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <div className="flex gap-2 text-xs text-muted-foreground mb-2">
+                  <span>Aug 21, 2025</span>
+                  <span>10 min read</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">15 Best Things To Do in Fayetteville, NC</h3>
+                <p className="text-sm text-muted-foreground">
+                  Are you looking for fun things to do in Fayetteville, NC? Here are the top 15 things to do in Fayetteville! Are you thinking about making...
+                </p>
+              </div>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" 
+                alt="Blog post"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <div className="flex gap-2 text-xs text-muted-foreground mb-2">
+                  <span>Jun 26, 2025</span>
+                  <span>7 min read</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Is Fayetteville, NC, a Safe Place to Live? (Crime Statistics)</h3>
+                <p className="text-sm text-muted-foreground">
+                  Considering a move to Fayetteville? Learn about crime rates, safe neighborhoods, and what makes this North Carolina city a great place to call home.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* What's Your Home Worth Section */}
+        <Card className="border-0 shadow-none bg-card/50 backdrop-blur">
+          <div className="p-8 text-center">
+            <h2 className="text-3xl font-bold mb-2">What's your home worth?</h2>
+            <p className="text-muted-foreground mb-6">Have a top local Realtor give you a FREE Comparative Market Analysis</p>
+            <Input placeholder="Your Email" className="mb-3 max-w-md mx-auto" />
+            <Button className="w-full max-w-md">Check Now</Button>
+          </div>
+        </Card>
       </div>
+
+      {/* Contact Form Dialog */}
+      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="relative h-32 -mt-6 -mx-6 mb-4">
+              <img 
+                src={property.images[0]} 
+                alt={property.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 flex items-end justify-center pb-4">
+                <DialogTitle className="text-white text-center text-lg">
+                  Interested in {property.address}, {property.city} NC, {property.zip}?
+                </DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">First Name</label>
+              <Input 
+                placeholder="First Name" 
+                value={contactForm.firstName}
+                onChange={(e) => setContactForm({...contactForm, firstName: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Last Name</label>
+              <Input 
+                placeholder="Last Name" 
+                value={contactForm.lastName}
+                onChange={(e) => setContactForm({...contactForm, lastName: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Email</label>
+              <Input 
+                type="email"
+                placeholder="Email" 
+                value={contactForm.email}
+                onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Phone</label>
+              <Input 
+                type="tel"
+                placeholder="Phone" 
+                value={contactForm.phone}
+                onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Comments</label>
+              <Textarea 
+                placeholder="Comments" 
+                value={contactForm.comments}
+                onChange={(e) => setContactForm({...contactForm, comments: e.target.value})}
+                rows={4}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              By proceeding, you consent to receive calls, texts and voicemails at the number you provided (may be recorded and may be autodialed and use prerecorded and artificial voices), and email, from Raleigh Realty about your inquiry and other home-related matters. Msg/data rates may apply. This consent applies even if you are on a do not call list and is not a condition of any purchase.
+            </p>
+            <Button className="w-full" onClick={() => setIsContactDialogOpen(false)}>Contact Agent</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Sticky Bottom CTA Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3">
-            <Button className="flex-1 h-12 text-base font-semibold" size="lg">
+            <Button 
+              className="flex-1 h-12 text-base font-semibold" 
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
               Request a Tour
             </Button>
-            <Button variant="outline" className="flex-1 h-12 text-base font-semibold" size="lg">
+            <Button 
+              variant="outline" 
+              className="flex-1 h-12 text-base font-semibold" 
+              size="lg"
+              onClick={() => setIsContactDialogOpen(true)}
+            >
               Ask a Question
             </Button>
           </div>
