@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import {
   X,
   Heart,
@@ -24,6 +25,7 @@ import {
   Ruler,
   Send,
   Video,
+  Camera,
 } from "lucide-react";
 
 interface PropertyDetailModalProps {
@@ -38,6 +40,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [comment, setComment] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   const { toast } = useToast();
 
   // Check if property is saved when modal opens
@@ -90,6 +94,17 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585152915-d208bec867a1?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600566752229-250ed79a9c14?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600563438938-a9a27216b4f5?auto=format&fit=crop&w=1200&q=80",
     ],
   };
 
@@ -202,8 +217,15 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const tourDates = getNextSevenDays();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden flex flex-col">
+    <>
+      <PhotoGalleryModal 
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        images={property.images}
+        initialIndex={galleryStartIndex}
+      />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden flex flex-col">
         <div className="flex flex-col flex-1 min-h-0">
           {/* Header with close button */}
           <div className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
@@ -239,12 +261,19 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
             <div className="p-4 md:p-6">
               {/* Image gallery */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
-                <div className="md:col-span-2 relative rounded-lg overflow-hidden aspect-video md:aspect-[16/10]">
+                <div 
+                  className="md:col-span-2 relative rounded-lg overflow-hidden aspect-video md:aspect-[16/10] group cursor-pointer"
+                  onClick={() => {
+                    setGalleryStartIndex(0);
+                    setIsGalleryOpen(true);
+                  }}
+                >
                   <img
-                    src={property.images[currentImageIndex]}
+                    src={property.images[0]}
                     alt={property.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                   <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-destructive"></div>
                     <span className="font-semibold text-sm">For sale</span>
@@ -252,19 +281,33 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="absolute bottom-4 right-4"
+                    className="absolute bottom-4 right-4 gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGalleryStartIndex(0);
+                      setIsGalleryOpen(true);
+                    }}
                   >
-                    View all 14 Photos
+                    <Camera className="w-4 h-4" />
+                    View all {property.images.length} Photos
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
                   {property.images.slice(1, 5).map((img, idx) => (
                     <div 
                       key={idx}
-                      className="relative rounded-lg overflow-hidden aspect-video md:aspect-square cursor-pointer"
-                      onClick={() => setCurrentImageIndex(idx + 1)}
+                      className="relative rounded-lg overflow-hidden aspect-video md:aspect-square cursor-pointer group"
+                      onClick={() => {
+                        setGalleryStartIndex(idx + 1);
+                        setIsGalleryOpen(true);
+                      }}
                     >
-                      <img src={img} alt={`View ${idx + 2}`} className="w-full h-full object-cover" />
+                      <img 
+                        src={img} 
+                        alt={`View ${idx + 2}`} 
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                     </div>
                   ))}
                 </div>
@@ -432,5 +475,6 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
