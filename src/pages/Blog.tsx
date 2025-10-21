@@ -210,9 +210,11 @@ const Blog = () => {
                       </div>
                       <span>{blog.author}</span>
                     </div>
-                    <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
-                      {blog.title}
-                    </h3>
+                    <Link to={`/blog/${blog.id}`}>
+                      <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors cursor-pointer">
+                        {blog.title}
+                      </h3>
+                    </Link>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground line-clamp-3 mb-4">

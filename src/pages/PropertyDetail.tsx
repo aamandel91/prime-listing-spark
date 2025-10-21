@@ -902,41 +902,45 @@ export default function PropertyDetail() {
           <h2 className="text-2xl font-bold mb-4">Related Blogs</h2>
           
           <div className="space-y-4">
-            <Card className="overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" 
-                alt="Blog post"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <div className="flex gap-2 text-xs text-muted-foreground mb-2">
-                  <span>Aug 21, 2025</span>
-                  <span>10 min read</span>
+            <Link to="/blog/1">
+              <Card className="overflow-hidden hover-scale group cursor-pointer">
+                <img 
+                  src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" 
+                  alt="Blog post"
+                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="p-4">
+                  <div className="flex gap-2 text-xs text-muted-foreground mb-2">
+                    <span>Aug 21, 2025</span>
+                    <span>10 min read</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">15 Best Things To Do in Fayetteville, NC</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Are you looking for fun things to do in Fayetteville, NC? Here are the top 15 things to do in Fayetteville! Are you thinking about making...
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-2">15 Best Things To Do in Fayetteville, NC</h3>
-                <p className="text-sm text-muted-foreground">
-                  Are you looking for fun things to do in Fayetteville, NC? Here are the top 15 things to do in Fayetteville! Are you thinking about making...
-                </p>
-              </div>
-            </Card>
+              </Card>
+            </Link>
 
-            <Card className="overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" 
-                alt="Blog post"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <div className="flex gap-2 text-xs text-muted-foreground mb-2">
-                  <span>Jun 26, 2025</span>
-                  <span>7 min read</span>
+            <Link to="/blog/2">
+              <Card className="overflow-hidden hover-scale group cursor-pointer">
+                <img 
+                  src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" 
+                  alt="Blog post"
+                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="p-4">
+                  <div className="flex gap-2 text-xs text-muted-foreground mb-2">
+                    <span>Jun 26, 2025</span>
+                    <span>7 min read</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Is Fayetteville, NC, a Safe Place to Live? (Crime Statistics)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Considering a move to Fayetteville? Learn about crime rates, safe neighborhoods, and what makes this North Carolina city a great place to call home.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-2">Is Fayetteville, NC, a Safe Place to Live? (Crime Statistics)</h3>
-                <p className="text-sm text-muted-foreground">
-                  Considering a move to Fayetteville? Learn about crime rates, safe neighborhoods, and what makes this North Carolina city a great place to call home.
-                </p>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           </div>
         </div>
 
