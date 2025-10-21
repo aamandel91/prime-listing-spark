@@ -104,14 +104,20 @@ const Hero = () => {
                     </Button>
                   </Link>
                 </div>
-                <div className="flex items-center justify-between mt-4">
-                  <Button variant="link" className="text-primary hover:text-primary/80">
-                    Search Properties Near Me
-                  </Button>
-                  <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                    Get an Instant Cash Offer
-                  </Button>
-                </div>
+                <Button variant="link" className="text-primary hover:text-primary/80 mt-4">
+                  Search Properties Near Me
+                </Button>
+              </div>
+
+              {/* Instant Cash Offer - Standalone */}
+              <div className="text-center mt-8">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground h-14 px-12 text-lg font-semibold"
+                >
+                  Get an Instant Cash Offer
+                </Button>
               </div>
             </div>
           </TabsContent>
