@@ -142,8 +142,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
               {/* Left column - Images and details */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Image gallery */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="col-span-2 relative rounded-lg overflow-hidden aspect-video">
+                <div className="grid grid-cols-5 gap-2">
+                  <div className="col-span-3 relative rounded-lg overflow-hidden aspect-video">
                     <img
                       src={property.images[currentImageIndex]}
                       alt={property.title}
@@ -157,7 +157,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   {property.images.slice(1, 5).map((img, idx) => (
                     <div 
                       key={idx}
-                      className="relative rounded-lg overflow-hidden aspect-video cursor-pointer"
+                      className="relative rounded-lg overflow-hidden aspect-square cursor-pointer"
                       onClick={() => setCurrentImageIndex(idx + 1)}
                     >
                       <img src={img} alt={`View ${idx + 2}`} className="w-full h-full object-cover" />
