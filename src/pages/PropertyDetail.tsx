@@ -290,14 +290,14 @@ export default function PropertyDetail() {
           <div className="hidden md:grid grid-rows-2 gap-2">
             {/* Top two images */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(1)}>
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(1)}>
                 <img
                   src={property.images[1] || property.images[0]}
                   alt={`${property.title} - View 2`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
               </div>
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(2)}>
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(2)}>
                 <img
                   src={property.images[2] || property.images[0]}
                   alt={`${property.title} - View 3`}
@@ -308,14 +308,14 @@ export default function PropertyDetail() {
             
             {/* Bottom two images */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(3)}>
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(3)}>
                 <img
                   src={property.images[0]}
                   alt={`${property.title} - View 4`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
               </div>
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group">
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square">
                 <img
                   src={property.images[1] || property.images[0]}
                   alt={`${property.title} - View 5`}
