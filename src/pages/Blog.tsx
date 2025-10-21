@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useMemo } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -7,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Calendar, ArrowRight, Search } from "lucide-react";
 
 const Blog = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const blogs = [
     {
       id: 1,
@@ -84,6 +90,36 @@ const Blog = () => {
 
   const categories = ["All", "Buying Guide", "Selling Tips", "Market Insights", "Investment", "Community", "Luxury", "Finance"];
 
+  // Filter blogs based on search query and category
+  const filteredBlogs = useMemo(() => {
+    return blogs.filter((blog) => {
+      const matchesSearch = 
+        blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        blog.author.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = selectedCategory === "All" || blog.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedBlogs = filteredBlogs.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to page 1 when filters change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -104,6 +140,8 @@ const Blog = () => {
                 <Input
                   placeholder="Search articles..."
                   className="pl-12 h-14 bg-background text-foreground"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                 />
               </div>
             </div>
@@ -117,8 +155,9 @@ const Blog = () => {
               {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={category === "All" ? "default" : "outline"}
+                  variant={category === selectedCategory ? "default" : "outline"}
                   className="rounded-full"
+                  onClick={() => handleCategoryChange(category)}
                 >
                   {category}
                 </Button>
@@ -130,8 +169,26 @@ const Blog = () => {
         {/* Blog Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.map((blog) => (
+            {/* Results count */}
+            <div className="mb-6 text-center">
+              <p className="text-muted-foreground">
+                Showing {paginatedBlogs.length} of {filteredBlogs.length} article{filteredBlogs.length !== 1 ? 's' : ''}
+                {searchQuery && ` for "${searchQuery}"`}
+                {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              </p>
+            </div>
+
+            {paginatedBlogs.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-xl text-muted-foreground mb-4">No articles found</p>
+                <Button onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>
+                  Clear filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {paginatedBlogs.map((blog) => (
                 <Card key={blog.id} className="overflow-hidden hover-scale group">
                   <div className="relative h-56 overflow-hidden">
                     <img
@@ -168,19 +225,41 @@ const Blog = () => {
                     </Link>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+                  ))}
+                </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <div className="flex gap-2">
-                <Button variant="outline">Previous</Button>
-                <Button variant="default">1</Button>
-                <Button variant="outline">2</Button>
-                <Button variant="outline">3</Button>
-                <Button variant="outline">Next</Button>
-              </div>
-            </div>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-12">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      {[...Array(totalPages)].map((_, index) => (
+                        <Button
+                          key={index + 1}
+                          variant={currentPage === index + 1 ? "default" : "outline"}
+                          onClick={() => setCurrentPage(index + 1)}
+                        >
+                          {index + 1}
+                        </Button>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
       </main>
