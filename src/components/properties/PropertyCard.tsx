@@ -41,13 +41,16 @@ const PropertyCard = ({
     }).format(price);
   };
 
+  // Generate SEO-optimized alt text
+  const altText = `${beds} bedroom, ${baths} bathroom ${title.toLowerCase()} for sale in ${city}, ${state} - ${formatPrice(price)}`;
+
   return (
     <Card className="group overflow-hidden hover:shadow-large transition-all duration-300">
       <Link to={`/property/${id}`}>
         <div className="relative overflow-hidden h-64">
           <img
             src={image}
-            alt={title}
+            alt={altText}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
           />

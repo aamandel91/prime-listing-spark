@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
+import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +15,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Search, SlidersHorizontal, Grid3x3, List } from "lucide-react";
 
 const Listings = () => {
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Get filter parameters from URL
+  const propertyType = searchParams.get("type") || "";
+  const city = searchParams.get("city") || "";
   
   // Sample property data - will be replaced with real data
   const properties = [
@@ -97,6 +105,75 @@ const Listings = () => {
       status: "under-contract" as const
     }
   ];
+
+  // Generate dynamic SEO content based on filters
+  const seoContent = useMemo(() => {
+    const typeMap: Record<string, string> = {
+      "single-family": "Single Family Homes",
+      "townhome": "Townhomes",
+      "condo": "Condos",
+      "acreage": "Homes on 1+ Acre",
+      "luxury": "Luxury Homes",
+      "multi-family": "Multi-Family Homes",
+      "new-construction": "New Construction Homes"
+    };
+
+    const cityName = city ? city.replace(/%20/g, " ") : "";
+    const typeName = propertyType ? typeMap[propertyType] || propertyType : "Properties";
+    
+    const location = cityName || "Florida";
+    const title = `${typeName} for Sale in ${location} | FloridaHomeFinder.com`;
+    const h1 = `${typeName} for Sale in ${location}`;
+    const description = `Browse ${properties.length}+ ${typeName.toLowerCase()} for sale in ${location}. Updated every 15 minutes. Find your dream home with FloridaHomeFinder.com - Florida's #1 real estate resource.`;
+    
+    return { title, h1, description };
+  }, [propertyType, city, properties.length]);
+
+  // Generate JSON-LD structured data for the listing page
+  const listingSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "numberOfItems": properties.length,
+    "itemListElement": properties.map((property, index) => ({
+      "@type": "RealEstateListing",
+      "position": index + 1,
+      "name": property.title,
+      "url": `${window.location.origin}/property/${property.id}`,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": property.address,
+        "addressLocality": property.city,
+        "addressRegion": property.state,
+        "addressCountry": "US"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": property.price,
+        "priceCurrency": "USD"
+      }
+    }))
+  };
+
+  // Generate breadcrumb items
+  const breadcrumbItems = useMemo(() => {
+    const items = [{ label: "Listings", href: "/listings" }];
+    if (propertyType) {
+      const typeMap: Record<string, string> = {
+        "single-family": "Single Family Homes",
+        "townhome": "Townhomes",
+        "condo": "Condos",
+        "acreage": "1+ Acre Homes",
+        "luxury": "Luxury Homes",
+        "multi-family": "Multi-Family",
+        "new-construction": "New Construction"
+      };
+      items.push({
+        label: typeMap[propertyType] || propertyType,
+        href: `/listings?type=${propertyType}`
+      });
+    }
+    return items;
+  }, [propertyType]);
 
   const FiltersSidebar = () => (
     <div className="space-y-4">
@@ -479,15 +556,43 @@ const Listings = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{seoContent.title}</title>
+        <meta name="description" content={seoContent.description} />
+        <link rel="canonical" href={`${window.location.origin}/listings`} />
+        
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content={seoContent.title} />
+        <meta property="og:description" content={seoContent.description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:image" content={properties[0]?.image || ""} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoContent.title} />
+        <meta name="twitter:description" content={seoContent.description} />
+        <meta name="twitter:image" content={properties[0]?.image || ""} />
+      </Helmet>
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(listingSchema) }}
+      />
+
       <Navbar />
       
       <main className="flex-1 bg-muted/30">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Florida Properties for Sale</h1>
+          {/* Breadcrumbs */}
+          <BreadcrumbSEO items={breadcrumbItems} />
+          
+          {/* Header with SEO-optimized H1 */}
+          <header className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">{seoContent.h1}</h1>
             <p className="text-muted-foreground">Showing {properties.length} properties</p>
-          </div>
+          </header>
 
           <div className="flex gap-6">
             {/* Desktop Filters Sidebar */}
