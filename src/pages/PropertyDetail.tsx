@@ -248,63 +248,107 @@ export default function PropertyDetail() {
         />
       </div>
       
-      {/* Hero Image with Overlay Controls */}
-      <div className="relative h-[60vh] md:h-[70vh] bg-muted">
-        <img
-          src={property.images[currentImageIndex]}
-          alt={property.title}
-          className="w-full h-full object-cover"
-        />
+      {/* Gallery Grid */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-[70vh]">
+          {/* Main large image - takes up 2 columns */}
+          <div className="md:col-span-2 relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(0)}>
+            <img
+              src={property.images[0]}
+              alt={`${property.title} - Main view`}
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            />
+            {/* For Sale Badge */}
+            <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-destructive"></div>
+              <span className="font-semibold text-sm">For sale</span>
+            </div>
+            
+            {/* Top Right Controls */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background">
+                <Search className="w-5 h-5" />
+              </Button>
+              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background">
+                <Phone className="w-5 h-5" />
+              </Button>
+              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background" onClick={handleShare}>
+                <Share2 className="w-5 h-5" />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="secondary" 
+                className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background"
+                onClick={() => setIsFavorite(!isFavorite)}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right side grid - 2x2 */}
+          <div className="hidden md:grid grid-rows-2 gap-2">
+            {/* Top two images */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(1)}>
+                <img
+                  src={property.images[1] || property.images[0]}
+                  alt={`${property.title} - View 2`}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+              </div>
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(2)}>
+                <img
+                  src={property.images[2] || property.images[0]}
+                  alt={`${property.title} - View 3`}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+              </div>
+            </div>
+            
+            {/* Bottom two images */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(3)}>
+                <img
+                  src={property.images[0]}
+                  alt={`${property.title} - View 4`}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+              </div>
+              <div className="relative rounded-lg overflow-hidden cursor-pointer group">
+                <img
+                  src={property.images[1] || property.images[0]}
+                  alt={`${property.title} - View 5`}
+                  className="w-full h-full object-cover"
+                />
+                {/* See all photos button overlay */}
+                <div 
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer hover:bg-black/50 transition-colors"
+                  onClick={() => setCurrentImageIndex(0)}
+                >
+                  <div className="bg-background rounded-lg px-4 py-2 flex items-center gap-2">
+                    <div className="grid grid-cols-2 gap-0.5">
+                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
+                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
+                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
+                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
+                    </div>
+                    <span className="font-semibold text-sm">See all {property.images.length} photos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         
-        {/* Top Overlay Controls */}
-        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
+        {/* Back Button - Mobile */}
+        <div className="md:hidden fixed top-4 left-4 z-10">
           <Link to="/listings">
-            <Button size="icon" variant="secondary" className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background">
+            <Button size="icon" variant="secondary" className="rounded-full bg-background/95 backdrop-blur-sm hover:bg-background">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="secondary" className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background">
-              <Search className="w-5 h-5" />
-            </Button>
-            <Button size="icon" variant="secondary" className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background">
-              <Phone className="w-5 h-5" />
-            </Button>
-            <Button size="icon" variant="secondary" className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background" onClick={handleShare}>
-              <Share2 className="w-5 h-5" />
-            </Button>
-            <Button 
-              size="icon" 
-              variant="secondary" 
-              className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
-              onClick={() => setIsFavorite(!isFavorite)}
-            >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
-            </Button>
-          </div>
         </div>
-
-        {/* Image Counter */}
-        <div className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm text-foreground px-3 py-1.5 rounded-lg text-sm font-medium">
-          {currentImageIndex + 1} of {property.images.length}
-        </div>
-
-        {/* Navigation Arrows - Hidden on mobile */}
-        <button
-          onClick={prevImage}
-          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background p-2 rounded-full transition-colors"
-          aria-label="Previous image"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextImage}
-          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background p-2 rounded-full transition-colors"
-          aria-label="Next image"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
       </div>
 
       {/* Main Content */}
