@@ -4,19 +4,24 @@ import { Button } from "@/components/ui/button";
 const ExploreListings = () => {
   const metros = [
     {
-      name: "Miami Metro",
-      image: "https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Miami"
-    },
-    {
       name: "Broward/Palm Beach Metro",
       image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
       searchParams: "?city=Fort%20Lauderdale"
     },
     {
-      name: "Port St Lucie Metro",
-      image: "https://images.unsplash.com/photo-1542401886-65d6c61db217?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Port%20St%20Lucie"
+      name: "Florida Keys Metro",
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Florida%20Keys"
+    },
+    {
+      name: "Jacksonville Metro",
+      image: "https://images.unsplash.com/photo-1566908829550-e6551b00979b?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Jacksonville"
+    },
+    {
+      name: "Miami Metro",
+      image: "https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Miami"
     },
     {
       name: "Orlando Metro",
@@ -24,14 +29,24 @@ const ExploreListings = () => {
       searchParams: "?city=Orlando"
     },
     {
+      name: "Port St Lucie Metro",
+      image: "https://images.unsplash.com/photo-1542401886-65d6c61db217?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Port%20St%20Lucie"
+    },
+    {
+      name: "Sarasota Metro",
+      image: "https://images.unsplash.com/photo-1502472584811-0a2f2feb8968?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Sarasota"
+    },
+    {
+      name: "SW Florida Metro",
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Fort%20Myers"
+    },
+    {
       name: "Tampa/St Pete Metro",
       image: "https://images.unsplash.com/photo-1605708613525-284002547674?auto=format&fit=crop&w=800&q=80",
       searchParams: "?city=Tampa"
-    },
-    {
-      name: "Jacksonville Metro",
-      image: "https://images.unsplash.com/photo-1566908829550-e6551b00979b?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Jacksonville"
     }
   ];
 
