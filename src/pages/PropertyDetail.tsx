@@ -371,7 +371,7 @@ export default function PropertyDetail() {
               </div>
               <div className="flex justify-between items-center border-b border-dotted pb-2">
                 <span className="text-muted-foreground">City</span>
-                <Link to={`/city/${property.city.toLowerCase()}`} className="font-semibold text-primary hover:underline">
+                <Link to={`/listings?city=${encodeURIComponent(property.city)}`} className="font-semibold text-primary hover:underline">
                   {property.city}
                 </Link>
               </div>
@@ -381,19 +381,19 @@ export default function PropertyDetail() {
               </div>
               <div className="flex justify-between items-center border-b border-dotted pb-2">
                 <span className="text-muted-foreground">Zip Code</span>
-                <Link to={`/zip/${property.zip}`} className="font-semibold text-primary hover:underline">
+                <Link to={`/listings?zip=${property.zip}`} className="font-semibold text-primary hover:underline">
                   {property.zip}
                 </Link>
               </div>
               <div className="flex justify-between items-center border-b border-dotted pb-2">
                 <span className="text-muted-foreground">County</span>
-                <Link to={`/county/${property.county.toLowerCase()}`} className="font-semibold text-primary hover:underline">
+                <Link to={`/listings?county=${encodeURIComponent(property.county)}`} className="font-semibold text-primary hover:underline">
                   {property.county}
                 </Link>
               </div>
               <div className="flex justify-between items-center pb-2">
                 <span className="text-muted-foreground">Subdivision</span>
-                <Link to={`/subdivision/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="font-semibold text-primary hover:underline">
+                <Link to={`/listings?subdivision=${encodeURIComponent(property.subdivision)}`} className="font-semibold text-primary hover:underline">
                   {property.subdivision}
                 </Link>
               </div>
