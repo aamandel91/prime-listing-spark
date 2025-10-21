@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import CTASection from "@/components/home/CTASection";
+import PropertyTypes from "@/components/home/PropertyTypes";
 import ExploreListings from "@/components/home/ExploreListings";
 import FeaturedProperties from "@/components/home/FeaturedProperties";
 
@@ -13,6 +14,7 @@ const Index = () => {
       <main className="flex-1">
         <Hero />
         <CTASection />
+        <PropertyTypes />
         <ExploreListings />
         <FeaturedProperties />
       </main>
