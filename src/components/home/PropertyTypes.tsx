@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, Building2, Building, Warehouse, Trees, Castle } from "lucide-react";
+import { Home, Building2, Building, Warehouse, Trees, Castle, Hammer } from "lucide-react";
 
 const PropertyTypes = () => {
   const propertyTypes = [
@@ -10,34 +10,40 @@ const PropertyTypes = () => {
       link: "/listings?type=single-family"
     },
     {
-      title: "Condos",
-      icon: Building2,
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=condo"
-    },
-    {
       title: "Townhomes",
       icon: Building,
       image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
       link: "/listings?type=townhome"
     },
     {
-      title: "Multi-Family",
-      icon: Warehouse,
-      image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=multi-family"
+      title: "Condos",
+      icon: Building2,
+      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+      link: "/listings?type=condo"
     },
     {
-      title: "Land",
+      title: "1+ Acre Homes",
       icon: Trees,
       image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=land"
+      link: "/listings?type=acreage"
     },
     {
       title: "Luxury Homes",
       icon: Castle,
       image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
       link: "/listings?type=luxury"
+    },
+    {
+      title: "Multi Family Homes",
+      icon: Warehouse,
+      image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
+      link: "/listings?type=multi-family"
+    },
+    {
+      title: "New Construction",
+      icon: Hammer,
+      image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
+      link: "/listings?type=new-construction"
     }
   ];
 
@@ -51,7 +57,7 @@ const PropertyTypes = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {propertyTypes.map((type) => (
             <Link
               key={type.title}

@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import CTASection from "@/components/home/CTASection";
 import PropertyTypes from "@/components/home/PropertyTypes";
+import PopularSearches from "@/components/home/PopularSearches";
 import ExploreListings from "@/components/home/ExploreListings";
 import FeaturedProperties from "@/components/home/FeaturedProperties";
 
@@ -15,6 +16,7 @@ const Index = () => {
         <Hero />
         <CTASection />
         <PropertyTypes />
+        <PopularSearches />
         <ExploreListings />
         <FeaturedProperties />
       </main>

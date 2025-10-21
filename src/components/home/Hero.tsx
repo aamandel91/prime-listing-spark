@@ -25,7 +25,7 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 py-20">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto mb-8">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-black/30 backdrop-blur-sm border-0 h-auto p-1 gap-1">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-black/30 backdrop-blur-sm border-0 h-auto p-1 gap-1">
             <TabsTrigger 
               value="buying" 
               className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4"
@@ -49,12 +49,6 @@ const Hero = () => {
               className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4"
             >
               Get Pre-Approved
-            </TabsTrigger>
-            <TabsTrigger 
-              value="offer" 
-              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4 md:col-span-1 col-span-2"
-            >
-              Instant Offer
             </TabsTrigger>
           </TabsList>
 
@@ -110,9 +104,14 @@ const Hero = () => {
                     </Button>
                   </Link>
                 </div>
-                <Button variant="link" className="text-primary hover:text-primary/80 mt-4">
-                  Search Properties Near Me
-                </Button>
+                <div className="flex items-center justify-between mt-4">
+                  <Button variant="link" className="text-primary hover:text-primary/80">
+                    Search Properties Near Me
+                  </Button>
+                  <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                    Get an Instant Cash Offer
+                  </Button>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -153,17 +152,6 @@ const Hero = () => {
             </Button>
           </TabsContent>
 
-          <TabsContent value="offer" className="mt-8 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-              Get an Instant Cash Offer
-            </h1>
-            <p className="text-xl text-white/90 mb-8">
-              Receive a fair cash offer on your home - no hassle, no fees
-            </p>
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground h-14 px-12 text-lg">
-              Get Your Offer
-            </Button>
-          </TabsContent>
         </Tabs>
       </div>
     </section>
