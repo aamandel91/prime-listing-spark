@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   X,
   Heart,
@@ -32,10 +34,32 @@ interface PropertyDetailModalProps {
 
 export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDetailModalProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [comment, setComment] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  const { toast } = useToast();
+
+  // Check if property is saved when modal opens
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('saved_properties')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('property_id', propertyId)
+        .maybeSingle();
+
+      setIsSaved(!!data);
+    };
+
+    if (isOpen) {
+      checkIfSaved();
+    }
+  }, [isOpen, propertyId]);
 
   // Mock data - will be replaced with actual API call
   const property = {
@@ -77,6 +101,48 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
     }).format(price);
   };
 
+  const handleSave = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save properties",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isSaved) {
+      // Unsave
+      const { error } = await supabase
+        .from('saved_properties')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('property_id', propertyId);
+
+      if (!error) {
+        setIsSaved(false);
+        toast({
+          title: "Property removed",
+          description: "Property removed from your saved list",
+        });
+      }
+    } else {
+      // Save
+      const { error } = await supabase
+        .from('saved_properties')
+        .insert({ user_id: user.id, property_id: propertyId });
+
+      if (!error) {
+        setIsSaved(true);
+        toast({
+          title: "Property saved",
+          description: "Property added to your saved list",
+        });
+      }
+    }
+  };
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -84,6 +150,36 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         text: `Check out this property: ${property.address}`,
         url: window.location.href,
       });
+    } else {
+      toast({
+        title: "Link copied",
+        description: "Property link copied to clipboard",
+      });
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const handleHide = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to hide properties",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('hidden_properties')
+      .insert({ user_id: user.id, property_id: propertyId });
+
+    if (!error) {
+      toast({
+        title: "Property hidden",
+        description: "This property will no longer appear in your searches",
+      });
+      onClose();
     }
   };
 
@@ -123,15 +219,14 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" onClick={handleShare}>
-                <Share2 className="w-5 h-5" />
+              <Button variant="ghost" onClick={handleSave}>
+                {isSaved ? "Saved" : "Save"}
               </Button>
-              <Button 
-                size="icon" 
-                variant="ghost"
-                onClick={() => setIsFavorite(!isFavorite)}
-              >
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
+              <Button variant="ghost" onClick={handleShare}>
+                Share
+              </Button>
+              <Button variant="ghost" onClick={handleHide}>
+                Hide
               </Button>
             </div>
           </div>
