@@ -17,15 +17,27 @@ import { Search, SlidersHorizontal, MapPin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Listings = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   
-  // Get filter parameters from URL
-  const propertyType = searchParams.get("type") || "";
-  const city = searchParams.get("city") || "";
+  // Filter states - Initialize from URL params
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
+  const [minBeds, setMinBeds] = useState(searchParams.get("beds") || "");
+  const [minBaths, setMinBaths] = useState(searchParams.get("baths") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   
-  // Sample property data
-  const properties = [
+  // More filters states
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [minSqft, setMinSqft] = useState("");
+  const [maxSqft, setMaxSqft] = useState("");
+  const [minYear, setMinYear] = useState("");
+  const [maxYear, setMaxYear] = useState("");
+  const [features, setFeatures] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState("");
+  
+  // Sample property data (expanded with more properties and attributes)
+  const allProperties = [
     {
       id: "1",
       title: "Modern Family Home",
@@ -38,7 +50,13 @@ const Listings = () => {
       city: "Miami",
       state: "FL",
       status: null,
-      description: "Beautiful modern family home featuring an open floor plan with high ceilings, gourmet kitchen with stainless steel appliances, spacious master suite with walk-in closet, and a large backyard perfect for entertaining. Located in a desirable neighborhood with excellent schools nearby."
+      type: "homes",
+      yearBuilt: 2018,
+      hasPool: true,
+      isWaterfront: false,
+      description: "Beautiful modern family home featuring an open floor plan with high ceilings, gourmet kitchen with stainless steel appliances, spacious master suite with walk-in closet, and a large backyard perfect for entertaining. Located in a desirable neighborhood with excellent schools nearby.",
+      lat: 25.7617,
+      lng: -80.1918
     },
     {
       id: "2",
@@ -53,7 +71,13 @@ const Listings = () => {
       state: "FL",
       isHotProperty: true,
       status: null,
-      description: "Stunning waterfront condo with breathtaking ocean views from every room. Features include floor-to-ceiling windows, modern kitchen with granite countertops, luxurious master bathroom with spa tub, private balcony, and access to world-class amenities including pool, fitness center, and concierge service."
+      type: "condos",
+      yearBuilt: 2020,
+      hasPool: true,
+      isWaterfront: true,
+      description: "Stunning waterfront condo with breathtaking ocean views from every room. Features include floor-to-ceiling windows, modern kitchen with granite countertops, luxurious master bathroom with spa tub, private balcony, and access to world-class amenities including pool, fitness center, and concierge service.",
+      lat: 26.1224,
+      lng: -80.1373
     },
     {
       id: "3",
@@ -67,7 +91,13 @@ const Listings = () => {
       city: "Orlando",
       state: "FL",
       status: "open-house" as const,
-      description: "Charming townhouse in a gated community with three bedrooms, two full bathrooms, and updated kitchen with new appliances. Enjoy the attached two-car garage, private patio, community pool, and playground. Close to shopping, dining, and major highways."
+      type: "townhomes",
+      yearBuilt: 2015,
+      hasPool: false,
+      isWaterfront: false,
+      description: "Charming townhouse in a gated community with three bedrooms, two full bathrooms, and updated kitchen with new appliances. Enjoy the attached two-car garage, private patio, community pool, and playground. Close to shopping, dining, and major highways.",
+      lat: 28.5383,
+      lng: -81.3792
     },
     {
       id: "4",
@@ -81,7 +111,13 @@ const Listings = () => {
       city: "Tampa",
       state: "FL",
       status: null,
-      description: "Spacious single-story ranch home on a large corner lot with mature landscaping. Five bedrooms including a master suite with sitting area, formal dining room, great room with fireplace, updated kitchen, and three-car garage. Perfect for large families or multi-generational living."
+      type: "homes",
+      yearBuilt: 2010,
+      hasPool: true,
+      isWaterfront: false,
+      description: "Spacious single-story ranch home on a large corner lot with mature landscaping. Five bedrooms including a master suite with sitting area, formal dining room, great room with fireplace, updated kitchen, and three-car garage. Perfect for large families or multi-generational living.",
+      lat: 27.9506,
+      lng: -82.4572
     },
     {
       id: "5",
@@ -96,7 +132,13 @@ const Listings = () => {
       state: "FL",
       isHotProperty: true,
       status: null,
-      description: "Exquisite contemporary villa with stunning architecture and designer finishes throughout. Features include soaring ceilings, walls of glass, chef's kitchen with premium appliances, wine cellar, home theater, resort-style pool with spa, outdoor kitchen, and four-car garage. Located in an exclusive waterfront community."
+      type: "homes",
+      yearBuilt: 2022,
+      hasPool: true,
+      isWaterfront: true,
+      description: "Exquisite contemporary villa with stunning architecture and designer finishes throughout. Features include soaring ceilings, walls of glass, chef's kitchen with premium appliances, wine cellar, home theater, resort-style pool with spa, outdoor kitchen, and four-car garage. Located in an exclusive waterfront community.",
+      lat: 26.1420,
+      lng: -81.7948
     },
     {
       id: "6",
@@ -110,39 +152,176 @@ const Listings = () => {
       city: "Sarasota",
       state: "FL",
       status: "under-contract" as const,
-      description: "Adorable cottage perfect for first-time buyers or downsizing. Features include hardwood floors, updated kitchen and bathrooms, cozy living room with fireplace, covered front porch, and fenced backyard. Walking distance to parks, shops, and restaurants in the heart of Sarasota."
+      type: "homes",
+      yearBuilt: 2005,
+      hasPool: false,
+      isWaterfront: false,
+      description: "Adorable cottage perfect for first-time buyers or downsizing. Features include hardwood floors, updated kitchen and bathrooms, cozy living room with fireplace, covered front porch, and fenced backyard. Walking distance to parks, shops, and restaurants in the heart of Sarasota.",
+      lat: 27.3364,
+      lng: -82.5307
     }
   ];
 
+  // Update URL params with current filters
+  const updateSearchParams = () => {
+    const params = new URLSearchParams();
+    if (location) params.set("location", location);
+    if (priceRange) params.set("price", priceRange);
+    if (minBeds) params.set("beds", minBeds);
+    if (minBaths) params.set("baths", minBaths);
+    if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
+    setSearchParams(params);
+  };
+
+  // Handle search button click
+  const handleSearch = () => {
+    updateSearchParams();
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setLocation("");
+    setPriceRange("");
+    setMinBeds("");
+    setMinBaths("");
+    setPropertyTypes([]);
+    setMinSqft("");
+    setMaxSqft("");
+    setMinYear("");
+    setMaxYear("");
+    setFeatures([]);
+    setSelectedCity("");
+    setSortBy("newest");
+    setSearchParams(new URLSearchParams());
+  };
+
+  // Toggle property type
+  const togglePropertyType = (type: string) => {
+    setPropertyTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  // Toggle feature
+  const toggleFeature = (feature: string) => {
+    setFeatures(prev =>
+      prev.includes(feature) ? prev.filter(f => f !== feature) : [...prev, feature]
+    );
+  };
+
+  // Filter and sort properties
+  const filteredProperties = useMemo(() => {
+    let filtered = [...allProperties];
+
+    // Filter by location (city or address)
+    if (location) {
+      const searchTerm = location.toLowerCase();
+      filtered = filtered.filter(
+        p =>
+          p.city.toLowerCase().includes(searchTerm) ||
+          p.address.toLowerCase().includes(searchTerm) ||
+          p.state.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Filter by selected city from dropdown
+    if (selectedCity) {
+      filtered = filtered.filter(p => p.city.toLowerCase() === selectedCity.toLowerCase());
+    }
+
+    // Filter by price range
+    if (priceRange) {
+      const [min, max] = priceRange.split("-").map(v => parseInt(v) * 1000);
+      if (max) {
+        filtered = filtered.filter(p => p.price >= min && p.price <= max);
+      } else {
+        filtered = filtered.filter(p => p.price >= min);
+      }
+    }
+
+    // Filter by minimum beds
+    if (minBeds) {
+      const beds = parseInt(minBeds);
+      filtered = filtered.filter(p => p.beds >= beds);
+    }
+
+    // Filter by minimum baths
+    if (minBaths) {
+      const baths = parseInt(minBaths);
+      filtered = filtered.filter(p => p.baths >= baths);
+    }
+
+    // Filter by property types
+    if (propertyTypes.length > 0) {
+      filtered = filtered.filter(p => propertyTypes.includes(p.type));
+    }
+
+    // Filter by square footage
+    if (minSqft) {
+      filtered = filtered.filter(p => p.sqft >= parseInt(minSqft));
+    }
+    if (maxSqft) {
+      filtered = filtered.filter(p => p.sqft <= parseInt(maxSqft));
+    }
+
+    // Filter by year built
+    if (minYear) {
+      filtered = filtered.filter(p => p.yearBuilt >= parseInt(minYear));
+    }
+    if (maxYear) {
+      filtered = filtered.filter(p => p.yearBuilt <= parseInt(maxYear));
+    }
+
+    // Filter by features
+    if (features.includes("pool")) {
+      filtered = filtered.filter(p => p.hasPool);
+    }
+    if (features.includes("waterfront")) {
+      filtered = filtered.filter(p => p.isWaterfront);
+    }
+    if (features.includes("open-house")) {
+      filtered = filtered.filter(p => p.status === "open-house");
+    }
+
+    // Sort properties
+    switch (sortBy) {
+      case "price-low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "beds":
+        filtered.sort((a, b) => b.beds - a.beds);
+        break;
+      case "sqft":
+        filtered.sort((a, b) => b.sqft - a.sqft);
+        break;
+      case "newest":
+      default:
+        filtered.sort((a, b) => (b.yearBuilt || 0) - (a.yearBuilt || 0));
+        break;
+    }
+
+    return filtered;
+  }, [location, selectedCity, priceRange, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties]);
+
   // Generate dynamic SEO content
   const seoContent = useMemo(() => {
-    const typeMap: Record<string, string> = {
-      "single-family": "Single Family Homes",
-      "townhome": "Townhomes",
-      "condo": "Condos",
-      "acreage": "Homes on 1+ Acre",
-      "luxury": "Luxury Homes",
-      "multi-family": "Multi-Family Homes",
-      "new-construction": "New Construction Homes"
-    };
-
-    const cityName = city ? city.replace(/%20/g, " ") : "";
-    const typeName = propertyType ? typeMap[propertyType] || propertyType : "Properties";
-    
-    const location = cityName || "Florida";
-    const title = `${typeName} for Sale in ${location} | FloridaHomeFinder.com`;
-    const h1 = `${typeName} for Sale in ${location}`;
-    const description = `Browse ${properties.length}+ ${typeName.toLowerCase()} for sale in ${location}. Updated every 15 minutes. Find your dream home with FloridaHomeFinder.com - Florida's #1 real estate resource.`;
+    const locationName = location || selectedCity || "Florida";
+    const title = `Real Estate & Homes for Sale in ${locationName} | FloridaHomeFinder.com`;
+    const h1 = `Homes for Sale in ${locationName}`;
+    const description = `Browse ${filteredProperties.length} homes for sale in ${locationName}. Updated every 15 minutes. Find your dream home with FloridaHomeFinder.com - Florida's #1 real estate resource.`;
     
     return { title, h1, description };
-  }, [propertyType, city, properties.length]);
+  }, [location, selectedCity, filteredProperties.length]);
 
   // Generate JSON-LD structured data
   const listingSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "numberOfItems": properties.length,
-    "itemListElement": properties.map((property, index) => ({
+    "numberOfItems": filteredProperties.length,
+    "itemListElement": filteredProperties.map((property, index) => ({
       "@type": "RealEstateListing",
       "position": index + 1,
       "name": property.title,
@@ -165,78 +344,46 @@ const Listings = () => {
   // Generate breadcrumbs
   const breadcrumbItems = useMemo(() => {
     const items = [{ label: "Listings", href: "/listings" }];
-    if (propertyType) {
-      const typeMap: Record<string, string> = {
-        "single-family": "Single Family Homes",
-        "townhome": "Townhomes",
-        "condo": "Condos",
-        "acreage": "1+ Acre Homes",
-        "luxury": "Luxury Homes",
-        "multi-family": "Multi-Family",
-        "new-construction": "New Construction"
-      };
+    if (location) {
       items.push({
-        label: typeMap[propertyType] || propertyType,
-        href: `/listings?type=${propertyType}`
+        label: location,
+        href: `/listings?location=${location}`
       });
     }
     return items;
-  }, [propertyType]);
+  }, [location]);
 
   const MoreFiltersContent = () => (
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-4">
-        <Accordion type="multiple" defaultValue={["status", "type", "details"]} className="w-full">
-          {/* Status */}
-          <AccordionItem value="status">
-            <AccordionTrigger className="text-base font-semibold">Status</AccordionTrigger>
-            <AccordionContent className="space-y-2 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="active" defaultChecked />
-                <Label htmlFor="active" className="text-sm font-normal cursor-pointer">Active</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="pending" />
-                <Label htmlFor="pending" className="text-sm font-normal cursor-pointer">Pending</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="coming-soon" />
-                <Label htmlFor="coming-soon" className="text-sm font-normal cursor-pointer">Coming Soon</Label>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
+        <Accordion type="multiple" defaultValue={["type", "details"]} className="w-full">
           {/* Property Type */}
           <AccordionItem value="type">
             <AccordionTrigger className="text-base font-semibold">Property Type</AccordionTrigger>
             <AccordionContent className="space-y-2 pt-2">
               <div className="flex items-center space-x-2">
-                <Checkbox id="homes" defaultChecked />
+                <Checkbox
+                  id="homes"
+                  checked={propertyTypes.includes("homes")}
+                  onCheckedChange={() => togglePropertyType("homes")}
+                />
                 <Label htmlFor="homes" className="text-sm font-normal cursor-pointer">Homes</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="townhomes" />
+                <Checkbox
+                  id="townhomes"
+                  checked={propertyTypes.includes("townhomes")}
+                  onCheckedChange={() => togglePropertyType("townhomes")}
+                />
                 <Label htmlFor="townhomes" className="text-sm font-normal cursor-pointer">Townhomes</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="condos" />
+                <Checkbox
+                  id="condos"
+                  checked={propertyTypes.includes("condos")}
+                  onCheckedChange={() => togglePropertyType("condos")}
+                />
                 <Label htmlFor="condos" className="text-sm font-normal cursor-pointer">Condos/Apartments</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="land" />
-                <Label htmlFor="land" className="text-sm font-normal cursor-pointer">Lot/Land</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="multi-family" />
-                <Label htmlFor="multi-family" className="text-sm font-normal cursor-pointer">Multi-Family</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="manufactured" />
-                <Label htmlFor="manufactured" className="text-sm font-normal cursor-pointer">Manufactured</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="farm" />
-                <Label htmlFor="farm" className="text-sm font-normal cursor-pointer">Farm</Label>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -248,45 +395,35 @@ const Listings = () => {
               <div>
                 <Label className="text-sm">Square Feet</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input placeholder="Min" type="number" />
-                  <Input placeholder="Max" type="number" />
+                  <Input
+                    placeholder="Min"
+                    type="number"
+                    value={minSqft}
+                    onChange={(e) => setMinSqft(e.target.value)}
+                  />
+                  <Input
+                    placeholder="Max"
+                    type="number"
+                    value={maxSqft}
+                    onChange={(e) => setMaxSqft(e.target.value)}
+                  />
                 </div>
-              </div>
-              <div>
-                <Label className="text-sm">Lot Size (Acres)</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="any">Any</SelectItem>
-                    <SelectItem value="0.25">0.25+</SelectItem>
-                    <SelectItem value="0.5">0.5+</SelectItem>
-                    <SelectItem value="1">1+</SelectItem>
-                    <SelectItem value="2">2+</SelectItem>
-                    <SelectItem value="5">5+</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <Label className="text-sm">Year Built</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input placeholder="Min" type="number" />
-                  <Input placeholder="Max" type="number" />
-                </div>
-              </div>
-              <div>
-                <Label className="text-sm">Garage Spaces</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input placeholder="Min" type="number" />
-                  <Input placeholder="Max" type="number" />
-                </div>
-              </div>
-              <div>
-                <Label className="text-sm">Days on Site</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input placeholder="Min" type="number" />
-                  <Input placeholder="Max" type="number" />
+                  <Input
+                    placeholder="Min"
+                    type="number"
+                    value={minYear}
+                    onChange={(e) => setMinYear(e.target.value)}
+                  />
+                  <Input
+                    placeholder="Max"
+                    type="number"
+                    value={maxYear}
+                    onChange={(e) => setMaxYear(e.target.value)}
+                  />
                 </div>
               </div>
             </AccordionContent>
@@ -297,183 +434,65 @@ const Listings = () => {
             <AccordionTrigger className="text-base font-semibold">Property Features</AccordionTrigger>
             <AccordionContent className="space-y-2 pt-2">
               <div className="flex items-center space-x-2">
-                <Checkbox id="hoa" />
-                <Label htmlFor="hoa" className="text-sm font-normal cursor-pointer">HOA Fee</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="senior" />
-                <Label htmlFor="senior" className="text-sm font-normal cursor-pointer">Senior Community</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="ranch" />
-                <Label htmlFor="ranch" className="text-sm font-normal cursor-pointer">Ranch Home</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="new-construction" />
-                <Label htmlFor="new-construction" className="text-sm font-normal cursor-pointer">New Construction</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="basement" />
-                <Label htmlFor="basement" className="text-sm font-normal cursor-pointer">Basement</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="golf" />
-                <Label htmlFor="golf" className="text-sm font-normal cursor-pointer">Golf Course</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="pool" />
+                <Checkbox
+                  id="pool"
+                  checked={features.includes("pool")}
+                  onCheckedChange={() => toggleFeature("pool")}
+                />
                 <Label htmlFor="pool" className="text-sm font-normal cursor-pointer">Pool</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="waterfront" />
+                <Checkbox
+                  id="waterfront"
+                  checked={features.includes("waterfront")}
+                  onCheckedChange={() => toggleFeature("waterfront")}
+                />
                 <Label htmlFor="waterfront" className="text-sm font-normal cursor-pointer">Waterfront</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="gated" />
-                <Label htmlFor="gated" className="text-sm font-normal cursor-pointer">Gated Community</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="first-floor-master" />
-                <Label htmlFor="first-floor-master" className="text-sm font-normal cursor-pointer">First Floor Master Bedroom</Label>
+                <Checkbox
+                  id="open-house"
+                  checked={features.includes("open-house")}
+                  onCheckedChange={() => toggleFeature("open-house")}
+                />
+                <Label htmlFor="open-house" className="text-sm font-normal cursor-pointer">Open House & Tour</Label>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* Location */}
           <AccordionItem value="location">
-            <AccordionTrigger className="text-base font-semibold">Location & Schools</AccordionTrigger>
+            <AccordionTrigger className="text-base font-semibold">Location</AccordionTrigger>
             <AccordionContent className="space-y-3 pt-2">
               <div>
-                <Label className="text-sm">County</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select county" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="miami-dade">Miami-Dade</SelectItem>
-                    <SelectItem value="broward">Broward</SelectItem>
-                    <SelectItem value="palm-beach">Palm Beach</SelectItem>
-                    <SelectItem value="orange">Orange</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
                 <Label className="text-sm">City</Label>
-                <Select>
+                <Select value={selectedCity} onValueChange={setSelectedCity}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select city" />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
-                    <SelectItem value="miami">Miami</SelectItem>
-                    <SelectItem value="fort-lauderdale">Fort Lauderdale</SelectItem>
-                    <SelectItem value="orlando">Orlando</SelectItem>
-                    <SelectItem value="tampa">Tampa</SelectItem>
+                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="Miami">Miami</SelectItem>
+                    <SelectItem value="Fort Lauderdale">Fort Lauderdale</SelectItem>
+                    <SelectItem value="Orlando">Orlando</SelectItem>
+                    <SelectItem value="Tampa">Tampa</SelectItem>
+                    <SelectItem value="Naples">Naples</SelectItem>
+                    <SelectItem value="Sarasota">Sarasota</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label className="text-sm">Elementary School</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select school" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="school1">School 1</SelectItem>
-                    <SelectItem value="school2">School 2</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm">Middle School</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select school" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="school1">School 1</SelectItem>
-                    <SelectItem value="school2">School 2</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm">High School</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select school" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="school1">School 1</SelectItem>
-                    <SelectItem value="school2">School 2</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm">Builders</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select builder" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="builder1">Builder 1</SelectItem>
-                    <SelectItem value="builder2">Builder 2</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* More Features */}
-          <AccordionItem value="more-features">
-            <AccordionTrigger className="text-base font-semibold">Additional Features</AccordionTrigger>
-            <AccordionContent className="space-y-2 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="open-house" />
-                <Label htmlFor="open-house" className="text-sm font-normal cursor-pointer">Open House & Tour</Label>
-              </div>
-              <div className="space-y-1 mt-3">
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Architectural Styles
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Basement Features
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Community Features
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Construction Materials
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Exterior Features
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Foundation
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Green Energy Efficient
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Interior Features
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Levels
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Pool Features
-                </Button>
-                <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
-                  Structure Types
-                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
 
         <div className="pt-4 space-y-2 sticky bottom-0 bg-background pb-4 border-t">
-          <Button className="w-full" size="lg" onClick={() => setIsFiltersOpen(false)}>
+          <Button className="w-full" size="lg" onClick={() => {
+            setIsFiltersOpen(false);
+            updateSearchParams();
+          }}>
             Apply Filters
           </Button>
-          <Button variant="outline" className="w-full">Clear All</Button>
+          <Button variant="outline" className="w-full" onClick={clearFilters}>Clear All</Button>
         </div>
       </div>
     </ScrollArea>
@@ -490,12 +509,12 @@ const Listings = () => {
         <meta property="og:description" content={seoContent.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={window.location.href} />
-        <meta property="og:image" content={properties[0]?.image || ""} />
+        <meta property="og:image" content={filteredProperties[0]?.image || ""} />
         
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoContent.title} />
         <meta name="twitter:description" content={seoContent.description} />
-        <meta name="twitter:image" content={properties[0]?.image || ""} />
+        <meta name="twitter:image" content={filteredProperties[0]?.image || ""} />
       </Helmet>
 
       <script
@@ -515,28 +534,32 @@ const Listings = () => {
                 <Input
                   placeholder="Enter City, Zip, or Address"
                   className="pl-10 h-12"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
               
-              <Select>
+              <Select value={priceRange} onValueChange={setPriceRange}>
                 <SelectTrigger className="md:w-40 h-12">
                   <SelectValue placeholder="Price" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
+                  <SelectItem value="">Any Price</SelectItem>
                   <SelectItem value="0-250">$0 - $250k</SelectItem>
                   <SelectItem value="250-500">$250k - $500k</SelectItem>
                   <SelectItem value="500-750">$500k - $750k</SelectItem>
                   <SelectItem value="750-1000">$750k - $1M</SelectItem>
-                  <SelectItem value="1000+">$1M+</SelectItem>
+                  <SelectItem value="1000-9999">$1M+</SelectItem>
                 </SelectContent>
               </Select>
               
-              <Select>
+              <Select value={minBeds} onValueChange={setMinBeds}>
                 <SelectTrigger className="md:w-32 h-12">
                   <SelectValue placeholder="Beds" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
-                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="">Any</SelectItem>
                   <SelectItem value="1">1+</SelectItem>
                   <SelectItem value="2">2+</SelectItem>
                   <SelectItem value="3">3+</SelectItem>
@@ -545,12 +568,12 @@ const Listings = () => {
                 </SelectContent>
               </Select>
               
-              <Select>
+              <Select value={minBaths} onValueChange={setMinBaths}>
                 <SelectTrigger className="md:w-32 h-12">
                   <SelectValue placeholder="Baths" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
-                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="">Any</SelectItem>
                   <SelectItem value="1">1+</SelectItem>
                   <SelectItem value="2">2+</SelectItem>
                   <SelectItem value="3">3+</SelectItem>
@@ -573,7 +596,10 @@ const Listings = () => {
                 </DialogContent>
               </Dialog>
               
-              <Button className="h-12 px-8 bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button
+                className="h-12 px-8 bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={handleSearch}
+              >
                 <Search className="w-5 h-5 mr-2" />
                 Search
               </Button>
@@ -585,7 +611,7 @@ const Listings = () => {
         <div className="flex-1 flex overflow-hidden">
           {/* Map - Left Side (50%) */}
           <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px]">
-            <PropertyMap properties={properties} />
+            <PropertyMap properties={filteredProperties} />
           </div>
 
           {/* Results - Right Side (50%) */}
@@ -595,12 +621,12 @@ const Listings = () => {
               
               <header className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{seoContent.h1}</h1>
-                <p className="text-muted-foreground">{properties.length} homes</p>
+                <p className="text-muted-foreground">{filteredProperties.length} homes</p>
               </header>
 
               {/* Sort */}
               <div className="mb-6 flex justify-between items-center">
-                <Select defaultValue="newest">
+                <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -615,22 +641,31 @@ const Listings = () => {
               </div>
 
               {/* Property Cards - 2 Column Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {properties.map((property) => (
-                  <PropertyCard key={property.id} {...property} />
-                ))}
-              </div>
+              {filteredProperties.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {filteredProperties.map((property) => (
+                    <PropertyCard key={property.id} {...property} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground mb-4">No properties found matching your criteria.</p>
+                  <Button onClick={clearFilters} variant="outline">Clear Filters</Button>
+                </div>
+              )}
 
               {/* Pagination */}
-              <div className="flex justify-center mt-8">
-                <div className="flex gap-2">
-                  <Button variant="outline">Previous</Button>
-                  <Button variant="default">1</Button>
-                  <Button variant="outline">2</Button>
-                  <Button variant="outline">3</Button>
-                  <Button variant="outline">Next</Button>
+              {filteredProperties.length > 0 && (
+                <div className="flex justify-center mt-8">
+                  <div className="flex gap-2">
+                    <Button variant="outline">Previous</Button>
+                    <Button variant="default">1</Button>
+                    <Button variant="outline">2</Button>
+                    <Button variant="outline">3</Button>
+                    <Button variant="outline">Next</Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
