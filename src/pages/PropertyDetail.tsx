@@ -460,6 +460,45 @@ export default function PropertyDetail() {
 
         <Separator />
 
+        {/* Home Evaluation CTA */}
+        <Card className="bg-muted/30 border-0">
+          <div className="p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+                  Need to sell your current home to buy this one?
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Find out how much it will sell for today!
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  size="lg" 
+                  className="h-12 px-6 bg-primary hover:bg-primary/90"
+                  onClick={() => setIsContactDialogOpen(true)}
+                >
+                  <Home className="w-5 h-5 mr-2" />
+                  Home Evaluation
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="h-12 px-6 bg-primary hover:bg-primary/90"
+                  onClick={() => setIsContactDialogOpen(true)}
+                >
+                  <span className="mr-2">✓</span>
+                  Guaranteed Sold*
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4 text-right">
+              *Some terms & Conditions apply. Guarantee by eXp Realty
+            </p>
+          </div>
+        </Card>
+
+        <Separator />
+
         {/* Description */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Description of {property.address}</h2>
