@@ -203,8 +203,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden">
-        <div className="flex flex-col h-full">
+      <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden flex flex-col">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Header with close button */}
           <div className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -219,13 +219,16 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={handleSave}>
+              <Button variant="ghost" onClick={handleSave} className="gap-2">
+                <Heart className={`w-4 h-4 ${isSaved ? 'fill-primary text-primary' : ''}`} />
                 {isSaved ? "Saved" : "Save"}
               </Button>
-              <Button variant="ghost" onClick={handleShare}>
+              <Button variant="ghost" onClick={handleShare} className="gap-2">
+                <Share2 className="w-4 h-4" />
                 Share
               </Button>
-              <Button variant="ghost" onClick={handleHide}>
+              <Button variant="ghost" onClick={handleHide} className="gap-2">
+                <X className="w-4 h-4" />
                 Hide
               </Button>
             </div>
