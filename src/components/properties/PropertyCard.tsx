@@ -17,6 +17,7 @@ interface PropertyCardProps {
   state: string;
   isHotProperty?: boolean;
   status?: "open-house" | "under-contract" | null;
+  description?: string;
 }
 
 const PropertyCard = ({
@@ -32,6 +33,7 @@ const PropertyCard = ({
   state,
   isHotProperty,
   status,
+  description,
 }: PropertyCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -116,6 +118,11 @@ const PropertyCard = ({
               <span className="font-medium">{sqft.toLocaleString()} sqft</span>
             </div>
           </div>
+
+          {/* Hidden description for SEO - accessible to screen readers and search engines */}
+          {description && (
+            <p className="sr-only">{description}</p>
+          )}
         </div>
       </Link>
     </Card>

@@ -37,7 +37,8 @@ const Listings = () => {
       address: "123 Palm Avenue",
       city: "Miami",
       state: "FL",
-      status: null
+      status: null,
+      description: "Beautiful modern family home featuring an open floor plan with high ceilings, gourmet kitchen with stainless steel appliances, spacious master suite with walk-in closet, and a large backyard perfect for entertaining. Located in a desirable neighborhood with excellent schools nearby."
     },
     {
       id: "2",
@@ -51,7 +52,8 @@ const Listings = () => {
       city: "Fort Lauderdale",
       state: "FL",
       isHotProperty: true,
-      status: null
+      status: null,
+      description: "Stunning waterfront condo with breathtaking ocean views from every room. Features include floor-to-ceiling windows, modern kitchen with granite countertops, luxurious master bathroom with spa tub, private balcony, and access to world-class amenities including pool, fitness center, and concierge service."
     },
     {
       id: "3",
@@ -64,7 +66,8 @@ const Listings = () => {
       address: "789 Grove Street",
       city: "Orlando",
       state: "FL",
-      status: "open-house" as const
+      status: "open-house" as const,
+      description: "Charming townhouse in a gated community with three bedrooms, two full bathrooms, and updated kitchen with new appliances. Enjoy the attached two-car garage, private patio, community pool, and playground. Close to shopping, dining, and major highways."
     },
     {
       id: "4",
@@ -77,7 +80,8 @@ const Listings = () => {
       address: "321 Sunset Blvd",
       city: "Tampa",
       state: "FL",
-      status: null
+      status: null,
+      description: "Spacious single-story ranch home on a large corner lot with mature landscaping. Five bedrooms including a master suite with sitting area, formal dining room, great room with fireplace, updated kitchen, and three-car garage. Perfect for large families or multi-generational living."
     },
     {
       id: "5",
@@ -91,7 +95,8 @@ const Listings = () => {
       city: "Naples",
       state: "FL",
       isHotProperty: true,
-      status: null
+      status: null,
+      description: "Exquisite contemporary villa with stunning architecture and designer finishes throughout. Features include soaring ceilings, walls of glass, chef's kitchen with premium appliances, wine cellar, home theater, resort-style pool with spa, outdoor kitchen, and four-car garage. Located in an exclusive waterfront community."
     },
     {
       id: "6",
@@ -104,7 +109,8 @@ const Listings = () => {
       address: "888 Pine Street",
       city: "Sarasota",
       state: "FL",
-      status: "under-contract" as const
+      status: "under-contract" as const,
+      description: "Adorable cottage perfect for first-time buyers or downsizing. Features include hardwood floors, updated kitchen and bathrooms, cozy living room with fireplace, covered front porch, and fenced backyard. Walking distance to parks, shops, and restaurants in the heart of Sarasota."
     }
   ];
 
@@ -577,13 +583,13 @@ const Listings = () => {
 
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Map - Left Side */}
-          <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px]">
+          {/* Map - Left Side (40%) */}
+          <div className="hidden lg:block w-2/5 h-[calc(100vh-180px)] sticky top-[180px]">
             <PropertyMap properties={properties} />
           </div>
 
-          {/* Results - Right Side */}
-          <div className="w-full lg:w-1/2 overflow-y-auto">
+          {/* Results - Right Side (60%) */}
+          <div className="w-full lg:w-3/5 overflow-y-auto">
             <div className="p-6">
               <BreadcrumbSEO items={breadcrumbItems} />
               
@@ -608,8 +614,8 @@ const Listings = () => {
                 </Select>
               </div>
 
-              {/* Property Cards */}
-              <div className="space-y-4">
+              {/* Property Cards - 2 Column Grid */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {properties.map((property) => (
                   <PropertyCard key={property.id} {...property} />
                 ))}
