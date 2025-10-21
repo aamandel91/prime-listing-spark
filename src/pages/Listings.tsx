@@ -5,273 +5,569 @@ import PropertyCard from "@/components/properties/PropertyCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Card } from "@/components/ui/card";
-import { Search, SlidersHorizontal, MapPin, Grid3x3, List } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Search, SlidersHorizontal, Grid3x3, List } from "lucide-react";
 
 const Listings = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [priceRange, setPriceRange] = useState([0, 5000000]);
-
-  // Mock data
+  
+  // Sample property data - will be replaced with real data
   const properties = [
     {
       id: "1",
-      title: "Modern Luxury Villa",
-      price: 1250000,
-      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-      beds: 5,
-      baths: 4,
-      sqft: 4500,
-      address: "123 Luxury Lane",
-      city: "Beverly Hills",
-      state: "CA",
-      isHotProperty: true,
-      status: null,
-    },
-    {
-      id: "2",
-      title: "Contemporary Downtown Condo",
+      title: "Modern Family Home",
       price: 850000,
-      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-      beds: 3,
-      baths: 2,
-      sqft: 2200,
-      address: "456 Urban St",
-      city: "San Francisco",
-      state: "CA",
-      isHotProperty: true,
-      status: "open-house" as const,
-    },
-    {
-      id: "3",
-      title: "Elegant Colonial Estate",
-      price: 2100000,
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-      beds: 6,
-      baths: 5,
-      sqft: 6200,
-      address: "789 Estate Dr",
-      city: "Greenwich",
-      state: "CT",
-      isHotProperty: false,
-      status: null,
-    },
-    {
-      id: "4",
-      title: "Charming Craftsman Home",
-      price: 675000,
-      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
-      beds: 4,
-      baths: 3,
-      sqft: 2800,
-      address: "321 Oak Avenue",
-      city: "Portland",
-      state: "OR",
-      isHotProperty: false,
-      status: "under-contract" as const,
-    },
-    {
-      id: "5",
-      title: "Waterfront Paradise",
-      price: 3500000,
-      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80",
-      beds: 7,
-      baths: 6,
-      sqft: 8500,
-      address: "555 Beach Road",
-      city: "Miami Beach",
-      state: "FL",
-      isHotProperty: true,
-      status: null,
-    },
-    {
-      id: "6",
-      title: "Mountain View Retreat",
-      price: 950000,
-      image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=800&q=80",
       beds: 4,
       baths: 3,
       sqft: 3200,
-      address: "888 Summit Drive",
-      city: "Aspen",
-      state: "CO",
-      isHotProperty: false,
-      status: "open-house" as const,
+      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+      address: "123 Palm Avenue",
+      city: "Miami",
+      state: "FL",
+      status: null
     },
+    {
+      id: "2",
+      title: "Luxury Waterfront Condo",
+      price: 1250000,
+      beds: 3,
+      baths: 2.5,
+      sqft: 2400,
+      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+      address: "456 Ocean Drive",
+      city: "Fort Lauderdale",
+      state: "FL",
+      isHotProperty: true,
+      status: null
+    },
+    {
+      id: "3",
+      title: "Charming Townhouse",
+      price: 425000,
+      beds: 3,
+      baths: 2,
+      sqft: 1800,
+      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
+      address: "789 Grove Street",
+      city: "Orlando",
+      state: "FL",
+      status: "open-house" as const
+    },
+    {
+      id: "4",
+      title: "Spacious Ranch Home",
+      price: 675000,
+      beds: 5,
+      baths: 3,
+      sqft: 3800,
+      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
+      address: "321 Sunset Blvd",
+      city: "Tampa",
+      state: "FL",
+      status: null
+    },
+    {
+      id: "5",
+      title: "Contemporary Villa",
+      price: 2100000,
+      beds: 5,
+      baths: 4.5,
+      sqft: 5200,
+      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
+      address: "555 Bay Road",
+      city: "Naples",
+      state: "FL",
+      isHotProperty: true,
+      status: null
+    },
+    {
+      id: "6",
+      title: "Cozy Cottage",
+      price: 320000,
+      beds: 2,
+      baths: 2,
+      sqft: 1200,
+      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
+      address: "888 Pine Street",
+      city: "Sarasota",
+      state: "FL",
+      status: "under-contract" as const
+    }
   ];
+
+  const FiltersSidebar = () => (
+    <div className="space-y-4">
+      {/* Search Location */}
+      <div>
+        <Label>Search Location</Label>
+        <div className="relative mt-2">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input placeholder="City, Zip, Address, or MLS #" className="pl-9" />
+        </div>
+      </div>
+
+      <Accordion type="multiple" defaultValue={["price", "basics", "property-details"]} className="w-full">
+        {/* Price */}
+        <AccordionItem value="price">
+          <AccordionTrigger className="text-base font-semibold">Price Range</AccordionTrigger>
+          <AccordionContent className="space-y-3 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Min Price</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="No Min" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="0">No Min</SelectItem>
+                    <SelectItem value="100000">$100,000</SelectItem>
+                    <SelectItem value="250000">$250,000</SelectItem>
+                    <SelectItem value="500000">$500,000</SelectItem>
+                    <SelectItem value="750000">$750,000</SelectItem>
+                    <SelectItem value="1000000">$1,000,000</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Max Price</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="No Max" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="250000">$250,000</SelectItem>
+                    <SelectItem value="500000">$500,000</SelectItem>
+                    <SelectItem value="1000000">$1,000,000</SelectItem>
+                    <SelectItem value="2000000">$2,000,000</SelectItem>
+                    <SelectItem value="0">No Max</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Basics */}
+        <AccordionItem value="basics">
+          <AccordionTrigger className="text-base font-semibold">Basics</AccordionTrigger>
+          <AccordionContent className="space-y-3 pt-2">
+            <div>
+              <Label className="text-sm">Bedrooms</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="1">1+</SelectItem>
+                  <SelectItem value="2">2+</SelectItem>
+                  <SelectItem value="3">3+</SelectItem>
+                  <SelectItem value="4">4+</SelectItem>
+                  <SelectItem value="5">5+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">Bathrooms</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="1">1+</SelectItem>
+                  <SelectItem value="2">2+</SelectItem>
+                  <SelectItem value="3">3+</SelectItem>
+                  <SelectItem value="4">4+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Status */}
+        <AccordionItem value="status">
+          <AccordionTrigger className="text-base font-semibold">Status</AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="active" defaultChecked />
+              <Label htmlFor="active" className="text-sm font-normal cursor-pointer">Active</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="pending" />
+              <Label htmlFor="pending" className="text-sm font-normal cursor-pointer">Pending</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="coming-soon" />
+              <Label htmlFor="coming-soon" className="text-sm font-normal cursor-pointer">Coming Soon</Label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Property Type */}
+        <AccordionItem value="type">
+          <AccordionTrigger className="text-base font-semibold">Property Type</AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="homes" defaultChecked />
+              <Label htmlFor="homes" className="text-sm font-normal cursor-pointer">Homes</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="townhomes" />
+              <Label htmlFor="townhomes" className="text-sm font-normal cursor-pointer">Townhomes</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="condos" />
+              <Label htmlFor="condos" className="text-sm font-normal cursor-pointer">Condos/Apartments</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="land" />
+              <Label htmlFor="land" className="text-sm font-normal cursor-pointer">Lot/Land</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="multi-family" />
+              <Label htmlFor="multi-family" className="text-sm font-normal cursor-pointer">Multi-Family</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="manufactured" />
+              <Label htmlFor="manufactured" className="text-sm font-normal cursor-pointer">Manufactured</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="farm" />
+              <Label htmlFor="farm" className="text-sm font-normal cursor-pointer">Farm</Label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Property Details */}
+        <AccordionItem value="property-details">
+          <AccordionTrigger className="text-base font-semibold">Property Details</AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-2">
+            <div>
+              <Label className="text-sm">Square Feet</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input placeholder="Min" type="number" />
+                <Input placeholder="Max" type="number" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm">Lot Size (Acres)</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="0.25">0.25+</SelectItem>
+                  <SelectItem value="0.5">0.5+</SelectItem>
+                  <SelectItem value="1">1+</SelectItem>
+                  <SelectItem value="2">2+</SelectItem>
+                  <SelectItem value="5">5+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">Year Built</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input placeholder="Min" type="number" />
+                <Input placeholder="Max" type="number" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm">Garage Spaces</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input placeholder="Min" type="number" />
+                <Input placeholder="Max" type="number" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm">Days on Site</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input placeholder="Min" type="number" />
+                <Input placeholder="Max" type="number" />
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Features */}
+        <AccordionItem value="features">
+          <AccordionTrigger className="text-base font-semibold">Property Features</AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="hoa" />
+              <Label htmlFor="hoa" className="text-sm font-normal cursor-pointer">HOA Fee</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="senior" />
+              <Label htmlFor="senior" className="text-sm font-normal cursor-pointer">Senior Community</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="ranch" />
+              <Label htmlFor="ranch" className="text-sm font-normal cursor-pointer">Ranch Home</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="new-construction" />
+              <Label htmlFor="new-construction" className="text-sm font-normal cursor-pointer">New Construction</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="basement" />
+              <Label htmlFor="basement" className="text-sm font-normal cursor-pointer">Basement</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="golf" />
+              <Label htmlFor="golf" className="text-sm font-normal cursor-pointer">Golf Course</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="pool" />
+              <Label htmlFor="pool" className="text-sm font-normal cursor-pointer">Pool</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="waterfront" />
+              <Label htmlFor="waterfront" className="text-sm font-normal cursor-pointer">Waterfront</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="gated" />
+              <Label htmlFor="gated" className="text-sm font-normal cursor-pointer">Gated Community</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="first-floor-master" />
+              <Label htmlFor="first-floor-master" className="text-sm font-normal cursor-pointer">First Floor Master Bedroom</Label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Location */}
+        <AccordionItem value="location">
+          <AccordionTrigger className="text-base font-semibold">Location & Schools</AccordionTrigger>
+          <AccordionContent className="space-y-3 pt-2">
+            <div>
+              <Label className="text-sm">County</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select county" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="miami-dade">Miami-Dade</SelectItem>
+                  <SelectItem value="broward">Broward</SelectItem>
+                  <SelectItem value="palm-beach">Palm Beach</SelectItem>
+                  <SelectItem value="orange">Orange</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">City</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="miami">Miami</SelectItem>
+                  <SelectItem value="fort-lauderdale">Fort Lauderdale</SelectItem>
+                  <SelectItem value="orlando">Orlando</SelectItem>
+                  <SelectItem value="tampa">Tampa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">Elementary School</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select school" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="school1">School 1</SelectItem>
+                  <SelectItem value="school2">School 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">Middle School</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select school" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="school1">School 1</SelectItem>
+                  <SelectItem value="school2">School 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">High School</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select school" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="school1">School 1</SelectItem>
+                  <SelectItem value="school2">School 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm">Builders</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select builder" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="builder1">Builder 1</SelectItem>
+                  <SelectItem value="builder2">Builder 2</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* More Features */}
+        <AccordionItem value="more-features">
+          <AccordionTrigger className="text-base font-semibold">Additional Features</AccordionTrigger>
+          <AccordionContent className="space-y-2 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="open-house" />
+              <Label htmlFor="open-house" className="text-sm font-normal cursor-pointer">Open House & Tour</Label>
+            </div>
+            <div className="space-y-1 mt-3">
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Architectural Styles
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Basement Features
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Community Features
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Construction Materials
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Exterior Features
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Foundation
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Green Energy Efficient
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Interior Features
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Levels
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Pool Features
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-sm text-primary justify-start w-full">
+                Structure Types
+              </Button>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="pt-4 space-y-2">
+        <Button className="w-full" size="lg">Apply Filters</Button>
+        <Button variant="outline" className="w-full">Clear All</Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
-      <main className="flex-1 bg-secondary/30">
-        {/* Search Header */}
-        <section className="bg-primary text-primary-foreground py-8">
-          <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold mb-6">Search Properties</h1>
-            
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-foreground/60 w-5 h-5" />
-                <Input
-                  placeholder="City, Neighborhood, or ZIP"
-                  className="pl-10 h-12 bg-white text-foreground border-0"
-                />
-              </div>
-              <Select defaultValue="all">
-                <SelectTrigger className="md:w-48 h-12 bg-white text-foreground border-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="single-family">Single Family</SelectItem>
-                  <SelectItem value="condo">Condo</SelectItem>
-                  <SelectItem value="townhome">Townhome</SelectItem>
-                  <SelectItem value="multi-family">Multi-Family</SelectItem>
-                  <SelectItem value="land">Land</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button className="h-12 px-8 bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Search className="w-5 h-5 mr-2" />
-                Search
-              </Button>
-            </div>
-          </div>
-        </section>
-
+      
+      <main className="flex-1 bg-muted/30">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Filters Sidebar */}
-            <aside className="lg:col-span-1">
-              <Card className="p-6 sticky top-20">
-                <div className="flex items-center gap-2 mb-6">
-                  <SlidersHorizontal className="w-5 h-5 text-primary" />
-                  <h2 className="text-xl font-bold text-primary">Filters</h2>
-                </div>
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Florida Properties for Sale</h1>
+            <p className="text-muted-foreground">Showing {properties.length} properties</p>
+          </div>
 
-                <div className="space-y-6">
-                  {/* Price Range */}
-                  <div>
-                    <label className="text-sm font-medium mb-3 block">
-                      Price Range
-                    </label>
-                    <Slider
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                      max={5000000}
-                      step={50000}
-                      className="mb-2"
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>${(priceRange[0] / 1000).toFixed(0)}K</span>
-                      <span>${(priceRange[1] / 1000).toFixed(0)}K</span>
-                    </div>
-                  </div>
-
-                  {/* Bedrooms */}
-                  <div>
-                    <label className="text-sm font-medium mb-3 block">Bedrooms</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {["1+", "2+", "3+", "4+"].map((bed) => (
-                        <Button key={bed} variant="outline" size="sm">
-                          {bed}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Bathrooms */}
-                  <div>
-                    <label className="text-sm font-medium mb-3 block">Bathrooms</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {["1+", "2+", "3+", "4+"].map((bath) => (
-                        <Button key={bath} variant="outline" size="sm">
-                          {bath}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Property Status */}
-                  <div>
-                    <label className="text-sm font-medium mb-3 block">Status</label>
-                    <Select defaultValue="all">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="open-house">Open House</SelectItem>
-                        <SelectItem value="under-contract">Under Contract</SelectItem>
-                        <SelectItem value="hot-property">Hot Property</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                    Apply Filters
-                  </Button>
-                </div>
-              </Card>
+          <div className="flex gap-6">
+            {/* Desktop Filters Sidebar */}
+            <aside className="hidden lg:block w-80 flex-shrink-0">
+              <div className="sticky top-20 bg-background rounded-lg shadow-medium p-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
+                <h2 className="text-xl font-bold mb-4">Filters</h2>
+                <FiltersSidebar />
+              </div>
             </aside>
 
-            {/* Results */}
-            <div className="lg:col-span-3">
-              {/* Results Header */}
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-primary">
-                    {properties.length} Properties Found
-                  </h2>
-                  <p className="text-muted-foreground">Showing all available listings</p>
-                </div>
-
+            {/* Main Content */}
+            <div className="flex-1">
+              {/* Toolbar */}
+              <div className="bg-background rounded-lg shadow-medium p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
+                  {/* Mobile Filter Button */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="lg:hidden">
+                        <SlidersHorizontal className="w-4 h-4 mr-2" />
+                        Filters
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-80 overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Filters</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <FiltersSidebar />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+
                   <Select defaultValue="newest">
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background z-50">
                       <SelectItem value="newest">Newest First</SelectItem>
                       <SelectItem value="price-low">Price: Low to High</SelectItem>
                       <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="sqft">Square Feet</SelectItem>
+                      <SelectItem value="beds">Most Bedrooms</SelectItem>
+                      <SelectItem value="sqft">Largest Sq Ft</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
 
-                  <div className="hidden md:flex border border-border rounded-lg p-1">
-                    <Button
-                      variant={viewMode === "grid" ? "secondary" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                    >
-                      <Grid3x3 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "list" ? "secondary" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("list")}
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("grid")}
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("list")}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
 
-              {/* Property Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Property Grid/List */}
+              <div className={viewMode === "grid" 
+                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" 
+                : "space-y-4"
+              }>
                 {properties.map((property) => (
                   <PropertyCard key={property.id} {...property} />
                 ))}
               </div>
 
               {/* Pagination */}
-              <div className="flex justify-center mt-8">
+              <div className="flex justify-center mt-12">
                 <div className="flex gap-2">
                   <Button variant="outline">Previous</Button>
-                  <Button variant="outline" className="bg-accent text-accent-foreground">1</Button>
+                  <Button variant="default">1</Button>
                   <Button variant="outline">2</Button>
                   <Button variant="outline">3</Button>
                   <Button variant="outline">Next</Button>
