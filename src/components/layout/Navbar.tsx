@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Home, MapPin, Map, Building2, DollarSign } from "lucide-react";
 import SearchDropdown from "./SearchDropdown";
 import CitiesDropdown from "./CitiesDropdown";
+import CountiesDropdown from "./CountiesDropdown";
+import PropertyTypeDropdown from "./PropertyTypeDropdown";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const leftLinks = [
-    { to: "/counties", label: "Counties", icon: Map },
-    { to: "/property-types", label: "Property Type", icon: Building2 },
     { to: "/sell", label: "Sell", icon: DollarSign },
   ];
 
@@ -27,6 +27,8 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-1">
             <SearchDropdown />
             <CitiesDropdown />
+            <CountiesDropdown />
+            <PropertyTypeDropdown />
             {leftLinks.map((link) => (
               <Link key={link.to} to={link.to}>
                 <Button variant="ghost" className="text-foreground hover:text-primary">
@@ -82,6 +84,22 @@ const Navbar = () => {
               >
                 <MapPin className="w-5 h-5 text-muted-foreground" />
                 <span className="text-foreground">Cities</span>
+              </Link>
+              <Link
+                to="/counties"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
+              >
+                <Map className="w-5 h-5 text-muted-foreground" />
+                <span className="text-foreground">Counties</span>
+              </Link>
+              <Link
+                to="/property-types"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
+              >
+                <Building2 className="w-5 h-5 text-muted-foreground" />
+                <span className="text-foreground">Property Type</span>
               </Link>
               {leftLinks.map((link) => (
                 <Link
