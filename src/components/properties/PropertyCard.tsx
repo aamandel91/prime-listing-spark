@@ -47,9 +47,9 @@ const PropertyCard = ({
   const altText = `${beds} bedroom, ${baths} bathroom ${title.toLowerCase()} for sale in ${city}, ${state} - ${formatPrice(price)}`;
 
   return (
-    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300">
-      <Link to={`/property/${id}`}>
-        <div className="relative overflow-hidden h-64">
+    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 flex flex-col">
+      <Link to={`/property/${id}`} className="flex flex-col h-full">
+        <div className="relative overflow-hidden aspect-square">
           <img
             src={image}
             alt={altText}
