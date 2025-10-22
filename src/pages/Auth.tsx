@@ -3,13 +3,16 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Apple } from "lucide-react";
+import { Apple, Upload, ImageIcon } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -86,6 +89,110 @@ const Auth = () => {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to send magic link",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please select an image file",
+        duration: 4000,
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Please select an image under 5MB",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setLogoFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogoUpload = async () => {
+    if (!logoFile) {
+      toast({
+        variant: "destructive",
+        title: "No file selected",
+        description: "Please select a logo to upload",
+        duration: 4000,
+      });
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please sign in to upload a logo",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Upload file to storage
+      const fileExt = logoFile.name.split('.').pop();
+      const fileName = `${user.id}/logo.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, logoFile, {
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Update profile with logo URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          logo_url: publicUrl,
+        });
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Logo uploaded",
+        description: "Your logo has been uploaded successfully",
+        duration: 4000,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: error.message || "Failed to upload logo",
         duration: 4000,
       });
     } finally {
@@ -177,6 +284,56 @@ const Auth = () => {
             >
               {isLoading ? "SENDING..." : "CONTINUE WITH EMAIL"}
             </Button>
+          </div>
+
+          {/* Logo Upload Section */}
+          <div className="border-t border-border pt-6 mt-6">
+            <Label className="text-sm font-semibold mb-3 block">Upload Your Logo (Optional)</Label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoSelect}
+                    className="hidden"
+                  />
+                  <Label
+                    htmlFor="logo-upload"
+                    className="flex items-center justify-center h-14 px-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors"
+                  >
+                    <Upload className="w-5 h-5 mr-2" />
+                    <span className="text-sm">
+                      {logoFile ? logoFile.name : "Choose a logo"}
+                    </span>
+                  </Label>
+                </div>
+                {logoPreview && (
+                  <div className="w-14 h-14 rounded-lg border-2 border-border overflow-hidden bg-muted flex items-center justify-center">
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+              {logoFile && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleLogoUpload}
+                  disabled={isLoading}
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Upload Logo
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Upload your company logo (max 5MB, JPG, PNG, or GIF)
+              </p>
+            </div>
           </div>
 
           {/* Login Link */}
