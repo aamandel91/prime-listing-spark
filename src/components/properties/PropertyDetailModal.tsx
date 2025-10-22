@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -412,6 +412,11 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       />
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden flex flex-col">
+        <DialogTitle className="sr-only">{property.address} - Property Details</DialogTitle>
+        <DialogDescription className="sr-only">
+          Detailed information about {property.address}, {property.city}, {property.state}. 
+          {property.beds} bedrooms, {property.baths} bathrooms, {property.sqft} sqft. Listed at {formatPrice(property.price)}.
+        </DialogDescription>
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Header with close button */}
           <div className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
@@ -751,110 +756,6 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                       </div>
                     </div>
                   </Card>
-
-                  {/* Similar Properties Carousel */}
-                  <div>
-                    <h2 className="text-2xl font-bold mb-4">Similar Properties in {property.city}</h2>
-                    <Carousel
-                      opts={{
-                        align: "start",
-                        loop: true,
-                      }}
-                      className="w-full"
-                    >
-                      <CarouselContent className="-ml-2 md:-ml-4">
-                        {similarProperties.map((prop) => (
-                          <CarouselItem key={prop.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                            <PropertyCard
-                              id={prop.id}
-                              title={prop.title}
-                              address={prop.address}
-                              city={prop.city}
-                              state={prop.state}
-                              zipCode={prop.zipCode}
-                              price={prop.price}
-                              beds={prop.beds}
-                              baths={prop.baths}
-                              sqft={prop.sqft}
-                              image={prop.image}
-                              mlsNumber={prop.mlsNumber}
-                            />
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      <CarouselPrevious className="hidden md:flex" />
-                      <CarouselNext className="hidden md:flex" />
-                    </Carousel>
-                  </div>
-
-                  {/* Other Homes in Neighborhood */}
-                  <div>
-                    <h2 className="text-2xl font-bold mb-4">Other Homes for Sale in {property.subdivision}</h2>
-                    <Card className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {neighborhoodListings.map((listing, idx) => (
-                          <Link
-                            key={idx}
-                            to={`/listings?address=${encodeURIComponent(listing.address)}`}
-                            className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
-                          >
-                            <Home className="w-4 h-4 flex-shrink-0" />
-                            <span className="group-hover:underline">
-                              {listing.address}, {listing.city}, {listing.zip}
-                            </span>
-                            <ArrowRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </Link>
-                        ))}
-                      </div>
-                    </Card>
-                  </div>
-
-                  {/* City-Specific Blog Carousel */}
-                  {cityBlogs.length > 0 && (
-                    <div>
-                      <h2 className="text-2xl font-bold mb-4">Learn About {property.city}</h2>
-                      <Carousel
-                        opts={{
-                          align: "start",
-                          loop: true,
-                        }}
-                        className="w-full"
-                      >
-                        <CarouselContent className="-ml-2 md:-ml-4">
-                          {cityBlogs.map((blog) => (
-                            <CarouselItem key={blog.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                              <Link to={`/blog/${blog.id}`}>
-                                <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-                                  <div className="aspect-video relative overflow-hidden">
-                                    <img
-                                      src={blog.image}
-                                      alt={blog.title}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                  </div>
-                                  <div className="p-4">
-                                    <Badge variant="secondary" className="mb-2">{blog.category}</Badge>
-                                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                                      {blog.title}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                                      {blog.excerpt}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                      <Calendar className="w-3 h-3" />
-                                      <span>{blog.date}</span>
-                                    </div>
-                                  </div>
-                                </Card>
-                              </Link>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="hidden md:flex" />
-                        <CarouselNext className="hidden md:flex" />
-                      </Carousel>
-                    </div>
-                  )}
 
                   {/* Financial Information */}
                   <div>
@@ -1315,33 +1216,6 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     </div>
                   </div>
 
-                  {/* Similar Properties */}
-                  <div>
-                    <h2 className="text-2xl font-bold mb-4">Similar Properties</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[1, 2].map((i) => (
-                        <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                          <div className="aspect-video relative">
-                            <img 
-                              src={`https://images.unsplash.com/photo-160058${5 + i}154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80`}
-                              alt="Similar property"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <div className="text-xl font-bold mb-2">{formatPrice(property.price + (i * 10000))}</div>
-                            <div className="flex gap-4 text-sm text-muted-foreground mb-2">
-                              <span>{property.beds} bd</span>
-                              <span>{property.baths} ba</span>
-                              <span>{property.sqft.toLocaleString()} sqft</span>
-                            </div>
-                            <p className="text-sm">{property.city}, {property.state}</p>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Disclaimer */}
                   <div className="bg-muted/30 rounded-lg p-6 text-sm text-muted-foreground">
                     <h3 className="font-semibold text-foreground mb-2">Disclaimer</h3>
@@ -1491,6 +1365,10 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
     {/* Contact Form Dialog */}
     <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
       <DialogContent className="max-w-2xl">
+        <DialogTitle className="sr-only">Contact Agent - {property.address}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Fill out the form to express interest in {property.address} or request more information from the listing agent.
+        </DialogDescription>
         <div className="relative">
           <div className="aspect-video relative rounded-lg overflow-hidden mb-6">
             <img
