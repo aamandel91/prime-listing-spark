@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,9 @@ import {
   Video,
   Camera,
   MapPin,
+  Navigation,
+  Mail,
+  MessageSquare,
 } from "lucide-react";
 
 interface PropertyDetailModalProps {
@@ -47,6 +51,10 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const [listingPrice, setListingPrice] = useState("379999");
+  const [downPayment, setDownPayment] = useState("37999.9");
+  const [interestRate, setInterestRate] = useState("5.75");
   const { toast } = useToast();
   const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
 
@@ -468,115 +476,164 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
                   {/* Interior Features */}
                   <div>
-                    <h2 className="text-2xl font-bold mb-4">Interior Features</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="font-semibold mb-2">Rooms & Spaces</h3>
+                    <h2 className="text-2xl font-bold mb-4">Interior</h2>
+                    <Card className="p-6">
+                      <div className="space-y-4">
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Bedrooms</span>
-                            <span>{property.beds}</span>
+                            <span className="text-muted-foreground">Interior Features</span>
+                            <span className="text-right">Double Vanity, Kitchen Island and Separate Shower</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Full Bathrooms</span>
-                            <span>{property.fullBaths}</span>
+                            <span className="text-muted-foreground">Appliances</span>
+                            <span className="text-right">Dishwasher, Microwave, Range and Washer/Dryer</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Half Bathrooms</span>
-                            <span>{property.halfBaths}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Stories</span>
-                            <span>{property.stories}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Amenities</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Flooring</span>
-                            <span className="text-right">{property.flooring}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Features</span>
-                            <span className="text-right text-xs">{property.interiorFeatures}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Heating & Cooling</h3>
-                        <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Heating</span>
-                            <span className="text-right">{property.heating}</span>
+                            <span>Heat Pump</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Cooling</span>
-                            <span className="text-right">{property.cooling}</span>
+                            <span>Central Air and Electric</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Fireplace</span>
+                            <span>Yes</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground"># of Fireplaces</span>
+                            <span>1</span>
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Appliances</h3>
-                        <p className="text-sm text-muted-foreground">{property.appliances}</p>
-                      </div>
-                    </div>
+                    </Card>
                   </div>
 
                   {/* Exterior Features */}
                   <div>
-                    <h2 className="text-2xl font-bold mb-4">Exterior Features</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="font-semibold mb-2">Property Details</h3>
+                    <h2 className="text-2xl font-bold mb-4">Exterior</h2>
+                    <Card className="p-6">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Exterior</span>
+                          <span>Rain Gutters</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Roof</span>
+                          <span>{property.roofType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Garage Spaces</span>
+                          <span>2</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Foundation</span>
+                          <span>{property.foundation}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* HOA Information */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">HOA</h2>
+                    <Card className="p-6">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Has HOA</span>
+                          <span className="font-semibold">{property.hoa}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Services included</span>
+                          <span className="font-semibold">None</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">HOA fee</span>
+                          <span className="font-semibold">${property.hoaFee} Annually</span>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Additional Information */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Additional Information</h2>
+                    <Card className="p-6">
+                      <div className="space-y-4">
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Lot Size</span>
-                            <span>{property.lotSize}</span>
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-muted-foreground">Styles</span>
+                            <span></span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Acres</span>
-                            <span>{property.acres}</span>
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-muted-foreground">Price per Sq Ft</span>
+                            <span className="font-semibold">${property.pricePerSqFt}</span>
+                          </div>
+                        </div>
+                        <Separator />
+                        <div>
+                          <h3 className="font-semibold mb-2">Listed By</h3>
+                          <p className="text-sm text-muted-foreground">
+                            LAUREN FURR, 336-501-0442, COLDWELL BANKER ADVANTAGE - FAYETTEVILLE
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">Source</h3>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-muted-foreground">Triangle, MLS, MLS#: {property.mlsId}</p>
+                            <Badge variant="outline" className="text-xs">IDX</Badge>
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Construction</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Construction</span>
-                            <span className="text-right">{property.construction}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Roof</span>
-                            <span>{property.roofType}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Foundation</span>
-                            <span>{property.foundation}</span>
-                          </div>
-                        </div>
+                    </Card>
+                  </div>
+
+                  {/* Comments Section */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Comments</h2>
+                    <Card className="p-6">
+                      <div className="flex gap-2">
+                        <Textarea placeholder="Add a comment" className="flex-1" />
+                        <Button size="icon" className="rounded-full">
+                          <Send className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Parking</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Garage</span>
-                            <span>{property.garage}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Parking</span>
-                            <span className="text-right">{property.parking}</span>
-                          </div>
+                    </Card>
+                  </div>
+
+                  {/* Guaranteed Offer Widget */}
+                  <Card className="bg-muted/30 border-0">
+                    <div className="p-6 md:p-8">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div className="flex-1">
+                          <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+                            Need to sell your current home to buy this one?
+                          </h2>
+                          <p className="text-lg text-muted-foreground">
+                            Find out how much it will sell for today!
+                          </p>
                         </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Features</h3>
-                        <p className="text-sm text-muted-foreground">{property.exteriorFeatures}</p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button 
+                            size="lg" 
+                            className="h-12 px-6 bg-primary hover:bg-primary/90"
+                            onClick={() => setIsContactFormOpen(true)}
+                          >
+                            <Home className="w-5 h-5 mr-2" />
+                            Home Evaluation
+                          </Button>
+                          <Button 
+                            size="lg" 
+                            className="h-12 px-6 bg-primary hover:bg-primary/90"
+                            onClick={() => setIsContactFormOpen(true)}
+                          >
+                            <span className="mr-2">✓</span>
+                            Guaranteed Sold*
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
 
                   {/* Financial Information */}
                   <div>
@@ -802,21 +859,34 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     <Card className="p-6">
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-sm mb-2 block">Home Price</Label>
-                          <Input type="text" value={formatPrice(property.price)} disabled />
+                          <Label className="text-sm mb-2 block">Listing Price</Label>
+                          <Input 
+                            type="text" 
+                            value={listingPrice}
+                            onChange={(e) => setListingPrice(e.target.value)}
+                          />
                         </div>
                         <div>
-                          <Label className="text-sm mb-2 block">Down Payment (20%)</Label>
-                          <Input type="text" value={formatPrice(property.price * 0.2)} disabled />
-                        </div>
-                        <div>
-                          <Label className="text-sm mb-2 block">Loan Amount</Label>
-                          <Input type="text" value={formatPrice(property.price * 0.8)} disabled />
+                          <Label className="text-sm mb-2 block">Down Payment</Label>
+                          <Input 
+                            type="text" 
+                            value={downPayment}
+                            onChange={(e) => setDownPayment(e.target.value)}
+                          />
                         </div>
                         <div>
                           <Label className="text-sm mb-2 block">Interest Rate</Label>
-                          <Input type="text" value="6.5%" disabled />
+                          <Input 
+                            type="text" 
+                            value={interestRate}
+                            onChange={(e) => setInterestRate(e.target.value)}
+                          />
                         </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Amortization</Label>
+                          <Input type="text" value="30 Years" disabled />
+                        </div>
+                        <Button className="w-full" size="lg">Calculate</Button>
                         <Separator />
                         <div className="bg-primary/10 p-4 rounded-lg">
                           <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
@@ -829,6 +899,99 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                         </div>
                       </div>
                     </Card>
+                  </div>
+
+                  {/* Community Information */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Community Information for {property.address}</h2>
+                    <Card className="p-6">
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">Address</span>
+                          <span className="font-semibold text-right">{property.address}</span>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">City</span>
+                          <Link to={`/listings?city=${property.city}`} className="font-semibold text-primary hover:underline">{property.city}</Link>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">State</span>
+                          <span className="font-semibold">{property.state}</span>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">Zip Code</span>
+                          <Link to={`/listings?zip=${property.zip}`} className="font-semibold text-primary hover:underline">{property.zip}</Link>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">County</span>
+                          <Link to={`/listings?county=${property.county}`} className="font-semibold text-primary hover:underline">{property.county}</Link>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="text-muted-foreground">Subdivision</span>
+                          <Link to={`/listings?subdivision=${property.subdivision}`} className="font-semibold text-primary hover:underline">{property.subdivision}</Link>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Get Directions & Street View */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Get Directions</h2>
+                    <Card className="p-6">
+                      <div className="space-y-4">
+                        <Input placeholder="Enter your location" />
+                        <Button className="w-full" size="lg">
+                          <Navigation className="w-4 h-4 mr-2" />
+                          Get Directions
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Streetview of {property.address}</h2>
+                    <div className="rounded-lg overflow-hidden h-[400px] bg-muted flex items-center justify-center">
+                      <p className="text-muted-foreground">Street View Available</p>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Schools Section */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Schools Near {property.address}</h2>
+                    <div className="space-y-4">
+                      <Card className="p-6">
+                        <div className="flex gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-24 h-24 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
+                              <div className="text-sm font-semibold text-primary">RATING</div>
+                              <div className="text-xs text-muted-foreground mt-1">Above</div>
+                              <div className="text-xs text-muted-foreground">Avg</div>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-lg mb-2">{property.elementarySchool}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">526 Andrews Road, {property.city} NC {property.zip}</p>
+                            <p className="text-sm text-muted-foreground">Public district, K-5 | 600 students</p>
+                          </div>
+                        </div>
+                      </Card>
+                      <Card className="p-6">
+                        <div className="flex gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-24 h-24 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
+                              <div className="text-sm font-semibold text-primary">RATING</div>
+                              <div className="text-xs text-muted-foreground mt-1">Above</div>
+                              <div className="text-xs text-muted-foreground">Avg</div>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-lg mb-2">{property.middleSchool}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">3200 Ramsey Street, {property.city} NC 28301</p>
+                            <p className="text-sm text-muted-foreground">Public district, 6-8 | 226 students</p>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
                   </div>
 
                   {/* MLS & Listing Information */}
@@ -1099,6 +1262,61 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Contact Form Dialog */}
+    <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
+      <DialogContent className="max-w-2xl">
+        <div className="relative">
+          <div className="aspect-video relative rounded-lg overflow-hidden mb-6">
+            <img
+              src={property.images[0]}
+              alt={property.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+              <div className="p-6 text-white">
+                <h2 className="text-2xl font-bold mb-2">
+                  Interested in {property.address}
+                </h2>
+                <p className="text-sm opacity-90">{property.city}, {property.state} {property.zip}?</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label>First Name</Label>
+              <Input placeholder="First Name" />
+            </div>
+            <div>
+              <Label>Last Name</Label>
+              <Input placeholder="Last Name" />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" placeholder="Email" />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input type="tel" placeholder="Phone" />
+            </div>
+            <div>
+              <Label>Comments</Label>
+              <Textarea 
+                placeholder={`Hi, I am interested in ${property.address}, ${property.city} NC, ${property.zip}`}
+                rows={4}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              By proceeding, you consent to receive calls, texts and voicemails at the number you provided (may be recorded and may be autodialed and use prerecorded and artificial voices), and email, from Raleigh Realty about your inquiry and other home-related matters. Msg/data rates may apply. This consent applies even if you are on a do not call list and is not a condition of any purchase.
+            </p>
+            <Button className="w-full" size="lg">
+              Contact Agent
+            </Button>
           </div>
         </div>
       </DialogContent>
