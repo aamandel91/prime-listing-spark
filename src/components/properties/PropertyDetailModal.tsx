@@ -795,6 +795,181 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                       </div>
                     </div>
                   </div>
+
+                  {/* Mortgage Calculator */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Mortgage Calculator</h2>
+                    <Card className="p-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-sm mb-2 block">Home Price</Label>
+                          <Input type="text" value={formatPrice(property.price)} disabled />
+                        </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Down Payment (20%)</Label>
+                          <Input type="text" value={formatPrice(property.price * 0.2)} disabled />
+                        </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Loan Amount</Label>
+                          <Input type="text" value={formatPrice(property.price * 0.8)} disabled />
+                        </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Interest Rate</Label>
+                          <Input type="text" value="6.5%" disabled />
+                        </div>
+                        <Separator />
+                        <div className="bg-primary/10 p-4 rounded-lg">
+                          <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
+                          <div className="text-3xl font-bold text-primary">
+                            {formatPrice(Math.round((property.price * 0.8 * 0.065) / 12 + property.taxAmount / 12 + property.hoaFee))}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Includes principal, interest, taxes, and HOA
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* MLS & Listing Information */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">MLS & Listing Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">MLS Number</span>
+                          <span className="font-semibold">{property.mlsId}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Status</span>
+                          <span className="font-semibold">{property.status}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Date Listed</span>
+                          <span className="font-semibold">{property.dateListed}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Days on Market</span>
+                          <span className="font-semibold">{property.daysOnSite}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Property Type</span>
+                          <span className="font-semibold">{property.propertyType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Sub Type</span>
+                          <span className="font-semibold">{property.subType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">County</span>
+                          <span className="font-semibold">{property.county}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Subdivision</span>
+                          <span className="font-semibold">{property.subdivision}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Listing Agent */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Listing Agent</h2>
+                    <Card className="p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl font-bold text-primary">
+                          JD
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg">John Doe</h3>
+                          <p className="text-sm text-muted-foreground">Premier Realty Group</p>
+                          <p className="text-xs text-muted-foreground">License #12345678</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <a href="tel:919-249-8536" className="hover:underline">919-249-8536</a>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Send className="w-4 h-4 text-muted-foreground" />
+                          <a href="mailto:john.doe@example.com" className="hover:underline">john.doe@example.com</a>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t">
+                        <p className="text-xs text-muted-foreground">
+                          Listing courtesy of Premier Realty Group. Information is deemed reliable but not guaranteed.
+                        </p>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Property History */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Property History</h2>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-3 border-b">
+                        <div>
+                          <div className="font-semibold">{property.dateListed}</div>
+                          <div className="text-sm text-muted-foreground">Listed for sale</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">{formatPrice(property.price)}</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b">
+                        <div>
+                          <div className="font-semibold">Sep 15, 2024</div>
+                          <div className="text-sm text-muted-foreground">Construction completed</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">New construction</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Similar Properties */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Similar Properties</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[1, 2].map((i) => (
+                        <Card key={i} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                          <div className="aspect-video relative">
+                            <img 
+                              src={`https://images.unsplash.com/photo-160058${5 + i}154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80`}
+                              alt="Similar property"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="p-4">
+                            <div className="text-xl font-bold mb-2">{formatPrice(property.price + (i * 10000))}</div>
+                            <div className="flex gap-4 text-sm text-muted-foreground mb-2">
+                              <span>{property.beds} bd</span>
+                              <span>{property.baths} ba</span>
+                              <span>{property.sqft.toLocaleString()} sqft</span>
+                            </div>
+                            <p className="text-sm">{property.city}, {property.state}</p>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Disclaimer */}
+                  <div className="bg-muted/30 rounded-lg p-6 text-sm text-muted-foreground">
+                    <h3 className="font-semibold text-foreground mb-2">Disclaimer</h3>
+                    <p className="mb-2">
+                      The data relating to real estate for sale on this website comes in part from the Internet Data Exchange program. 
+                      Information is deemed reliable but not guaranteed. All measurements and all calculations of area are approximate.
+                    </p>
+                    <p>
+                      This property is listed by Premier Realty Group. Last updated: {property.dateListed}. 
+                      Source: MLS #{property.mlsId}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Right sidebar - desktop only */}
