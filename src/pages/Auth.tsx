@@ -28,6 +28,7 @@ const Auth = () => {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to sign in with Google",
+        duration: 4000,
       });
     }
   };
@@ -47,6 +48,7 @@ const Auth = () => {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to sign in with Apple",
+        duration: 4000,
       });
     }
   };
@@ -57,6 +59,7 @@ const Auth = () => {
         variant: "destructive",
         title: "Error",
         description: "Please enter your email address",
+        duration: 4000,
       });
       return;
     }
@@ -76,12 +79,14 @@ const Auth = () => {
       toast({
         title: "Check your email",
         description: "We've sent you a magic link to sign in",
+        duration: 4000,
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to send magic link",
+        duration: 4000,
       });
     } finally {
       setIsLoading(false);

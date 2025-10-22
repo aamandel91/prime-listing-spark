@@ -317,6 +317,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         title: "Sign in required",
         description: "Please sign in to save properties",
         variant: "destructive",
+        duration: 4000,
       });
       return;
     }
@@ -334,6 +335,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         toast({
           title: "Property removed",
           description: "Property removed from your saved list",
+          duration: 4000,
         });
       }
     } else {
@@ -347,6 +349,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         toast({
           title: "Property saved",
           description: "Property added to your saved list",
+          duration: 4000,
         });
         
         // Track property save in Follow Up Boss
@@ -378,6 +381,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       toast({
         title: "Link copied",
         description: "Property link copied to clipboard",
+        duration: 4000,
       });
       navigator.clipboard.writeText(window.location.href);
     }
@@ -390,6 +394,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         title: "Sign in required",
         description: "Please sign in to hide properties",
         variant: "destructive",
+        duration: 4000,
       });
       return;
     }
@@ -402,6 +407,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       toast({
         title: "Property hidden",
         description: "This property will no longer appear in your searches",
+        duration: 4000,
       });
       onClose();
     }
