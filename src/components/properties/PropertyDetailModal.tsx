@@ -65,6 +65,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [listingPrice, setListingPrice] = useState("379999");
   const [downPayment, setDownPayment] = useState("37999.9");
   const [interestRate, setInterestRate] = useState("5.75");
+  const [showStickyButtons, setShowStickyButtons] = useState(false);
   const { toast } = useToast();
   const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
 
@@ -102,6 +103,24 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       });
     }
   }, [isOpen, propertyId]);
+
+  // Handle sticky buttons on scroll
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const scrollTop = target.scrollTop;
+      // Show sticky buttons after scrolling 600px
+      setShowStickyButtons(scrollTop > 600);
+    };
+
+    const scrollContainer = document.querySelector('[data-scroll-container="property-detail"]');
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, [isOpen]);
 
   // Mock data - will be replaced with actual API call
   const property = {
@@ -529,7 +548,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" data-scroll-container="property-detail">
             <div className="p-4 md:p-6">
               {/* Image gallery */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
@@ -619,8 +638,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
                     {/* CTA buttons - mobile */}
                     <div className="flex flex-col sm:flex-row gap-3 mb-6 lg:hidden">
-                      <Button className="flex-1" size="lg">Request a Tour</Button>
-                      <Button variant="outline" className="flex-1" size="lg">Ask a Question</Button>
+                      <Button className="flex-1" size="lg" onClick={() => setIsContactFormOpen(true)}>Request a Tour</Button>
+                      <Button variant="outline" className="flex-1" size="lg" onClick={() => setIsContactFormOpen(true)}>Get Pre-Approved</Button>
                     </div>
                     <div className="flex items-center gap-2 text-primary mb-6 lg:hidden">
                       <Phone className="w-5 h-5" />
@@ -1099,8 +1118,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                 <div className="hidden lg:block space-y-6">
                   {/* CTA buttons */}
                   <div className="space-y-3">
-                    <Button className="w-full" size="lg">Request a Tour</Button>
-                    <Button variant="outline" className="w-full" size="lg">Ask a Question</Button>
+                    <Button className="w-full" size="lg" onClick={() => setIsContactFormOpen(true)}>Request a Tour</Button>
+                    <Button variant="outline" className="w-full" size="lg" onClick={() => setIsContactFormOpen(true)}>Get Pre-Approved</Button>
                     <div className="flex items-center gap-2 text-primary justify-center">
                       <Phone className="w-5 h-5" />
                       <a href="tel:919-249-8536" className="text-lg font-semibold hover:underline">
@@ -1240,6 +1259,40 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
             </div>
           </div>
         </div>
+        
+        {/* Sticky Bottom CTA Bar */}
+        {showStickyButtons && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border p-4 shadow-lg animate-in slide-in-from-bottom">
+            <div className="max-w-7xl mx-auto flex gap-3">
+              <Button 
+                className="flex-1" 
+                size="lg"
+                onClick={() => setIsContactFormOpen(true)}
+              >
+                Request a Tour
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1" 
+                size="lg"
+                onClick={() => setIsContactFormOpen(true)}
+              >
+                Get Pre-Approved
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                className="gap-2"
+                asChild
+              >
+                <a href="tel:919-249-8536">
+                  <Phone className="w-4 h-4" />
+                  <span className="hidden sm:inline">Call Now</span>
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
 
