@@ -63,8 +63,8 @@ const CitiesDropdown = () => {
                 {eastCoast.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
-                      <Link
-                        to={`/city/${city.slug}`}
+                       <Link
+                        to={`/${city.slug}`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -82,8 +82,8 @@ const CitiesDropdown = () => {
                 {westCoast.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
-                      <Link
-                        to={`/city/${city.slug}`}
+                       <Link
+                        to={`/${city.slug}`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -101,8 +101,8 @@ const CitiesDropdown = () => {
                 {centralFlorida.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
-                      <Link
-                        to={`/city/${city.slug}`}
+                       <Link
+                        to={`/${city.slug}`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}

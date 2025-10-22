@@ -921,8 +921,8 @@ export default function PropertyDetail() {
           <p className="mt-4">
             If you'd like to request a tour or more information on <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span>, please call us at{" "}
             <a href="tel:919-249-8536" className="text-primary font-semibold hover:underline">919-249-8536</a> so that we can assist you in your real estate search. To find homes like {property.address}, {property.city}, {property.state} {property.zip}, you can search{" "}
-            <Link to={`/city/${property.city.toLowerCase()}`} className="text-primary font-semibold hover:underline">homes for sale in {property.city}</Link>, or visit the neighborhood of{" "}
-            <Link to={`/subdivision/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary font-semibold hover:underline">{property.subdivision}</Link>, or by{" "}
+            <Link to={`/${property.city.toLowerCase()}`} className="text-primary font-semibold hover:underline">homes for sale in {property.city}</Link>, or visit the neighborhood of{" "}
+            <Link to={`/${property.city.toLowerCase()}/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary font-semibold hover:underline">{property.subdivision}</Link>, or by{" "}
             <Link to={`/zip/${property.zip}`} className="text-primary font-semibold hover:underline">{property.zip}</Link>. We are here to help when you're ready to{" "}
             <button onClick={() => setIsContactDialogOpen(true)} className="text-primary font-semibold hover:underline">contact us</button>!
           </p>

@@ -51,7 +51,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Property Types</h3>
             <ul className="space-y-2">
-              <li><Link to="/listings?type=single-family" className="text-primary-foreground/80 hover:text-accent transition-colors">Single Family Homes</Link></li>
+              <li><Link to="/fayetteville/single-family" className="text-primary-foreground/80 hover:text-accent transition-colors">Single Family Homes</Link></li>
               <li><Link to="/listings?type=condo" className="text-primary-foreground/80 hover:text-accent transition-colors">Condos & Townhomes</Link></li>
               <li><Link to="/listings?type=multi-family" className="text-primary-foreground/80 hover:text-accent transition-colors">Multi-Family</Link></li>
               <li><Link to="/listings?type=land" className="text-primary-foreground/80 hover:text-accent transition-colors">Land & Lots</Link></li>

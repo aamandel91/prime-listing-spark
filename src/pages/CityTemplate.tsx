@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
@@ -120,13 +120,13 @@ const CITY_DATA: Record<string, {
 };
 
 const CityTemplate = () => {
-  const { citySlug, neighborhoodSlug } = useParams();
+  const { citySlug, filter } = useParams();
   
   // Get city data based on slug
   const cityData = useMemo(() => {
-    const slug = (citySlug || neighborhoodSlug || "").toLowerCase();
+    const slug = (citySlug || "").toLowerCase();
     return CITY_DATA[slug] || CITY_DATA["fayetteville"]; // Default to Fayetteville
-  }, [citySlug, neighborhoodSlug]);
+  }, [citySlug]);
 
   // Sample properties - in a real app, these would be filtered by city
   const featuredProperties = useMemo(() => [
@@ -175,9 +175,10 @@ const CityTemplate = () => {
   ], [cityData]);
 
   // SEO Content
-  const pageTitle = `${cityData.name} Real Estate & Homes for Sale | ${cityData.state}`;
-  const pageDescription = `Find homes for sale in ${cityData.name}, ${cityData.state}. Browse ${cityData.stats.activeListings} active listings with a median price of ${cityData.stats.medianPrice}. ${cityData.description.substring(0, 100)}...`;
-  const pageUrl = `${window.location.origin}/city/${(citySlug || neighborhoodSlug || 'fayetteville').toLowerCase()}`;
+  const filterText = filter ? ` - ${filter.replace(/-/g, ' ')}` : '';
+  const pageTitle = `${cityData.name} Real Estate & Homes for Sale${filterText} | ${cityData.state}`;
+  const pageDescription = `Find homes for sale in ${cityData.name}, ${cityData.state}${filterText}. Browse ${cityData.stats.activeListings} active listings with a median price of ${cityData.stats.medianPrice}. ${cityData.description.substring(0, 100)}...`;
+  const pageUrl = `${window.location.origin}/${citySlug?.toLowerCase() || 'fayetteville'}${filter ? `/${filter}` : ''}`;
 
   // Structured data for Place/City
   const placeSchema = {
@@ -249,14 +250,14 @@ const CityTemplate = () => {
           {/* Breadcrumbs */}
           <BreadcrumbSEO 
             items={[
-              { label: cityData.name, href: `/city/${(citySlug || neighborhoodSlug || 'fayetteville').toLowerCase()}` }
+              { label: cityData.name, href: `/${citySlug?.toLowerCase() || 'fayetteville'}` }
             ]} 
           />
 
           {/* Page Title */}
           <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              Real Estate in {cityData.name}, {cityData.state}
+              Real Estate in {cityData.name}, {cityData.state}{filter && ` - ${filter.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
             </h1>
             <p className="text-muted-foreground">
               {cityData.stats.activeListings} properties available
@@ -343,7 +344,7 @@ const CityTemplate = () => {
                 {cityData.neighborhoods.map((neighborhood) => (
                   <Link
                     key={neighborhood.slug}
-                    to={`/listings?subdivision=${encodeURIComponent(neighborhood.name)}`}
+                    to={`/${citySlug?.toLowerCase() || 'fayetteville'}/${neighborhood.slug}`}
                     className="flex justify-between items-center p-4 bg-secondary rounded-lg hover:bg-secondary/70 transition-colors block"
                   >
                     <div className="flex justify-between items-center w-full">
@@ -371,13 +372,14 @@ const CityTemplate = () => {
               </h2>
               <div className="space-y-4">
                 {cityData.propertyTypes.map((type) => (
-                  <div
+                  <Link
                     key={type.type}
-                    className="flex justify-between items-center p-4 bg-secondary rounded-lg"
+                    to={`/${citySlug?.toLowerCase() || 'fayetteville'}/${type.type.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="flex justify-between items-center p-4 bg-secondary rounded-lg hover:bg-secondary/70 transition-colors"
                   >
                     <span className="font-medium text-foreground">{type.type}</span>
                     <span className="text-accent font-bold">{type.count} listings</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </Card>

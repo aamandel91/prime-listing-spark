@@ -52,7 +52,7 @@ const PropertyTypeDropdown = () => {
                   <li key={item.filter}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?propertyType=${item.filter}`}
+                        to={`/fayetteville/${item.filter}`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}
@@ -70,7 +70,7 @@ const PropertyTypeDropdown = () => {
                   <li key={item.filter}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?propertyType=${item.filter}`}
+                        to={`/fayetteville/${item.filter}`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}

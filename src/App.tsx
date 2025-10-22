@@ -28,12 +28,12 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/listings" element={<Listings />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
-            <Route path="/city/:citySlug" element={<CityTemplate />} />
-            <Route path="/neighborhood/:neighborhoodSlug" element={<CityTemplate />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/:citySlug/:filter" element={<CityTemplate />} />
+            <Route path="/:citySlug" element={<CityTemplate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
