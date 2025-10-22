@@ -362,11 +362,12 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     View all {property.images.length} Photos
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                {/* Hidden on mobile, shown as grid on desktop */}
+                <div className="hidden md:grid md:grid-cols-1 gap-2">
                   {property.images.slice(1, 5).map((img, idx) => (
                     <div 
                       key={idx}
-                      className="relative rounded-lg overflow-hidden aspect-video md:aspect-square cursor-pointer group"
+                      className="relative rounded-lg overflow-hidden aspect-square cursor-pointer group"
                       onClick={() => {
                         setGalleryStartIndex(idx + 1);
                         setIsGalleryOpen(true);
