@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -402,8 +403,96 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
   const tourDates = getNextSevenDays();
 
+  // SEO structured data
+  const propertySchema = {
+    "@context": "https://schema.org",
+    "@type": "SingleFamilyResidence",
+    "name": property.address,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": property.address,
+      "addressLocality": property.city,
+      "addressRegion": property.state,
+      "postalCode": property.zip,
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "35.0527",
+      "longitude": "-78.8784"
+    },
+    "numberOfRooms": property.beds + property.baths,
+    "numberOfBedrooms": property.beds,
+    "numberOfBathroomsTotal": property.baths,
+    "floorSize": {
+      "@type": "QuantitativeValue",
+      "value": property.sqft,
+      "unitCode": "FTK"
+    },
+    "yearBuilt": property.yearBuilt,
+    "image": property.images,
+    "offers": {
+      "@type": "Offer",
+      "price": property.price,
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "RealEstateAgent",
+        "name": "Naomi Richardson",
+        "telephone": "919-398-8357",
+        "email": "naomi@markspain.com",
+        "organization": {
+          "@type": "Organization",
+          "name": "Mark Spain Real Estate"
+        }
+      }
+    },
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "MLS Number",
+        "value": property.mlsId
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Property Type",
+        "value": property.propertyType
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Lot Size",
+        "value": property.acres + " acres"
+      }
+    ]
+  };
+
   return (
     <>
+      <Helmet>
+        <title>{property.address} - {property.city}, {property.state} | Homes for Sale</title>
+        <meta name="description" content={`${property.beds} bed, ${property.baths} bath home for sale at ${property.address} in ${property.city}, ${property.state}. ${property.sqft} sqft listed at ${formatPrice(property.price)}. MLS #${property.mlsId}.`} />
+        <meta name="keywords" content={`${property.city} real estate, ${property.city} homes for sale, ${property.subdivision}, ${property.zip} homes, ${property.county} real estate`} />
+        <link rel="canonical" href={`${window.location.origin}/property/${propertyId}`} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${property.address} - ${property.city}, ${property.state}`} />
+        <meta property="og:description" content={`${property.beds} bed, ${property.baths} bath home for sale. ${property.sqft} sqft listed at ${formatPrice(property.price)}`} />
+        <meta property="og:image" content={property.images[0]} />
+        <meta property="og:url" content={`${window.location.origin}/property/${propertyId}`} />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${property.address} - ${property.city}, ${property.state}`} />
+        <meta name="twitter:description" content={`${property.beds} bed, ${property.baths} bath home for sale at ${formatPrice(property.price)}`} />
+        <meta name="twitter:image" content={property.images[0]} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(propertySchema)}
+        </script>
+      </Helmet>
+      
       <PhotoGalleryModal 
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
@@ -419,30 +508,22 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         </DialogDescription>
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Header with close button */}
-          <div className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button size="icon" variant="ghost" onClick={onClose}>
-                <X className="w-5 h-5" />
-              </Button>
-              <div>
-                <h2 className="text-xl font-bold">{property.address}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {property.city}, {property.state} {property.zip}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={handleSave} className="gap-2">
+          <div className="sticky top-0 z-10 bg-background border-b p-2 flex items-center justify-between">
+            <Button size="icon" variant="ghost" onClick={onClose}>
+              <X className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={handleSave} className="gap-2">
                 <Heart className={`w-4 h-4 ${isSaved ? 'fill-primary text-primary' : ''}`} />
-                {isSaved ? "Saved" : "Save"}
+                <span className="hidden sm:inline">{isSaved ? "Saved" : "Save"}</span>
               </Button>
-              <Button variant="ghost" onClick={handleShare} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={handleShare} className="gap-2">
                 <Share2 className="w-4 h-4" />
-                Share
+                <span className="hidden sm:inline">Share</span>
               </Button>
-              <Button variant="ghost" onClick={handleHide} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={handleHide} className="gap-2">
                 <X className="w-4 h-4" />
-                Hide
+                <span className="hidden sm:inline">Hide</span>
               </Button>
             </div>
           </div>
