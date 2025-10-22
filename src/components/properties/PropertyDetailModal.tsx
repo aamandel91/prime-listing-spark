@@ -95,8 +95,11 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
     price: 379999,
     beds: 5,
     baths: 3,
+    fullBaths: 2,
+    halfBaths: 1,
     sqft: 2469,
     acres: 0.35,
+    lotSize: "15,246 sqft",
     yearBuilt: 2025,
     daysOnSite: 1,
     propertyType: "Residential",
@@ -104,8 +107,32 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
     pricePerSqFt: 154,
     dateListed: "Oct 20, 2025",
     status: "Active",
+    garage: "2 Car Garage",
+    parking: "Driveway, Garage",
+    flooring: "Carpet, Hardwood, Tile",
+    heating: "Central, Forced Air",
+    cooling: "Central Air",
+    appliances: "Dishwasher, Disposal, Microwave, Range, Refrigerator",
+    interiorFeatures: "High Ceilings, Walk-In Closets, Open Floor Plan, Kitchen Island",
+    exteriorFeatures: "Covered Patio, Fenced Yard, Sprinkler System",
+    roofType: "Composition Shingle",
+    foundation: "Slab",
+    construction: "Frame, Vinyl Siding",
+    stories: "2",
+    hoa: "Yes",
+    hoaFee: 250,
+    hoaFeePeriod: "Monthly",
+    hoaAmenities: "Clubhouse, Fitness Center, Pool, Playground",
+    taxYear: 2024,
+    taxAmount: 4200,
+    schoolDistrict: "Cumberland County Schools",
+    elementarySchool: "Cumberland Road Elementary",
+    middleSchool: "Mac Williams Middle School", 
+    highSchool: "Jack Britt High School",
+    utilities: "Public Water, Public Sewer, Electric, Gas",
+    zoning: "Residential",
     description:
-      "This beautiful new construction home in The Hills at Stone Gate is under construction! Featuring 5 bedrooms, 2.5 bathrooms, and a 2-car garage, this home offers modern living at its finest.",
+      "This beautiful new construction home in The Hills at Stone Gate is under construction! Featuring 5 bedrooms, 2.5 bathrooms, and a 2-car garage, this home offers modern living at its finest. The open floor plan includes a gourmet kitchen with island, spacious living areas, and a master suite with walk-in closet. High ceilings throughout create an airy feel. Located in a family-friendly community with excellent schools and amenities including pool, fitness center, and playground.",
     images: [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
@@ -257,7 +284,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       />
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-7xl h-[90vh] p-0 overflow-hidden flex flex-col">
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Header with close button */}
           <div className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -429,13 +456,211 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                       <p className="text-muted-foreground leading-relaxed">
                         <span className="font-semibold text-foreground">Listing details for {property.address}:</span> {property.description}
                       </p>
-                      <Button variant="link" className="px-0 text-primary">
-                        View More
-                      </Button>
                     </div>
                     <p className="text-sm text-muted-foreground mt-4">
                       Listing Updated: {property.dateListed}
                     </p>
+                  </div>
+
+                  {/* Interior Features */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Interior Features</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold mb-2">Rooms & Spaces</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Bedrooms</span>
+                            <span>{property.beds}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Full Bathrooms</span>
+                            <span>{property.fullBaths}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Half Bathrooms</span>
+                            <span>{property.halfBaths}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Stories</span>
+                            <span>{property.stories}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Amenities</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Flooring</span>
+                            <span className="text-right">{property.flooring}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Features</span>
+                            <span className="text-right text-xs">{property.interiorFeatures}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Heating & Cooling</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Heating</span>
+                            <span className="text-right">{property.heating}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Cooling</span>
+                            <span className="text-right">{property.cooling}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Appliances</h3>
+                        <p className="text-sm text-muted-foreground">{property.appliances}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Exterior Features */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Exterior Features</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold mb-2">Property Details</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Lot Size</span>
+                            <span>{property.lotSize}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Acres</span>
+                            <span>{property.acres}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Construction</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Construction</span>
+                            <span className="text-right">{property.construction}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Roof</span>
+                            <span>{property.roofType}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Foundation</span>
+                            <span>{property.foundation}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Parking</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Garage</span>
+                            <span>{property.garage}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Parking</span>
+                            <span className="text-right">{property.parking}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Features</h3>
+                        <p className="text-sm text-muted-foreground">{property.exteriorFeatures}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Financial Information */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Financial Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold mb-2">HOA Information</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">HOA</span>
+                            <span>{property.hoa}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">HOA Fee</span>
+                            <span>${property.hoaFee}/{property.hoaFeePeriod}</span>
+                          </div>
+                          <div className="pt-2">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-semibold">Amenities:</span> {property.hoaAmenities}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Tax Information</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Tax Year</span>
+                            <span>{property.taxYear}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Annual Taxes</span>
+                            <span>${property.taxAmount.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location & Schools */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Location & Schools</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold mb-2">Location Details</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">County</span>
+                            <span>{property.county}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Subdivision</span>
+                            <span>{property.subdivision}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Zoning</span>
+                            <span>{property.zoning}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">School District</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">District</span>
+                            <span className="text-right">{property.schoolDistrict}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Elementary</span>
+                            <span className="text-right">{property.elementarySchool}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Middle</span>
+                            <span className="text-right">{property.middleSchool}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">High School</span>
+                            <span className="text-right">{property.highSchool}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Utilities */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Utilities</h2>
+                    <p className="text-sm text-muted-foreground">{property.utilities}</p>
                   </div>
                 </div>
 
