@@ -1,1 +1,4 @@
 project_id = "orzihyioizslidrqnyio"
+
+[functions.followup-boss-event]
+verify_jwt = false

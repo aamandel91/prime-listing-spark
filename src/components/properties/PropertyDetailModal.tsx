@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhotoGalleryModal } from "./PhotoGalleryModal";
+import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import {
   X,
   Heart,
@@ -43,6 +44,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   const { toast } = useToast();
+  const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
 
   // Check if property is saved when modal opens
   useEffect(() => {
@@ -62,6 +64,20 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
     if (isOpen) {
       checkIfSaved();
+      // Track property view in Follow Up Boss
+      trackPropertyView({
+        id: property.id,
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        zip: property.zip,
+        mlsNumber: property.mlsId,
+        price: property.price,
+        beds: property.beds,
+        baths: property.baths,
+        sqft: property.sqft,
+        propertyType: property.subType,
+      });
     }
   }, [isOpen, propertyId]);
 
@@ -153,6 +169,21 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         toast({
           title: "Property saved",
           description: "Property added to your saved list",
+        });
+        
+        // Track property save in Follow Up Boss
+        trackPropertySave({
+          id: property.id,
+          address: property.address,
+          city: property.city,
+          state: property.state,
+          zip: property.zip,
+          mlsNumber: property.mlsId,
+          price: property.price,
+          beds: property.beds,
+          baths: property.baths,
+          sqft: property.sqft,
+          propertyType: property.subType,
         });
       }
     }

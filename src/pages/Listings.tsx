@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
@@ -18,11 +18,13 @@ import { Search, SlidersHorizontal, MapPin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
 import PriceFilter from "@/components/search/PriceFilter";
+import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const { trackPropertySearch } = useFollowUpBoss();
   
   // Filter states - Initialize from URL params
   const [location, setLocation] = useState(searchParams.get("location") || "");
@@ -182,6 +184,18 @@ const Listings = () => {
   // Handle search button click
   const handleSearch = () => {
     updateSearchParams();
+    
+    // Track property search in Follow Up Boss
+    trackPropertySearch({
+      minPrice: minPrice ? parseInt(minPrice) : undefined,
+      maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+      beds: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
+      baths: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
+      city: selectedCity || location,
+      state: "FL",
+      subdivision: searchParams.get("subdivision") || undefined,
+      county: searchParams.get("county") || undefined,
+    });
   };
 
   // Clear all filters
