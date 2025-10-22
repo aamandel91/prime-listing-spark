@@ -5,11 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
+import PropertyMap from "@/components/map/PropertyMap";
 import {
   X,
   Heart,
@@ -27,6 +30,7 @@ import {
   Send,
   Video,
   Camera,
+  MapPin,
 } from "lucide-react";
 
 interface PropertyDetailModalProps {
@@ -662,6 +666,135 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     <h2 className="text-2xl font-bold mb-4">Utilities</h2>
                     <p className="text-sm text-muted-foreground">{property.utilities}</p>
                   </div>
+
+                  {/* Request Tour Section - Mobile */}
+                  <div className="lg:hidden">
+                    <Card className="p-6">
+                      <h2 className="text-2xl font-bold mb-4">Schedule a Tour</h2>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Choose your preferred date and tour type
+                      </p>
+                      
+                      {/* Tour Type Selection */}
+                      <div className="flex gap-2 mb-4">
+                        <Button
+                          variant={tourType === "in-person" ? "default" : "outline"}
+                          className="flex-1 gap-2"
+                          onClick={() => setTourType("in-person")}
+                        >
+                          <Home className="w-4 h-4" />
+                          In Person
+                        </Button>
+                        <Button
+                          variant={tourType === "video" ? "default" : "outline"}
+                          className="flex-1 gap-2"
+                          onClick={() => setTourType("video")}
+                        >
+                          <Video className="w-4 h-4" />
+                          Video Chat
+                        </Button>
+                      </div>
+
+                      {/* Date Selection */}
+                      <ScrollArea className="w-full">
+                        <div className="flex gap-2 pb-2">
+                          {tourDates.map((date) => (
+                            <Button
+                              key={date.fullDate}
+                              variant={selectedDate === date.fullDate ? "default" : "outline"}
+                              className="flex-col h-auto py-3 px-4 min-w-[80px]"
+                              onClick={() => setSelectedDate(date.fullDate)}
+                            >
+                              <span className="text-xs font-normal">{date.dayOfWeek}</span>
+                              <span className="text-2xl font-bold my-1">{date.day}</span>
+                              <span className="text-xs font-normal">{date.month}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+
+                      {/* Time Selection */}
+                      {selectedDate && (
+                        <div className="mt-4">
+                          <Label className="text-sm mb-2 block">Select Time</Label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"].map((time) => (
+                              <Button key={time} variant="outline" size="sm">
+                                {time}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <Separator className="my-4" />
+
+                      {/* Contact Form */}
+                      <div className="space-y-3">
+                        <Input placeholder="Your Name" />
+                        <Input placeholder="Your Email" type="email" />
+                        <Input placeholder="Your Phone" type="tel" />
+                        <Input
+                          placeholder="Add a comment (optional)"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                        />
+                        <Button className="w-full" size="lg">
+                          <Send className="w-4 h-4 mr-2" />
+                          Request Tour
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Property Map */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Location</h2>
+                    <div className="rounded-lg overflow-hidden h-[400px] bg-muted">
+                      <PropertyMap
+                        properties={[{
+                          id: property.id,
+                          title: property.title,
+                          price: property.price,
+                          address: property.address,
+                          city: property.city,
+                          state: property.state,
+                        }]}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-4">
+                      {property.address}, {property.city}, {property.state} {property.zip}
+                    </p>
+                  </div>
+
+                  {/* Nearby Amenities */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">What's Nearby</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          Schools
+                        </h3>
+                        <div className="text-sm space-y-1 ml-6">
+                          <p className="text-muted-foreground">{property.elementarySchool} - 1.2 mi</p>
+                          <p className="text-muted-foreground">{property.middleSchool} - 2.5 mi</p>
+                          <p className="text-muted-foreground">{property.highSchool} - 3.1 mi</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <Building className="w-4 h-4" />
+                          Shopping & Dining
+                        </h3>
+                        <div className="text-sm space-y-1 ml-6">
+                          <p className="text-muted-foreground">Cross Creek Mall - 4.2 mi</p>
+                          <p className="text-muted-foreground">Walmart Supercenter - 2.8 mi</p>
+                          <p className="text-muted-foreground">Various Restaurants - 1.5 mi</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right sidebar - desktop only */}
@@ -678,7 +811,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     </div>
                   </div>
 
-                  {/* Home Details card */}
+                   {/* Home Details card */}
                   <Card className="p-6">
                     <h3 className="text-xl font-bold mb-4">Home Details</h3>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -722,6 +855,70 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                         <span className="text-muted-foreground">Days on Site</span>
                         <span className="font-semibold">{property.daysOnSite}</span>
                       </div>
+                    </div>
+                  </Card>
+
+                  {/* Request Tour Card - Desktop */}
+                  <Card className="p-6">
+                    <h3 className="text-xl font-bold mb-4">Schedule a Tour</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Choose your preferred date and tour type
+                    </p>
+                    
+                    {/* Tour Type Selection */}
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        variant={tourType === "in-person" ? "default" : "outline"}
+                        className="flex-1 gap-2"
+                        size="sm"
+                        onClick={() => setTourType("in-person")}
+                      >
+                        <Home className="w-4 h-4" />
+                        In Person
+                      </Button>
+                      <Button
+                        variant={tourType === "video" ? "default" : "outline"}
+                        className="flex-1 gap-2"
+                        size="sm"
+                        onClick={() => setTourType("video")}
+                      >
+                        <Video className="w-4 h-4" />
+                        Video
+                      </Button>
+                    </div>
+
+                    {/* Date Selection */}
+                    <div className="space-y-2 mb-4">
+                      {tourDates.slice(0, 5).map((date) => (
+                        <Button
+                          key={date.fullDate}
+                          variant={selectedDate === date.fullDate ? "default" : "outline"}
+                          className="w-full justify-start"
+                          size="sm"
+                          onClick={() => setSelectedDate(date.fullDate)}
+                        >
+                          <Clock className="w-4 h-4 mr-2" />
+                          {date.dayOfWeek}, {date.month} {date.day}
+                        </Button>
+                      ))}
+                    </div>
+
+                    <Separator className="my-4" />
+
+                    {/* Contact Form */}
+                    <div className="space-y-3">
+                      <Input placeholder="Your Name" size={30} />
+                      <Input placeholder="Your Email" type="email" />
+                      <Input placeholder="Your Phone" type="tel" />
+                      <Input
+                        placeholder="Add a comment"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                      />
+                      <Button className="w-full" size="sm">
+                        <Send className="w-4 h-4 mr-2" />
+                        Request Tour
+                      </Button>
                     </div>
                   </Card>
                 </div>
