@@ -4,10 +4,11 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
+import PropertyMap from "@/components/map/PropertyMap";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
-import { MapPin, TrendingUp, Building2, School, DollarSign } from "lucide-react";
+import { TrendingUp, Building2, School, DollarSign } from "lucide-react";
 
 // City data mapping
 const CITY_DATA: Record<string, {
@@ -244,97 +245,94 @@ const CityTemplate = () => {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-96 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <img
-              src={cityData.heroImage}
-              alt={`${cityData.name} cityscape`}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-overlay" />
-          </div>
-
-          <div className="relative z-10 container mx-auto px-4 text-center">
-            <div className="flex items-center justify-center mb-4">
-              <MapPin className="w-8 h-8 text-accent mr-3" />
-              <h1 className="text-4xl md:text-5xl font-bold text-white">
-                Real Estate in {cityData.name}, {cityData.state}
-              </h1>
-            </div>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Discover homes and investment opportunities in {cityData.name}
-            </p>
-          </div>
-        </section>
-
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-4">
           {/* Breadcrumbs */}
           <BreadcrumbSEO 
             items={[
               { label: cityData.name, href: `/city/${(citySlug || neighborhoodSlug || 'fayetteville').toLowerCase()}` }
             ]} 
           />
-          
-          {/* City Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <Card className="p-6 text-center">
-              <DollarSign className="w-10 h-10 text-accent mx-auto mb-3" />
-              <div className="text-2xl font-bold text-primary mb-1">
-                {cityData.stats.medianPrice}
-              </div>
-              <div className="text-sm text-muted-foreground">Median Price</div>
-            </Card>
-            <Card className="p-6 text-center">
-              <Building2 className="w-10 h-10 text-accent mx-auto mb-3" />
-              <div className="text-2xl font-bold text-primary mb-1">
-                {cityData.stats.activeListings}
-              </div>
-              <div className="text-sm text-muted-foreground">Active Listings</div>
-            </Card>
-            <Card className="p-6 text-center">
-              <TrendingUp className="w-10 h-10 text-accent mx-auto mb-3" />
-              <div className="text-2xl font-bold text-primary mb-1">
-                {cityData.stats.avgDaysOnMarket}
-              </div>
-              <div className="text-sm text-muted-foreground">Avg Days on Market</div>
-            </Card>
-            <Card className="p-6 text-center">
-              <School className="w-10 h-10 text-accent mx-auto mb-3" />
-              <div className="text-2xl font-bold text-primary mb-1">
-                {cityData.stats.schools}
-              </div>
-              <div className="text-sm text-muted-foreground">School Rating</div>
-            </Card>
+
+          {/* Page Title */}
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
+              Real Estate in {cityData.name}, {cityData.state}
+            </h1>
+            <p className="text-muted-foreground">
+              {cityData.stats.activeListings} properties available
+            </p>
           </div>
 
-          {/* About Section */}
+          {/* Main Content: Map and Properties Split */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+            {/* Map - Hidden on mobile */}
+            <div className="hidden lg:block sticky top-4 h-[calc(100vh-120px)]">
+              <PropertyMap properties={featuredProperties} />
+            </div>
+
+            {/* Properties Grid */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {featuredProperties.map((property) => (
+                  <PropertyCard 
+                    key={property.id} 
+                    {...property}
+                  />
+                ))}
+              </div>
+
+              {/* View All Button */}
+              <div className="flex justify-center pt-4">
+                <Link to={`/listings?city=${encodeURIComponent(cityData.name)}`}>
+                  <Button size="lg">View All Listings</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Neighborhood Details Section */}
           <Card className="p-8 mb-12">
             <h2 className="text-3xl font-bold text-primary mb-4">
               About {cityData.name}
             </h2>
-            <p className="text-foreground text-lg leading-relaxed">
+            <p className="text-foreground text-lg leading-relaxed mb-6">
               {cityData.description}
             </p>
+
+            {/* City Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <DollarSign className="w-8 h-8 text-accent mx-auto mb-2" />
+                <div className="text-xl font-bold text-primary mb-1">
+                  {cityData.stats.medianPrice}
+                </div>
+                <div className="text-sm text-muted-foreground">Median Price</div>
+              </div>
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <Building2 className="w-8 h-8 text-accent mx-auto mb-2" />
+                <div className="text-xl font-bold text-primary mb-1">
+                  {cityData.stats.activeListings}
+                </div>
+                <div className="text-sm text-muted-foreground">Active Listings</div>
+              </div>
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <TrendingUp className="w-8 h-8 text-accent mx-auto mb-2" />
+                <div className="text-xl font-bold text-primary mb-1">
+                  {cityData.stats.avgDaysOnMarket}
+                </div>
+                <div className="text-sm text-muted-foreground">Avg Days on Market</div>
+              </div>
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <School className="w-8 h-8 text-accent mx-auto mb-2" />
+                <div className="text-xl font-bold text-primary mb-1">
+                  {cityData.stats.schools}
+                </div>
+                <div className="text-sm text-muted-foreground">School Rating</div>
+              </div>
+            </div>
           </Card>
 
-          {/* Featured Properties */}
-          <section className="mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-bold text-primary">
-                Featured Properties in {cityData.name}
-              </h2>
-              <Link to={`/listings?city=${encodeURIComponent(cityData.name)}`}>
-                <Button variant="outline">View All Listings</Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredProperties.map((property) => (
-                <PropertyCard key={property.id} {...property} />
-              ))}
-            </div>
-          </section>
-
+          {/* Neighborhoods and Property Types */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Neighborhoods */}
             <Card className="p-6">
