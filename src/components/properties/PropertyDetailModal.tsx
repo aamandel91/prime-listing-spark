@@ -710,19 +710,6 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     </Card>
                   </div>
 
-                  {/* Comments Section */}
-                  <div>
-                    <h2 className="text-2xl font-bold mb-4">Comments</h2>
-                    <Card className="p-6">
-                      <div className="flex gap-2">
-                        <Textarea placeholder="Add a comment" className="flex-1" />
-                        <Button size="icon" className="rounded-full">
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Card>
-                  </div>
-
                   {/* Guaranteed Offer Widget */}
                   <Card className="bg-muted/30 border-0">
                     <div className="p-6 md:p-8">
