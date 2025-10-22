@@ -14,6 +14,14 @@ import { useToast } from "@/hooks/use-toast";
 import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import PropertyMap from "@/components/map/PropertyMap";
+import PropertyCard from "./PropertyCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import {
   X,
   Heart,
@@ -35,6 +43,7 @@ import {
   Navigation,
   Mail,
   MessageSquare,
+  ArrowRight,
 } from "lucide-react";
 
 interface PropertyDetailModalProps {
@@ -162,6 +171,113 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       "https://images.unsplash.com/photo-1600563438938-a9a27216b4f5?auto=format&fit=crop&w=1200&q=80",
     ],
   };
+
+  // Mock similar properties
+  const similarProperties = [
+    {
+      id: "sim-1",
+      title: "510 Edwalton Way",
+      address: "510 Edwalton Way",
+      city: property.city,
+      state: property.state,
+      zipCode: property.zip,
+      price: 389999,
+      beds: 4,
+      baths: 2.5,
+      sqft: 2300,
+      image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80",
+      mlsNumber: "LP752129"
+    },
+    {
+      id: "sim-2",
+      title: "520 Edwalton Way",
+      address: "520 Edwalton Way",
+      city: property.city,
+      state: property.state,
+      zipCode: property.zip,
+      price: 369999,
+      beds: 5,
+      baths: 3,
+      sqft: 2400,
+      image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80",
+      mlsNumber: "LP752130"
+    },
+    {
+      id: "sim-3",
+      title: "530 Edwalton Way",
+      address: "530 Edwalton Way",
+      city: property.city,
+      state: property.state,
+      zipCode: property.zip,
+      price: 395999,
+      beds: 5,
+      baths: 3.5,
+      sqft: 2600,
+      image: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=800&q=80",
+      mlsNumber: "LP752131"
+    },
+    {
+      id: "sim-4",
+      title: "540 Edwalton Way",
+      address: "540 Edwalton Way",
+      city: property.city,
+      state: property.state,
+      zipCode: property.zip,
+      price: 375999,
+      beds: 4,
+      baths: 2.5,
+      sqft: 2250,
+      image: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=800&q=80",
+      mlsNumber: "LP752132"
+    }
+  ];
+
+  // Mock neighborhood listings
+  const neighborhoodListings = [
+    { address: "515 Edwalton Way LOT 80", city: property.city, zip: property.zip },
+    { address: "525 Edwalton Way LOT 83", city: property.city, zip: property.zip },
+    { address: "535 Edwalton Way LOT 84", city: property.city, zip: property.zip },
+    { address: "545 Edwalton Way LOT 85", city: property.city, zip: property.zip },
+    { address: "555 Edwalton Way LOT 86", city: property.city, zip: property.zip },
+    { address: "565 Edwalton Way LOT 87", city: property.city, zip: property.zip },
+    { address: "575 Edwalton Way LOT 88", city: property.city, zip: property.zip },
+    { address: "585 Edwalton Way LOT 89", city: property.city, zip: property.zip },
+    { address: "595 Edwalton Way LOT 90", city: property.city, zip: property.zip },
+    { address: "605 Edwalton Way LOT 91", city: property.city, zip: property.zip },
+  ];
+
+  // Mock blogs - filter by city name
+  const allBlogs = [
+    {
+      id: 1,
+      title: "Best Neighborhoods in Fayetteville for Growing Families",
+      excerpt: "Discover why Fayetteville is becoming one of North Carolina's most desirable places to raise a family.",
+      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
+      date: "March 15, 2024",
+      category: "Community",
+    },
+    {
+      id: 2,
+      title: "Fayetteville Real Estate Market Update 2024",
+      excerpt: "Stay ahead of the curve with our comprehensive analysis of Fayetteville's current market conditions.",
+      image: "https://images.unsplash.com/photo-1560184897-ae75f418493e?auto=format&fit=crop&w=800&q=80",
+      date: "March 12, 2024",
+      category: "Market Insights",
+    },
+    {
+      id: 3,
+      title: "Top 10 Things to Do in Fayetteville, NC",
+      excerpt: "Moving to Fayetteville? Here are the best attractions and activities in the area.",
+      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
+      date: "March 8, 2024",
+      category: "Community",
+    },
+  ];
+
+  // Filter blogs by city name
+  const cityBlogs = allBlogs.filter(blog => 
+    blog.title.toLowerCase().includes(property.city.toLowerCase())
+  );
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -635,6 +751,110 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                       </div>
                     </div>
                   </Card>
+
+                  {/* Similar Properties Carousel */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Similar Properties in {property.city}</h2>
+                    <Carousel
+                      opts={{
+                        align: "start",
+                        loop: true,
+                      }}
+                      className="w-full"
+                    >
+                      <CarouselContent className="-ml-2 md:-ml-4">
+                        {similarProperties.map((prop) => (
+                          <CarouselItem key={prop.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                            <PropertyCard
+                              id={prop.id}
+                              title={prop.title}
+                              address={prop.address}
+                              city={prop.city}
+                              state={prop.state}
+                              zipCode={prop.zipCode}
+                              price={prop.price}
+                              beds={prop.beds}
+                              baths={prop.baths}
+                              sqft={prop.sqft}
+                              image={prop.image}
+                              mlsNumber={prop.mlsNumber}
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="hidden md:flex" />
+                      <CarouselNext className="hidden md:flex" />
+                    </Carousel>
+                  </div>
+
+                  {/* Other Homes in Neighborhood */}
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Other Homes for Sale in {property.subdivision}</h2>
+                    <Card className="p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {neighborhoodListings.map((listing, idx) => (
+                          <Link
+                            key={idx}
+                            to={`/listings?address=${encodeURIComponent(listing.address)}`}
+                            className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
+                          >
+                            <Home className="w-4 h-4 flex-shrink-0" />
+                            <span className="group-hover:underline">
+                              {listing.address}, {listing.city}, {listing.zip}
+                            </span>
+                            <ArrowRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </Link>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* City-Specific Blog Carousel */}
+                  {cityBlogs.length > 0 && (
+                    <div>
+                      <h2 className="text-2xl font-bold mb-4">Learn About {property.city}</h2>
+                      <Carousel
+                        opts={{
+                          align: "start",
+                          loop: true,
+                        }}
+                        className="w-full"
+                      >
+                        <CarouselContent className="-ml-2 md:-ml-4">
+                          {cityBlogs.map((blog) => (
+                            <CarouselItem key={blog.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                              <Link to={`/blog/${blog.id}`}>
+                                <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
+                                  <div className="aspect-video relative overflow-hidden">
+                                    <img
+                                      src={blog.image}
+                                      alt={blog.title}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                  </div>
+                                  <div className="p-4">
+                                    <Badge variant="secondary" className="mb-2">{blog.category}</Badge>
+                                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                      {blog.title}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                                      {blog.excerpt}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <Calendar className="w-3 h-3" />
+                                      <span>{blog.date}</span>
+                                    </div>
+                                  </div>
+                                </Card>
+                              </Link>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="hidden md:flex" />
+                        <CarouselNext className="hidden md:flex" />
+                      </Carousel>
+                    </div>
+                  )}
 
                   {/* Financial Information */}
                   <div>
