@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [downPayment, setDownPayment] = useState("37999.9");
   const [interestRate, setInterestRate] = useState("5.75");
   const [showStickyButtons, setShowStickyButtons] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
 
@@ -106,20 +107,22 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
   // Handle sticky buttons on scroll
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setShowStickyButtons(false);
+      return;
+    }
 
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const scrollTop = target.scrollTop;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
       // Show sticky buttons after scrolling 600px
       setShowStickyButtons(scrollTop > 600);
     };
 
-    const scrollContainer = document.querySelector('[data-scroll-container="property-detail"]');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll);
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [isOpen]);
 
   // Mock data - will be replaced with actual API call
@@ -548,7 +551,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto" data-scroll-container="property-detail">
+          <div className="flex-1 overflow-y-auto" ref={scrollContainerRef}>
             <div className="p-4 md:p-6">
               {/* Image gallery */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
