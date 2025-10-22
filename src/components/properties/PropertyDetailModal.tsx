@@ -1354,7 +1354,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              By proceeding, you consent to receive calls, texts and voicemails at the number you provided (may be recorded and may be autodialed and use prerecorded and artificial voices), and email, from Raleigh Realty about your inquiry and other home-related matters. Msg/data rates may apply. This consent applies even if you are on a do not call list and is not a condition of any purchase.
+              By proceeding, you consent to receive calls, texts and voicemails at the number you provided (may be recorded and may be autodialed and use prerecorded and artificial voices), and email, from Florida Home Finder about your inquiry and other home-related matters. Msg/data rates may apply. This consent applies even if you are on a do not call list and is not a condition of any purchase.
             </p>
             <Button className="w-full" size="lg">
               Contact Agent

@@ -43,7 +43,7 @@ const Navbar = () => {
             <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center shadow-medium transition-transform group-hover:scale-105">
               <Home className="w-6 h-6 text-accent-foreground" />
             </div>
-            <span className="text-xl font-bold text-primary whitespace-nowrap">Premier Properties</span>
+            <span className="text-xl font-bold text-primary whitespace-nowrap">Florida Home Finder</span>
           </Link>
 
           {/* Right Navigation */}

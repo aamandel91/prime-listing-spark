@@ -14,10 +14,10 @@ const Footer = () => {
               <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center">
                 <Home className="w-6 h-6 text-accent-foreground" />
               </div>
-              <span className="text-xl font-bold">Premier Properties</span>
+              <span className="text-xl font-bold">Florida Home Finder</span>
             </div>
             <p className="text-primary-foreground/80 mb-4">
-              Your trusted partner in finding the perfect home. Excellence in real estate since 2024.
+              Your trusted partner in finding the perfect Florida home. Excellence in real estate since 2024.
             </p>
             <div className="flex space-x-3">
               <a href="#" className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors">
@@ -73,7 +73,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-accent flex-shrink-0" />
-                <a href="mailto:info@premierproperties.com" className="text-primary-foreground/80 hover:text-accent transition-colors">info@premierproperties.com</a>
+                <a href="mailto:info@floridahomefinder.com" className="text-primary-foreground/80 hover:text-accent transition-colors">info@floridahomefinder.com</a>
               </li>
             </ul>
           </div>
@@ -81,7 +81,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-light mt-8 pt-8 text-center">
           <p className="text-primary-foreground/60 text-sm">
-            © {currentYear} Premier Properties. All rights reserved. | 
+            © {currentYear} Florida Home Finder. All rights reserved. | 
             <Link to="/privacy" className="hover:text-accent transition-colors ml-1">Privacy Policy</Link> | 
             <Link to="/terms" className="hover:text-accent transition-colors ml-1">Terms of Service</Link>
           </p>
