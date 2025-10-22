@@ -151,14 +151,55 @@ const Blog = () => {
         "@type": "BlogPosting",
         "headline": blog.title,
         "description": blog.excerpt,
+        "image": blog.image,
         "author": {
           "@type": "Person",
           "name": blog.author
         },
         "datePublished": blog.date,
+        "publisher": {
+          "@type": "Organization",
+          "name": "FloridaHomeFinder"
+        },
         "url": `${window.location.origin}/blog/${blog.id}`
       }
     }))
+  };
+
+  // Breadcrumb structured data
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": window.location.origin
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": pageUrl
+      }
+    ]
+  };
+
+  // WebSite structured data for search
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "FloridaHomeFinder Blog",
+    "url": pageUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${pageUrl}?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
   };
 
   return (
@@ -166,9 +207,11 @@ const Blog = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta name="keywords" content="Florida real estate blog, home buying tips, selling tips, market insights, real estate investment, Florida housing market, property guides" />
         <link rel="canonical" href={pageUrl} />
         
         {/* Open Graph tags */}
+        <meta property="og:site_name" content="FloridaHomeFinder" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
@@ -176,6 +219,7 @@ const Blog = () => {
         
         {/* Twitter Card tags */}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@FloridaHomeFinder" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         
@@ -185,6 +229,12 @@ const Blog = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(itemListSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
         </script>
       </Helmet>
       

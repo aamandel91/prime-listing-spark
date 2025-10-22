@@ -122,11 +122,18 @@ const BlogPost = () => {
     "@type": "BlogPosting",
     "headline": blog.title,
     "description": blog.excerpt,
-    "image": blog.image,
+    "image": {
+      "@type": "ImageObject",
+      "url": blog.image,
+      "width": 1200,
+      "height": 630
+    },
     "datePublished": blog.date,
+    "dateModified": blog.date,
     "author": {
       "@type": "Person",
-      "name": blog.author
+      "name": blog.author,
+      "url": `${window.location.origin}/blog?author=${encodeURIComponent(blog.author)}`
     },
     "publisher": {
       "@type": "Organization",
@@ -141,7 +148,41 @@ const BlogPost = () => {
       "@id": pageUrl
     },
     "articleSection": blog.category,
-    "keywords": `${blog.category}, Florida real estate, home buying, real estate tips`
+    "keywords": `${blog.category}, Florida real estate, home buying, real estate tips, ${blog.author}`,
+    "wordCount": blog.content.split(' ').length,
+    "articleBody": blog.excerpt
+  };
+
+  // Breadcrumb structured data
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": window.location.origin
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": `${window.location.origin}/blog`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": blog.category,
+        "item": `${window.location.origin}/blog?category=${encodeURIComponent(blog.category)}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": blog.title,
+        "item": pageUrl
+      }
+    ]
   };
 
   return (
@@ -149,27 +190,41 @@ const BlogPost = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={`${blog.category}, Florida real estate, real estate tips, ${blog.author}, home buying guide, property market`} />
+        <meta name="author" content={blog.author} />
         <link rel="canonical" href={pageUrl} />
         
         {/* Open Graph tags */}
+        <meta property="og:site_name" content="FloridaHomeFinder" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:image" content={blog.image} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={blog.title} />
         <meta property="article:published_time" content={blog.date} />
+        <meta property="article:modified_time" content={blog.date} />
         <meta property="article:author" content={blog.author} />
         <meta property="article:section" content={blog.category} />
+        <meta property="article:tag" content={blog.category} />
         
         {/* Twitter Card tags */}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@FloridaHomeFinder" />
+        <meta name="twitter:creator" content={`@${blog.author.replace(' ', '')}`} />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={blog.image} />
+        <meta name="twitter:image:alt" content={blog.title} />
         
         {/* Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify(articleSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
         </script>
       </Helmet>
       
