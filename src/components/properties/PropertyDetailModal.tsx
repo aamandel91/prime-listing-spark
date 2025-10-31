@@ -16,6 +16,7 @@ import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import PropertyMap from "@/components/map/PropertyMap";
 import PropertyCard from "./PropertyCard";
+import { useRepliersListing } from "@/hooks/useRepliers";
 import {
   Carousel,
   CarouselContent,
@@ -45,6 +46,7 @@ import {
   Mail,
   MessageSquare,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 interface PropertyDetailModalProps {
@@ -69,6 +71,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
+  const { listing, loading, error } = useRepliersListing(propertyId);
 
   // Check if property is saved when modal opens
   useEffect(() => {
@@ -125,182 +128,107 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [isOpen]);
 
-  // Mock data - will be replaced with actual API call
-  const property = {
-    id: propertyId,
-    title: "505 Edwalton Way LOT 82",
-    address: "505 Edwalton Way LOT 82",
-    city: "Fayetteville",
-    state: "North Carolina",
-    zip: "28311",
-    county: "Cumberland",
-    subdivision: "The Hills At Stonegate",
-    mlsId: "LP752128",
-    price: 379999,
-    beds: 5,
-    baths: 3,
-    fullBaths: 2,
-    halfBaths: 1,
-    sqft: 2469,
-    acres: 0.35,
-    lotSize: "15,246 sqft",
-    yearBuilt: 2025,
-    daysOnSite: 1,
-    propertyType: "Residential",
-    subType: "Single Family",
-    pricePerSqFt: 154,
-    dateListed: "Oct 20, 2025",
-    status: "Active",
-    garage: "2 Car Garage",
-    parking: "Driveway, Garage",
-    flooring: "Carpet, Hardwood, Tile",
-    heating: "Central, Forced Air",
-    cooling: "Central Air",
-    appliances: "Dishwasher, Disposal, Microwave, Range, Refrigerator",
-    interiorFeatures: "High Ceilings, Walk-In Closets, Open Floor Plan, Kitchen Island",
-    exteriorFeatures: "Covered Patio, Fenced Yard, Sprinkler System",
-    roofType: "Composition Shingle",
-    foundation: "Slab",
-    construction: "Frame, Vinyl Siding",
-    stories: "2",
-    hoa: "Yes",
-    hoaFee: 250,
-    hoaFeePeriod: "Monthly",
-    hoaAmenities: "Clubhouse, Fitness Center, Pool, Playground",
-    taxYear: 2024,
-    taxAmount: 4200,
-    schoolDistrict: "Cumberland County Schools",
-    elementarySchool: "Cumberland Road Elementary",
-    middleSchool: "Mac Williams Middle School", 
-    highSchool: "Jack Britt High School",
-    utilities: "Public Water, Public Sewer, Electric, Gas",
-    zoning: "Residential",
-    description:
-      "This beautiful new construction home in The Hills at Stone Gate is under construction! Featuring 5 bedrooms, 2.5 bathrooms, and a 2-car garage, this home offers modern living at its finest. The open floor plan includes a gourmet kitchen with island, spacious living areas, and a master suite with walk-in closet. High ceilings throughout create an airy feel. Located in a family-friendly community with excellent schools and amenities including pool, fitness center, and playground.",
-    images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600585152915-d208bec867a1?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600566752229-250ed79a9c14?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600563438938-a9a27216b4f5?auto=format&fit=crop&w=1200&q=80",
-    ],
-  };
+  // Transform API listing to component format
+  const property = listing ? {
+    id: listing.mlsNumber || propertyId,
+    title: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
+      .filter(Boolean).join(' ') || "Property",
+    address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
+      .filter(Boolean).join(' ') || "",
+    city: listing.address?.city || "",
+    state: listing.address?.state || "",
+    zip: listing.address?.zip || "",
+    county: listing.address?.area || "",
+    subdivision: listing.address?.neighborhood || "",
+    mlsId: listing.mlsNumber || "",
+    price: listing.listPrice || 0,
+    originalPrice: listing.originalPrice || listing.listPrice || 0,
+    beds: listing.details?.numBedrooms || 0,
+    baths: listing.details?.numBathrooms || 0,
+    sqft: parseInt(listing.details?.sqft || "0"),
+    acres: listing.lot?.acres || 0,
+    lotSize: listing.lot?.squareFeet || 0,
+    lotFeatures: listing.lot?.features || "",
+    legalDescription: listing.lot?.legalDescription || "",
+    yearBuilt: parseInt(listing.details?.yearBuilt || "0") || undefined,
+    daysOnSite: listing.daysOnMarket || 0,
+    listDate: listing.listDate || "",
+    propertyType: listing.details?.propertyType || "Residential",
+    propertyClass: listing.class || "",
+    subType: listing.details?.style || "Single Family",
+    pricePerSqFt: listing.details?.sqft ? Math.round((listing.listPrice || 0) / parseInt(listing.details.sqft)) : 0,
+    dateListed: listing.listDate ? new Date(listing.listDate).toLocaleDateString() : "",
+    status: listing.standardStatus || listing.lastStatus || "Active",
+    description: listing.details?.description || "",
+    interiorFeatures: [
+      listing.details?.airConditioning && `Air Conditioning: ${listing.details.airConditioning}`,
+      listing.details?.heating && `Heating: ${listing.details.heating}`,
+      listing.details?.flooringType && `Flooring: ${listing.details.flooringType}`,
+      listing.details?.extras && `Appliances: ${listing.details.extras}`,
+    ].filter(Boolean) as string[],
+    exteriorFeatures: [
+      listing.details?.exteriorConstruction1 && `Construction: ${listing.details.exteriorConstruction1}`,
+      listing.details?.roofMaterial && `Roof: ${listing.details.roofMaterial}`,
+      listing.details?.foundationType && `Foundation: ${listing.details.foundationType}`,
+      listing.details?.patio && `Outdoor: ${listing.details.patio}`,
+      listing.details?.sewer && `Sewer: ${listing.details.sewer}`,
+    ].filter(Boolean) as string[],
+    hoaFeatures: [
+      listing.condominium?.fees?.maintenance && `HOA Fee: $${listing.condominium.fees.maintenance}/mo`,
+      listing.condominium?.condoCorp && `Association: ${listing.condominium.condoCorp}`,
+      listing.condominium?.parkingType && `Parking: ${listing.condominium.parkingType}`,
+      listing.nearby?.amenities && `Amenities: ${listing.nearby.amenities.join(', ')}`,
+    ].filter(Boolean) as string[],
+    additionalInfo: [
+      listing.details?.numGarageSpaces && `Garage Spaces: ${listing.details.numGarageSpaces}`,
+      listing.details?.numParkingSpaces && `Parking Spaces: ${listing.details.numParkingSpaces}`,
+      listing.taxes?.annualAmount && `Annual Taxes: $${listing.taxes.annualAmount}`,
+      listing.taxes?.assessmentYear && `Tax Year: ${listing.taxes.assessmentYear}`,
+    ].filter(Boolean) as string[],
+    rooms: listing.rooms || [],
+    listingAgent: {
+      name: listing.agents?.[0]?.name || "",
+      phone: listing.agents?.[0]?.phones?.[0] || "",
+      email: listing.agents?.[0]?.email || "",
+      company: listing.agents?.[0]?.brokerage?.name || listing.office?.brokerageName || "",
+    },
+    avm: listing.avm ? {
+      value: listing.avm.value,
+      high: listing.avm.high,
+      low: listing.avm.low,
+    } : null,
+    source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
+    images: listing.images && listing.images.length > 0 
+      ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
+      : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
+  } : null;
 
-  // Mock similar properties
-  const similarProperties = [
-    {
-      id: "sim-1",
-      title: "510 Edwalton Way",
-      address: "510 Edwalton Way",
-      city: property.city,
-      state: property.state,
-      zipCode: property.zip,
-      price: 389999,
-      beds: 4,
-      baths: 2.5,
-      sqft: 2300,
-      image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80",
-      mlsNumber: "LP752129"
-    },
-    {
-      id: "sim-2",
-      title: "520 Edwalton Way",
-      address: "520 Edwalton Way",
-      city: property.city,
-      state: property.state,
-      zipCode: property.zip,
-      price: 369999,
-      beds: 5,
-      baths: 3,
-      sqft: 2400,
-      image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80",
-      mlsNumber: "LP752130"
-    },
-    {
-      id: "sim-3",
-      title: "530 Edwalton Way",
-      address: "530 Edwalton Way",
-      city: property.city,
-      state: property.state,
-      zipCode: property.zip,
-      price: 395999,
-      beds: 5,
-      baths: 3.5,
-      sqft: 2600,
-      image: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=800&q=80",
-      mlsNumber: "LP752131"
-    },
-    {
-      id: "sim-4",
-      title: "540 Edwalton Way",
-      address: "540 Edwalton Way",
-      city: property.city,
-      state: property.state,
-      zipCode: property.zip,
-      price: 375999,
-      beds: 4,
-      baths: 2.5,
-      sqft: 2250,
-      image: "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=800&q=80",
-      mlsNumber: "LP752132"
-    }
-  ];
+  // Loading and error states
+  if (loading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl h-[60vh] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading property details...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-  // Mock neighborhood listings
-  const neighborhoodListings = [
-    { address: "515 Edwalton Way LOT 80", city: property.city, zip: property.zip },
-    { address: "525 Edwalton Way LOT 83", city: property.city, zip: property.zip },
-    { address: "535 Edwalton Way LOT 84", city: property.city, zip: property.zip },
-    { address: "545 Edwalton Way LOT 85", city: property.city, zip: property.zip },
-    { address: "555 Edwalton Way LOT 86", city: property.city, zip: property.zip },
-    { address: "565 Edwalton Way LOT 87", city: property.city, zip: property.zip },
-    { address: "575 Edwalton Way LOT 88", city: property.city, zip: property.zip },
-    { address: "585 Edwalton Way LOT 89", city: property.city, zip: property.zip },
-    { address: "595 Edwalton Way LOT 90", city: property.city, zip: property.zip },
-    { address: "605 Edwalton Way LOT 91", city: property.city, zip: property.zip },
-  ];
-
-  // Mock blogs - filter by city name
-  const allBlogs = [
-    {
-      id: 1,
-      title: "Best Neighborhoods in Fayetteville for Growing Families",
-      excerpt: "Discover why Fayetteville is becoming one of North Carolina's most desirable places to raise a family.",
-      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
-      date: "March 15, 2024",
-      category: "Community",
-    },
-    {
-      id: 2,
-      title: "Fayetteville Real Estate Market Update 2024",
-      excerpt: "Stay ahead of the curve with our comprehensive analysis of Fayetteville's current market conditions.",
-      image: "https://images.unsplash.com/photo-1560184897-ae75f418493e?auto=format&fit=crop&w=800&q=80",
-      date: "March 12, 2024",
-      category: "Market Insights",
-    },
-    {
-      id: 3,
-      title: "Top 10 Things to Do in Fayetteville, NC",
-      excerpt: "Moving to Fayetteville? Here are the best attractions and activities in the area.",
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
-      date: "March 8, 2024",
-      category: "Community",
-    },
-  ];
-
-  // Filter blogs by city name
-  const cityBlogs = allBlogs.filter(blog => 
-    blog.title.toLowerCase().includes(property.city.toLowerCase())
-  );
+  if (error || !property) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl h-[40vh] flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-semibold mb-2">Property Not Found</p>
+            <p className="text-muted-foreground">We couldn't load this property right now.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -695,20 +623,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Schools</h2>
                     <Card className="p-6">
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Elementary</span>
-                          <span className="font-semibold text-right">{property.elementarySchool}</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Middle</span>
-                          <span className="font-semibold text-right">{property.middleSchool}</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">High</span>
-                          <span className="font-semibold text-right">{property.highSchool}</span>
-                        </div>
-                      </div>
+                      <div className="text-sm text-muted-foreground">School information is not available for this listing.</div>
                     </Card>
                   </div>
 
@@ -717,14 +632,21 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     <h2 className="text-2xl font-bold mb-4">Utilities</h2>
                     <Card className="p-6">
                       <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Sewer</span>
-                          <span className="font-semibold">Septic Tank</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Water Source</span>
-                          <span className="font-semibold">Well</span>
-                        </div>
+                        {listing?.details?.sewer && (
+                          <div className="flex justify-between py-2">
+                            <span className="text-muted-foreground">Sewer</span>
+                            <span className="font-semibold">{listing.details.sewer}</span>
+                          </div>
+                        )}
+                        {listing?.details?.extras && (
+                          <div className="flex justify-between py-2">
+                            <span className="text-muted-foreground">Appliances</span>
+                            <span className="font-semibold text-right">{listing.details.extras}</span>
+                          </div>
+                        )}
+                        {!listing?.details?.sewer && !listing?.details?.extras && (
+                          <div className="text-muted-foreground">Not available</div>
+                        )}
                       </div>
                     </Card>
                   </div>
@@ -746,20 +668,15 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Interior</h2>
                     <Card className="p-6">
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Heating</span>
-                          <span className="font-semibold">Heat Pump</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Cooling</span>
-                          <span className="font-semibold">Electric</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Fireplace</span>
-                          <span className="font-semibold">No</span>
-                        </div>
-                      </div>
+                      {property.interiorFeatures.length > 0 ? (
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          {property.interiorFeatures.map((feature, idx) => (
+                            <li key={idx} className="text-foreground">{feature}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">Not available</div>
+                      )}
                     </Card>
                   </div>
 
@@ -767,16 +684,15 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Exterior</h2>
                     <Card className="p-6">
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Roof</span>
-                          <span className="font-semibold">Shingle</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Foundation</span>
-                          <span className="font-semibold">Combination</span>
-                        </div>
-                      </div>
+                      {property.exteriorFeatures.length > 0 ? (
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          {property.exteriorFeatures.map((feature, idx) => (
+                            <li key={idx} className="text-foreground">{feature}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">Not available</div>
+                      )}
                     </Card>
                   </div>
 
@@ -784,12 +700,15 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   <div>
                     <h2 className="text-2xl font-bold mb-4">HOA</h2>
                     <Card className="p-6">
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Has HOA</span>
-                          <span className="font-semibold">None</span>
-                        </div>
-                      </div>
+                      {property.hoaFeatures.length > 0 ? (
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          {property.hoaFeatures.map((feature, idx) => (
+                            <li key={idx} className="text-foreground">{feature}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">None</div>
+                      )}
                     </Card>
                   </div>
 
@@ -798,10 +717,13 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     <h2 className="text-2xl font-bold mb-4">Additional Information</h2>
                     <Card className="p-6">
                       <div className="space-y-3 text-sm">
-                        <div className="flex justify-between py-2">
-                          <span className="text-muted-foreground">Styles</span>
-                          <span className="font-semibold">Ranch</span>
-                        </div>
+                        {property.additionalInfo.length > 0 ? (
+                          <ul className="list-disc pl-5 space-y-1">
+                            {property.additionalInfo.map((info, idx) => (
+                              <li key={idx} className="text-foreground">{info}</li>
+                            ))}
+                          </ul>
+                        ) : null}
                         <div className="flex justify-between py-2">
                           <span className="text-muted-foreground">Price per Sq Ft</span>
                           <span className="font-semibold">${property.pricePerSqFt}</span>
@@ -814,9 +736,13 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                   
                   <div className="text-sm text-muted-foreground">
                     <p className="mb-1"><strong>Listed By</strong></p>
-                    <p>Naomi Richardson, 919-398-8357, Mark Spain Real Estate</p>
+                    <p>
+                      {property.listingAgent.name}
+                      {property.listingAgent.phone ? `, ${property.listingAgent.phone}` : ''}
+                      {property.listingAgent.company ? `, ${property.listingAgent.company}` : ''}
+                    </p>
                     <p className="mt-2"><strong>Source</strong></p>
-                    <p>Triangle, MLS, MLS#: {property.mlsId}</p>
+                    <p>MLS, MLS#: {property.mlsId}</p>
                   </div>
 
                    {/* Need to sell your current home Widget */}
@@ -995,8 +921,8 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                             {formatPrice(
                               Math.round(
                                 (property.price * 0.8 * 0.065) / 12 + // Principal & Interest
-                                property.taxAmount / 12 + // Taxes
-                                (property.hoaFee || 0) + // HOA (if any)
+                                (listing?.taxes?.annualAmount || 0) / 12 + // Taxes
+                                (listing?.condominium?.fees?.maintenance || 0) + // HOA (monthly)
                                 (property.price * 0.005) / 12 // Insurance (0.5% of price annually)
                               )
                             )}
@@ -1039,43 +965,11 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                     </div>
                   </div>
 
-                  {/* Enhanced Schools Section */}
                   <div>
-                    <h2 className="text-2xl font-bold mb-4">Schools Near {property.address}</h2>
-                    <div className="space-y-4">
-                      <Card className="p-6">
-                        <div className="flex gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-24 h-24 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-                              <div className="text-sm font-semibold text-primary">RATING</div>
-                              <div className="text-xs text-muted-foreground mt-1">Above</div>
-                              <div className="text-xs text-muted-foreground">Avg</div>
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-bold text-lg mb-2">{property.elementarySchool}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">526 Andrews Road, {property.city} NC {property.zip}</p>
-                            <p className="text-sm text-muted-foreground">Public district, K-5 | 600 students</p>
-                          </div>
-                        </div>
-                      </Card>
-                      <Card className="p-6">
-                        <div className="flex gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-24 h-24 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-                              <div className="text-sm font-semibold text-primary">RATING</div>
-                              <div className="text-xs text-muted-foreground mt-1">Above</div>
-                              <div className="text-xs text-muted-foreground">Avg</div>
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-bold text-lg mb-2">{property.middleSchool}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">3200 Ramsey Street, {property.city} NC 28301</p>
-                            <p className="text-sm text-muted-foreground">Public district, 6-8 | 226 students</p>
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
+                    <h2 className="text-2xl font-bold mb-4">Schools</h2>
+                    <Card className="p-6">
+                      <div className="text-sm text-muted-foreground">School information is not available for this listing.</div>
+                    </Card>
                   </div>
 
 
