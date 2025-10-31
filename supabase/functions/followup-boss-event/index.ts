@@ -123,11 +123,15 @@ serve(async (req) => {
 
     console.log('Sending to Follow Up Boss:', JSON.stringify(fubPayload, null, 2));
 
-    // Send event to Follow Up Boss
+    // Send event to Follow Up Boss with proper Basic Auth
+    // API key as username, blank password
+    const apiKey = FUB_API_KEY.trim(); // Remove any whitespace
+    const authString = btoa(`${apiKey}:`);
+    
     const response = await fetch(FUB_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(FUB_API_KEY + ':')}`,
+        'Authorization': `Basic ${authString}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(fubPayload),
