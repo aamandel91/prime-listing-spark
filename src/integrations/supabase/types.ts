@@ -191,6 +191,51 @@ export type Database = {
         }
         Relationships: []
       }
+      open_house_leads: {
+        Row: {
+          buyer_timeline: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          page_referrer: string | null
+          page_url: string | null
+          phone: string
+          property_address: string
+          property_mls: string
+          working_with_agent: boolean
+        }
+        Insert: {
+          buyer_timeline: string
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          page_referrer?: string | null
+          page_url?: string | null
+          phone: string
+          property_address: string
+          property_mls: string
+          working_with_agent?: boolean
+        }
+        Update: {
+          buyer_timeline?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          page_referrer?: string | null
+          page_url?: string | null
+          phone?: string
+          property_address?: string
+          property_mls?: string
+          working_with_agent?: boolean
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           content: Json

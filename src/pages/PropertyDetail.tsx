@@ -1,10 +1,11 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrafficSource } from "@/hooks/useTrafficSource";
 import RegistrationModal from "@/components/auth/RegistrationModal";
+import OpenHouseSignIn from "@/components/properties/OpenHouseSignIn";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,8 @@ import {
 
 export default function PropertyDetail() {
   const { id } = useParams();
+  const location = useLocation();
+  const isOpenHouse = location.pathname.endsWith('/openhouse');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
@@ -247,6 +250,21 @@ export default function PropertyDetail() {
   // Error or not found state - Return 404
   if (error || !property) {
     return <Navigate to="/404" replace />;
+  }
+
+  // Show Open House Sign-In form if /openhouse is in URL
+  if (isOpenHouse) {
+    return (
+      <OpenHouseSignIn
+        propertyId={property.id}
+        propertyAddress={`${property.address}, ${property.city}, ${property.state} ${property.zip}`}
+        propertyPrice={property.price}
+        propertyImage={property.images[0]}
+        propertyBeds={property.beds}
+        propertyBaths={property.baths}
+        propertySqft={property.sqft}
+      />
+    );
   }
 
   const formatPrice = (price: number) => {
