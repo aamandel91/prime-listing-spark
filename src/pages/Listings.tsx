@@ -14,10 +14,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, SlidersHorizontal, MapPin } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
 import PriceFilter from "@/components/search/PriceFilter";
+import { CityAutocomplete } from "@/components/search/CityAutocomplete";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 
@@ -556,16 +557,14 @@ const Listings = () => {
         <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input
-                  placeholder="Enter City, Zip, or Address"
-                  className="pl-10 h-12"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                />
-              </div>
+              <CityAutocomplete
+                value={location}
+                onChange={setLocation}
+                onSelect={(city) => setSelectedState(city.state)}
+                placeholder="Enter City, Zip, or Address"
+                className="h-12"
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
               
               <PriceFilter 
                 minValue={minPrice} 

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
 import PriceFilter from "@/components/search/PriceFilter";
+import { CityAutocomplete } from "@/components/search/CityAutocomplete";
 
 const Hero = () => {
   const [activeTab, setActiveTab] = useState("buying");
@@ -13,6 +13,7 @@ const Hero = () => {
   
   // Search form states
   const [location, setLocation] = useState("");
+  const [selectedState, setSelectedState] = useState("TX");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [beds, setBeds] = useState("any");
@@ -22,7 +23,7 @@ const Hero = () => {
     const params = new URLSearchParams();
     if (location) {
       params.set("city", location);
-      params.set("state", "TX");
+      params.set("state", selectedState);
     }
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
@@ -93,16 +94,14 @@ const Hero = () => {
               {/* Search Form */}
               <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-large p-4 animate-fade-up">
                 <div className="flex flex-col md:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                    <Input
-                      placeholder="Enter Location, Zip, Address or MLS #"
-                      className="pl-10 h-12 border-0 focus-visible:ring-1"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    />
-                  </div>
+                  <CityAutocomplete
+                    value={location}
+                    onChange={setLocation}
+                    onSelect={(city) => setSelectedState(city.state)}
+                    placeholder="Enter Location, Zip, Address or MLS #"
+                    className="h-12 border-0 focus-visible:ring-1"
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
                   <PriceFilter 
                     minValue={minPrice} 
                     maxValue={maxPrice}
