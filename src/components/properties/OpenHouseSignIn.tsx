@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -147,6 +148,10 @@ export default function OpenHouseSignIn({
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      
       {/* Property Header */}
       <div className="relative bg-gradient-to-b from-black/80 to-black/60 text-white">
         <div className="container mx-auto px-4 py-8">
