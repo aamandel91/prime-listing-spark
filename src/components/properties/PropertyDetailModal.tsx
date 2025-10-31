@@ -67,6 +67,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const [listingPrice, setListingPrice] = useState("379999");
   const [downPayment, setDownPayment] = useState("37999.9");
   const [interestRate, setInterestRate] = useState("5.75");
+  const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
   const [showStickyButtons, setShowStickyButtons] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -170,6 +171,12 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
 
     if (isOpen && property) {
       checkIfSaved();
+      
+      // Initialize calculator with property values
+      setListingPrice(property.price.toString());
+      setDownPayment((property.price * 0.2).toString());
+      setInterestRate("5.75");
+      
       // Track property view in Follow Up Boss
       trackPropertyView({
         id: property.id,
@@ -240,6 +247,29 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       currency: "USD",
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const calculateMortgage = () => {
+    const principal = parseFloat(listingPrice) - parseFloat(downPayment);
+    const monthlyRate = parseFloat(interestRate) / 100 / 12;
+    const numPayments = 30 * 12; // 30 years
+    
+    // Monthly principal & interest
+    const monthlyPI = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+    
+    // Add taxes, insurance, and HOA
+    const monthlyTaxes = (listing?.taxes?.annualAmount || 0) / 12;
+    const monthlyHOA = listing?.condominium?.fees?.maintenance || 0;
+    const monthlyInsurance = (parseFloat(listingPrice) * 0.005) / 12;
+    
+    const total = monthlyPI + monthlyTaxes + monthlyHOA + monthlyInsurance;
+    setMonthlyPayment(Math.round(total));
+    
+    toast({
+      title: "Calculation Complete",
+      description: "Your estimated monthly payment has been updated",
+      duration: 3000,
+    });
   };
 
   const handleSave = async () => {
@@ -946,13 +976,13 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                           />
                           <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
                         </div>
-                        <Button className="w-full" size="lg">Calculate</Button>
+                        <Button className="w-full" size="lg" onClick={calculateMortgage}>Calculate</Button>
                         <Separator />
                         <div className="bg-primary/10 p-4 rounded-lg">
                           <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
                           <div className="text-3xl font-bold text-primary">
                             {formatPrice(
-                              Math.round(
+                              monthlyPayment !== null ? monthlyPayment : Math.round(
                                 (property.price * 0.8 * 0.065) / 12 + // Principal & Interest
                                 (listing?.taxes?.annualAmount || 0) / 12 + // Taxes
                                 (listing?.condominium?.fees?.maintenance || 0) + // HOA (monthly)

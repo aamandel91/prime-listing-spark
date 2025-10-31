@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,10 @@ export default function PropertyDetail() {
   const [comment, setComment] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  const [listingPrice, setListingPrice] = useState("0");
+  const [downPayment, setDownPayment] = useState("0");
+  const [interestRate, setInterestRate] = useState("5.75");
+  const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(id || "");
@@ -162,6 +166,14 @@ export default function PropertyDetail() {
       : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
   } : null;
 
+  // Initialize calculator when property loads
+  useEffect(() => {
+    if (property) {
+      setListingPrice(property.price.toString());
+      setDownPayment((property.price * 0.2).toString());
+    }
+  }, [property]);
+
   // Loading state
   if (loading) {
     return (
@@ -199,6 +211,23 @@ export default function PropertyDetail() {
       currency: "USD",
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const calculateMortgage = () => {
+    const principal = parseFloat(listingPrice) - parseFloat(downPayment);
+    const monthlyRate = parseFloat(interestRate) / 100 / 12;
+    const numPayments = 30 * 12; // 30 years
+    
+    // Monthly principal & interest
+    const monthlyPI = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+    
+    // Add taxes, insurance, and HOA
+    const monthlyTaxes = (listing?.taxes?.annualAmount || 0) / 12;
+    const monthlyHOA = listing?.condominium?.fees?.maintenance || 0;
+    const monthlyInsurance = (parseFloat(listingPrice) * 0.005) / 12;
+    
+    const total = monthlyPI + monthlyTaxes + monthlyHOA + monthlyInsurance;
+    setMonthlyPayment(Math.round(total));
   };
 
   const nextImage = () => {
@@ -1063,19 +1092,32 @@ export default function PropertyDetail() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Listing Price</label>
-                <Input type="number" defaultValue={property.price} />
+                <Input 
+                  type="number" 
+                  value={listingPrice}
+                  onChange={(e) => setListingPrice(e.target.value)}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Down Payment</label>
-                <Input type="number" defaultValue={property.price * 0.1} />
+                <Input 
+                  type="number" 
+                  value={downPayment}
+                  onChange={(e) => setDownPayment(e.target.value)}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Interest Rate</label>
-                <Input type="number" step="0.01" defaultValue="5.75" />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(e.target.value)}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Amortization</label>
-                <Input type="text" defaultValue="30 Years" readOnly />
+                <Input type="text" value="30 Years" readOnly />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
@@ -1094,7 +1136,19 @@ export default function PropertyDetail() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
               </div>
-              <Button className="w-full">Calculate</Button>
+              <Button className="w-full" onClick={calculateMortgage}>Calculate</Button>
+              
+              {monthlyPayment !== null && (
+                <div className="bg-primary/10 p-4 rounded-lg mt-4">
+                  <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {formatPrice(monthlyPayment)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Includes principal, interest, taxes, HOA, and insurance
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </Card>
