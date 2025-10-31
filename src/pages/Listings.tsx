@@ -34,6 +34,10 @@ const Listings = () => {
   const [minParking, setMinParking] = useState(searchParams.get("parking") || "any");
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   
+  // Debounced values to reduce API calls during slider drag
+  const [debouncedMinPrice, setDebouncedMinPrice] = useState(minPrice);
+  const [debouncedMaxPrice, setDebouncedMaxPrice] = useState(maxPrice);
+  
   // More filters states
   const [propertyTypes, setPropertyTypes] = useState<string[]>(() => {
     const typeParam = searchParams.get("type");
@@ -86,6 +90,17 @@ const Listings = () => {
     return () => clearTimeout(timer);
   }, [location]);
 
+  // Debounce price range to avoid hitting rate limits
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedMinPrice(minPrice), 400);
+    return () => clearTimeout(t);
+  }, [minPrice]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedMaxPrice(maxPrice), 400);
+    return () => clearTimeout(t);
+  }, [maxPrice]);
+
   // Normalize URL parameters on mount
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
@@ -125,8 +140,8 @@ const Listings = () => {
   const { listings: apiListings, loading, error, totalCount, hasMore } = useRepliersListings({
     city: debouncedLocation || undefined,
     state: selectedState || undefined,
-    minPrice: minPrice ? parseInt(minPrice) : undefined,
-    maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+    minPrice: debouncedMinPrice ? parseInt(debouncedMinPrice) : undefined,
+    maxPrice: debouncedMaxPrice ? parseInt(debouncedMaxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
     bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
     minGarageSpaces: minGarage && minGarage !== "any" ? parseInt(minGarage) : undefined,
@@ -181,7 +196,7 @@ const Listings = () => {
         zipCode: listing.address?.zip || "",
         mlsNumber: listing.mlsNumber || "",
         status: listing.openHouse && listing.openHouse.length > 0 ? "open-house" as const : null,
-        type: (listing.details?.propertyType || "homes").toLowerCase(),
+        type: (listing.details?.style || listing.details?.propertyType || "homes").toLowerCase(),
         yearBuilt: parseInt(listing.details?.yearBuilt || "2020"),
         hasPool: listing.details?.swimmingPool && listing.details.swimmingPool !== "None",
         isWaterfront: listing.details?.waterfront === "Yes",
@@ -312,9 +327,10 @@ const Listings = () => {
       filtered = filtered.filter(p => p.baths >= baths);
     }
 
-    // Filter by property types
+    // Filter by property types (use synonyms)
     if (propertyTypes.length > 0) {
-      filtered = filtered.filter(p => propertyTypes.includes(p.type));
+      const selectedTypeSynonyms = propertyTypes.flatMap((t) => mapTypeToSynonyms(t)).map((s) => s.toLowerCase());
+      filtered = filtered.filter(p => selectedTypeSynonyms.includes(p.type));
     }
 
     // Filter by square footage
@@ -386,9 +402,10 @@ const Listings = () => {
         result = result.filter(p => p.baths >= baths);
       }
 
-      // Filter by property types
+      // Filter by property types (use synonyms)
       if (propertyTypes.length > 0) {
-        result = result.filter(p => propertyTypes.includes(p.type));
+        const selectedTypeSynonyms = propertyTypes.flatMap((t) => mapTypeToSynonyms(t)).map((s) => s.toLowerCase());
+        result = result.filter(p => selectedTypeSynonyms.includes(p.type));
       }
 
       // Filter by square footage
