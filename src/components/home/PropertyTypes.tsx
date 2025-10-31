@@ -7,43 +7,43 @@ const PropertyTypes = () => {
       title: "Single Family Homes",
       icon: Home,
       image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=Single%20Family&status=Active"
+      link: "/listings?type=House%2FSingle%20Family&status=A"
     },
     {
       title: "Townhomes",
       icon: Building,
       image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=Townhouse&status=Active"
+      link: "/listings?type=Townhouse&status=A"
     },
     {
       title: "Condos",
       icon: Building2,
       image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=Condo&status=Active"
+      link: "/listings?type=Apartment%2FCondo&status=A"
     },
     {
       title: "1+ Acre Homes",
       icon: Trees,
       image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?minLotSize=43560&status=Active"
+      link: "/listings?type=House%20With%20Acreage&status=A"
     },
     {
       title: "Luxury Homes",
       icon: Castle,
       image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?minPrice=1000000&status=Active"
+      link: "/listings?minPrice=1000000&status=A"
     },
     {
       title: "Multi Family Homes",
       icon: Warehouse,
       image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=Multi%20Family&status=Active"
+      link: "/listings?type=Multi-Family%20Commercial&status=A"
     },
     {
       title: "New Construction",
       icon: Hammer,
       image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?newConstruction=true&status=Active"
+      link: "/listings?maxYearBuilt=2025&minYearBuilt=2023&status=A"
     }
   ];
 
