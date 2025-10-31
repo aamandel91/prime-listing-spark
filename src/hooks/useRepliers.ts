@@ -4,6 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 export interface RepliersProperty {
   mlsNumber: string;
   listPrice: number;
+  originalPrice?: number;
+  listDate?: string;
+  standardStatus?: string;
+  class?: string;
   address: {
     streetNumber: string;
     streetName: string;
@@ -12,6 +16,7 @@ export interface RepliersProperty {
     state: string;
     zip: string;
     neighborhood?: string;
+    area?: string;
   };
   details: {
     numBedrooms: number;
@@ -21,6 +26,17 @@ export interface RepliersProperty {
     description: string;
     propertyType: string;
     style: string;
+    airConditioning?: string;
+    heating?: string;
+    flooringType?: string;
+    extras?: string;
+    exteriorConstruction1?: string;
+    roofMaterial?: string;
+    foundationType?: string;
+    patio?: string;
+    sewer?: string;
+    numGarageSpaces?: number;
+    numParkingSpaces?: number;
   };
   images: string[];
   map: {
@@ -31,8 +47,46 @@ export interface RepliersProperty {
   daysOnMarket: number;
   lot?: {
     acres: number;
+    squareFeet?: number;
+    features?: string;
+    legalDescription?: string;
   };
   openHouse?: Array<any>;
+  agents?: Array<{
+    name: string;
+    phones?: string[];
+    email?: string;
+    brokerage?: {
+      name: string;
+    };
+  }>;
+  office?: {
+    brokerageName?: string;
+  };
+  condominium?: {
+    fees?: {
+      maintenance?: number;
+    };
+    condoCorp?: string;
+    parkingType?: string;
+  };
+  nearby?: {
+    amenities?: string[];
+  };
+  taxes?: {
+    annualAmount?: number;
+    assessmentYear?: string;
+  };
+  rooms?: Array<{
+    description: string;
+    features?: string;
+    level?: string;
+  }>;
+  avm?: {
+    value: number;
+    high: number;
+    low: number;
+  };
 }
 
 export interface RepliersSearchParams {

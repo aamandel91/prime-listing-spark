@@ -34,6 +34,7 @@ import {
   ChevronRight as ChevronRightIcon,
   Video,
   Loader2,
+  FileText,
 } from "lucide-react";
 
 export default function PropertyDetail() {
@@ -85,31 +86,72 @@ export default function PropertyDetail() {
     city: listing.address?.city || "",
     state: listing.address?.state || "",
     zip: listing.address?.zip || "",
-    county: "",
+    county: listing.address?.area || "",
     subdivision: listing.address?.neighborhood || "",
     mlsId: listing.mlsNumber || "",
     price: listing.listPrice || 0,
+    originalPrice: listing.originalPrice || listing.listPrice || 0,
     beds: listing.details?.numBedrooms || 0,
     baths: listing.details?.numBathrooms || 0,
     sqft: parseInt(listing.details?.sqft || "0"),
     acres: listing.lot?.acres || 0,
+    lotSize: listing.lot?.squareFeet || 0,
+    lotFeatures: listing.lot?.features || "",
+    legalDescription: listing.lot?.legalDescription || "",
     yearBuilt: parseInt(listing.details?.yearBuilt || "2024"),
     daysOnSite: listing.daysOnMarket || 0,
+    listDate: listing.listDate || "",
     propertyType: listing.details?.propertyType || "Residential",
+    propertyClass: listing.class || "",
     subType: listing.details?.style || "Single Family",
     pricePerSqFt: listing.details?.sqft ? Math.round(listing.listPrice / parseInt(listing.details.sqft)) : 0,
-    dateListed: "Recently",
-    status: listing.lastStatus || "Active",
+    dateListed: listing.listDate ? new Date(listing.listDate).toLocaleDateString() : "Recently",
+    status: listing.standardStatus || listing.lastStatus || "Active",
     description: listing.details?.description || "Beautiful property available for sale.",
-    interiorFeatures: [],
-    exteriorFeatures: [],
-    hoaFeatures: [],
-    additionalInfo: [],
+    // Interior features from details
+    interiorFeatures: [
+      listing.details?.airConditioning && `Air Conditioning: ${listing.details.airConditioning}`,
+      listing.details?.heating && `Heating: ${listing.details.heating}`,
+      listing.details?.flooringType && `Flooring: ${listing.details.flooringType}`,
+      listing.details?.extras && `Appliances: ${listing.details.extras}`,
+    ].filter(Boolean),
+    // Exterior features
+    exteriorFeatures: [
+      listing.details?.exteriorConstruction1 && `Construction: ${listing.details.exteriorConstruction1}`,
+      listing.details?.roofMaterial && `Roof: ${listing.details.roofMaterial}`,
+      listing.details?.foundationType && `Foundation: ${listing.details.foundationType}`,
+      listing.details?.patio && `Outdoor: ${listing.details.patio}`,
+      listing.details?.sewer && `Sewer: ${listing.details.sewer}`,
+    ].filter(Boolean),
+    // HOA/Community features
+    hoaFeatures: [
+      listing.condominium?.fees?.maintenance && `HOA Fee: $${listing.condominium.fees.maintenance}/mo`,
+      listing.condominium?.condoCorp && `Association: ${listing.condominium.condoCorp}`,
+      listing.condominium?.parkingType && `Parking: ${listing.condominium.parkingType}`,
+      listing.nearby?.amenities && `Amenities: ${listing.nearby.amenities.join(', ')}`,
+    ].filter(Boolean),
+    // Additional info
+    additionalInfo: [
+      listing.details?.numGarageSpaces && `Garage Spaces: ${listing.details.numGarageSpaces}`,
+      listing.details?.numParkingSpaces && `Parking Spaces: ${listing.details.numParkingSpaces}`,
+      listing.taxes?.annualAmount && `Annual Taxes: $${listing.taxes.annualAmount}`,
+      listing.taxes?.assessmentYear && `Tax Year: ${listing.taxes.assessmentYear}`,
+    ].filter(Boolean),
+    // Rooms array
+    rooms: listing.rooms || [],
+    // Agent info
     listingAgent: {
-      name: "Contact Agent",
-      phone: "",
-      company: "",
+      name: listing.agents?.[0]?.name || "Contact Agent",
+      phone: listing.agents?.[0]?.phones?.[0] || "",
+      email: listing.agents?.[0]?.email || "",
+      company: listing.agents?.[0]?.brokerage?.name || listing.office?.brokerageName || "",
     },
+    // AVM data
+    avm: listing.avm ? {
+      value: listing.avm.value,
+      high: listing.avm.high,
+      low: listing.avm.low,
+    } : null,
     source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
     images: listing.images && listing.images.length > 0 
       ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
@@ -379,6 +421,11 @@ export default function PropertyDetail() {
           
           <div className="flex items-center gap-4 mb-6">
             <div className="text-3xl md:text-4xl font-bold">{formatPrice(property.price)}</div>
+            {property.originalPrice && property.originalPrice !== property.price && (
+              <span className="text-lg text-muted-foreground line-through">
+                {formatPrice(property.originalPrice)}
+              </span>
+            )}
             <Badge className="bg-success/20 text-success hover:bg-success/30 border-0 px-3 py-1">
               {property.status.toUpperCase()}
             </Badge>
@@ -465,13 +512,40 @@ export default function PropertyDetail() {
               <div className="font-semibold">${property.pricePerSqFt}</div>
             </div>
           </div>
-          <div className="flex items-start gap-3 col-span-2">
+          <div className="flex items-start gap-3">
             <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
             <div>
               <div className="text-sm text-muted-foreground">Date Listed</div>
               <div className="font-semibold">{property.dateListed}</div>
             </div>
           </div>
+          {property.lotSize > 0 && (
+            <div className="flex items-start gap-3">
+              <Ruler className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div>
+                <div className="text-sm text-muted-foreground">Lot Size</div>
+                <div className="font-semibold">{property.lotSize.toLocaleString()} sq ft</div>
+              </div>
+            </div>
+          )}
+          {property.county && (
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div>
+                <div className="text-sm text-muted-foreground">County</div>
+                <div className="font-semibold">{property.county}</div>
+              </div>
+            </div>
+          )}
+          {property.legalDescription && (
+            <div className="flex items-start gap-3 col-span-2">
+              <FileText className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div>
+                <div className="text-sm text-muted-foreground">Legal Description</div>
+                <div className="font-semibold text-sm">{property.legalDescription}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -624,8 +698,7 @@ export default function PropertyDetail() {
             <div className="space-y-3">
               {property.interiorFeatures.map((feature, index) => (
                 <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-muted-foreground">{feature.label}</span>
-                  <span className="font-semibold text-right max-w-[60%]">{feature.value || "—"}</span>
+                  <span className="text-sm">{feature}</span>
                 </div>
               ))}
             </div>
@@ -642,8 +715,7 @@ export default function PropertyDetail() {
             <div className="space-y-3">
               {property.exteriorFeatures.map((feature, index) => (
                 <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-muted-foreground">{feature.label}</span>
-                  <span className="font-semibold text-right max-w-[60%]">{feature.value || "—"}</span>
+                  <span className="text-sm">{feature}</span>
                 </div>
               ))}
             </div>
@@ -660,8 +732,7 @@ export default function PropertyDetail() {
             <div className="space-y-3">
               {property.hoaFeatures.map((feature, index) => (
                 <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-muted-foreground">{feature.label}</span>
-                  <span className="font-semibold text-right max-w-[60%]">{feature.value || "—"}</span>
+                  <span className="text-sm">{feature}</span>
                 </div>
               ))}
             </div>
@@ -678,8 +749,7 @@ export default function PropertyDetail() {
             <div className="space-y-3 mb-6">
               {property.additionalInfo.map((info, index) => (
                 <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-muted-foreground">{info.label}</span>
-                  <span className="font-semibold text-right max-w-[60%]">{info.value || "—"}</span>
+                  <span className="text-sm">{info}</span>
                 </div>
               ))}
             </div>
@@ -688,8 +758,18 @@ export default function PropertyDetail() {
               <div>
                 <h4 className="font-semibold mb-2">Listed By</h4>
                 <p className="text-sm text-muted-foreground">
-                  {property.listingAgent.name}, {property.listingAgent.phone}, {property.listingAgent.company}
+                  {property.listingAgent.name}
                 </p>
+                {property.listingAgent.phone && (
+                  <p className="text-sm text-muted-foreground">
+                    {property.listingAgent.phone}
+                  </p>
+                )}
+                {property.listingAgent.company && (
+                  <p className="text-sm text-muted-foreground">
+                    {property.listingAgent.company}
+                  </p>
+                )}
               </div>
               
               <div>
@@ -699,6 +779,62 @@ export default function PropertyDetail() {
             </div>
           </div>
         </Card>
+
+        {/* Rooms Section - if available */}
+        {property.rooms && property.rooms.length > 0 && (
+          <>
+            <Separator />
+            <Card className="border-0 shadow-none bg-card">
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-6">Room Details</h3>
+                
+                <div className="space-y-4">
+                  {property.rooms.map((room, index) => (
+                    <div key={index} className="border-b pb-3 last:border-0">
+                      <h4 className="font-semibold mb-1">{room.description}</h4>
+                      {room.level && (
+                        <p className="text-sm text-muted-foreground">Level: {room.level}</p>
+                      )}
+                      {room.features && (
+                        <p className="text-sm text-muted-foreground">{room.features}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
+
+        {/* Home Value Estimate - if available */}
+        {property.avm && (
+          <>
+            <Separator />
+            <Card className="border-0 shadow-none bg-card">
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-6">Home Value Estimate</h3>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Estimated Value</span>
+                    <span className="text-2xl font-bold">{formatPrice(property.avm.value)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">High Estimate</span>
+                    <span className="font-semibold">{formatPrice(property.avm.high)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Low Estimate</span>
+                    <span className="font-semibold">{formatPrice(property.avm.low)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    * This is an automated valuation model estimate and should not be used as the sole basis for determining property value.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
 
         <Separator />
 
