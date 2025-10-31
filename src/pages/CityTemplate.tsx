@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { TrendingUp, Building2, School, DollarSign } from "lucide-react";
+import { useRepliersListings } from "@/hooks/useRepliers";
 
 // City data mapping
 const CITY_DATA: Record<string, {
@@ -128,51 +129,35 @@ const CityTemplate = () => {
     return CITY_DATA[slug] || CITY_DATA["fayetteville"]; // Default to Fayetteville
   }, [citySlug]);
 
-  // Sample properties - in a real app, these would be filtered by city
-  const featuredProperties = useMemo(() => [
-    {
-      id: "1",
-      title: "Modern Family Home",
-      price: 379999,
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-      beds: 5,
-      baths: 3,
-      sqft: 2469,
-      address: "505 Edwalton Way LOT 82",
-      city: cityData.name,
-      state: cityData.state,
-      isHotProperty: true,
-      status: null,
-    },
-    {
-      id: "2",
-      title: "Luxury Estate",
-      price: 425000,
-      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80",
-      beds: 4,
-      baths: 3,
-      sqft: 3200,
-      address: "789 Estate Dr",
-      city: cityData.name,
-      state: cityData.state,
-      isHotProperty: true,
-      status: "open-house" as const,
-    },
-    {
-      id: "3",
-      title: "Contemporary Living",
-      price: 359000,
-      image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=800&q=80",
-      beds: 3,
-      baths: 2,
-      sqft: 2100,
-      address: "456 Modern Way",
-      city: cityData.name,
-      state: cityData.state,
+  // Fetch properties from Repliers API
+  const { listings: apiListings, loading, error } = useRepliersListings({
+    city: cityData.name,
+    state: cityData.state,
+    limit: 50,
+  });
+
+  // Transform API data to match our component format
+  const featuredProperties = useMemo(() => {
+    if (!apiListings) return [];
+    
+    return apiListings.map((listing: any) => ({
+      id: listing.id || listing.mlsNumber || Math.random().toString(),
+      title: listing.propertyType || "Property",
+      price: listing.price || 0,
+      beds: listing.bedrooms || 0,
+      baths: listing.bathrooms || 0,
+      sqft: listing.sqft || listing.squareFeet || 0,
+      image: listing.images?.[0] || listing.image || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+      address: listing.address || "",
+      city: listing.city || cityData.name,
+      state: listing.state || cityData.state,
+      zipCode: listing.zipCode || listing.zip || "",
+      mlsNumber: listing.mlsNumber || "",
+      status: listing.status === "Under Contract" ? "under-contract" as const : 
+              listing.status === "Open House" ? "open-house" as const : null,
       isHotProperty: false,
-      status: null,
-    },
-  ], [cityData]);
+    }));
+  }, [apiListings, cityData]);
 
   // SEO Content
   const filterText = filter ? ` - ${filter.replace(/-/g, ' ')}` : '';

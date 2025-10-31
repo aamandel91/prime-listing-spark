@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
 import PriceFilter from "@/components/search/PriceFilter";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
+import { useRepliersListings } from "@/hooks/useRepliers";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,131 +44,44 @@ const Listings = () => {
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
   
-  // Sample property data (expanded with more properties and attributes)
-  const allProperties = [
-    {
-      id: "1",
-      title: "Modern Family Home",
-      price: 850000,
-      beds: 4,
-      baths: 3,
-      sqft: 3200,
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-      address: "123 Palm Avenue",
-      city: "Miami",
-      state: "FL",
-      status: null,
-      type: "homes",
-      yearBuilt: 2018,
-      hasPool: true,
-      isWaterfront: false,
-      description: "Beautiful modern family home featuring an open floor plan with high ceilings, gourmet kitchen with stainless steel appliances, spacious master suite with walk-in closet, and a large backyard perfect for entertaining. Located in a desirable neighborhood with excellent schools nearby.",
-      lat: 25.7617,
-      lng: -80.1918
-    },
-    {
-      id: "2",
-      title: "Luxury Waterfront Condo",
-      price: 1250000,
-      beds: 3,
-      baths: 2.5,
-      sqft: 2400,
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-      address: "456 Ocean Drive",
-      city: "Fort Lauderdale",
-      state: "FL",
-      isHotProperty: true,
-      status: null,
-      type: "condos",
-      yearBuilt: 2020,
-      hasPool: true,
-      isWaterfront: true,
-      description: "Stunning waterfront condo with breathtaking ocean views from every room. Features include floor-to-ceiling windows, modern kitchen with granite countertops, luxurious master bathroom with spa tub, private balcony, and access to world-class amenities including pool, fitness center, and concierge service.",
-      lat: 26.1224,
-      lng: -80.1373
-    },
-    {
-      id: "3",
-      title: "Charming Townhouse",
-      price: 425000,
-      beds: 3,
-      baths: 2,
-      sqft: 1800,
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-      address: "789 Grove Street",
-      city: "Orlando",
-      state: "FL",
-      status: "open-house" as const,
-      type: "townhomes",
-      yearBuilt: 2015,
-      hasPool: false,
-      isWaterfront: false,
-      description: "Charming townhouse in a gated community with three bedrooms, two full bathrooms, and updated kitchen with new appliances. Enjoy the attached two-car garage, private patio, community pool, and playground. Close to shopping, dining, and major highways.",
-      lat: 28.5383,
-      lng: -81.3792
-    },
-    {
-      id: "4",
-      title: "Spacious Ranch Home",
-      price: 675000,
-      beds: 5,
-      baths: 3,
-      sqft: 3800,
-      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
-      address: "321 Sunset Blvd",
-      city: "Tampa",
-      state: "FL",
-      status: null,
-      type: "homes",
-      yearBuilt: 2010,
-      hasPool: true,
-      isWaterfront: false,
-      description: "Spacious single-story ranch home on a large corner lot with mature landscaping. Five bedrooms including a master suite with sitting area, formal dining room, great room with fireplace, updated kitchen, and three-car garage. Perfect for large families or multi-generational living.",
-      lat: 27.9506,
-      lng: -82.4572
-    },
-    {
-      id: "5",
-      title: "Contemporary Villa",
-      price: 2100000,
-      beds: 5,
-      baths: 4.5,
-      sqft: 5200,
-      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-      address: "555 Bay Road",
-      city: "Naples",
-      state: "FL",
-      isHotProperty: true,
-      status: null,
-      type: "homes",
-      yearBuilt: 2022,
-      hasPool: true,
-      isWaterfront: true,
-      description: "Exquisite contemporary villa with stunning architecture and designer finishes throughout. Features include soaring ceilings, walls of glass, chef's kitchen with premium appliances, wine cellar, home theater, resort-style pool with spa, outdoor kitchen, and four-car garage. Located in an exclusive waterfront community.",
-      lat: 26.1420,
-      lng: -81.7948
-    },
-    {
-      id: "6",
-      title: "Cozy Cottage",
-      price: 320000,
-      beds: 2,
-      baths: 2,
-      sqft: 1200,
-      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
-      address: "888 Pine Street",
-      city: "Sarasota",
-      state: "FL",
-      status: "under-contract" as const,
-      type: "homes",
-      yearBuilt: 2005,
-      hasPool: false,
-      isWaterfront: false,
-      description: "Adorable cottage perfect for first-time buyers or downsizing. Features include hardwood floors, updated kitchen and bathrooms, cozy living room with fireplace, covered front porch, and fenced backyard. Walking distance to parks, shops, and restaurants in the heart of Sarasota.",
-      lat: 27.3364,
-      lng: -82.5307
-    }
-  ];
+  // Fetch properties from Repliers API
+  const { listings: apiListings, loading, error } = useRepliersListings({
+    city: location || undefined,
+    minPrice: minPrice ? parseInt(minPrice) : undefined,
+    maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+    bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
+    bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
+    limit: 100,
+  });
+
+  // Transform API data to match our component format
+  const allProperties = useMemo(() => {
+    if (!apiListings) return [];
+    
+    return apiListings.map((listing: any) => ({
+      id: listing.id || listing.mlsNumber || Math.random().toString(),
+      title: listing.propertyType || "Property",
+      price: listing.price || 0,
+      beds: listing.bedrooms || 0,
+      baths: listing.bathrooms || 0,
+      sqft: listing.sqft || listing.squareFeet || 0,
+      image: listing.images?.[0] || listing.image || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+      address: listing.address || "",
+      city: listing.city || "",
+      state: listing.state || "FL",
+      zipCode: listing.zipCode || listing.zip || "",
+      mlsNumber: listing.mlsNumber || "",
+      status: listing.status === "Under Contract" ? "under-contract" as const : 
+              listing.status === "Open House" ? "open-house" as const : null,
+      type: listing.propertyType?.toLowerCase() || "homes",
+      yearBuilt: listing.yearBuilt || 2020,
+      hasPool: listing.hasPool || false,
+      isWaterfront: listing.isWaterfront || false,
+      description: listing.description || "",
+      lat: listing.latitude || 0,
+      lng: listing.longitude || 0,
+    }));
+  }, [apiListings]);
 
   // Update URL params with current filters
   const updateSearchParams = () => {
