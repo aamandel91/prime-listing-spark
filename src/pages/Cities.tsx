@@ -6,19 +6,21 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MapPin } from "lucide-react";
+import { useRepliers } from "@/hooks/useRepliers";
 
-interface FeaturedCity {
-  id: string;
+interface CityData {
   city_name: string;
   state: string;
   slug: string;
   description: string | null;
   hero_image_url: string | null;
+  property_count?: number;
 }
 
 export default function Cities() {
-  const [cities, setCities] = useState<FeaturedCity[]>([]);
+  const [cities, setCities] = useState<CityData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { searchListings } = useRepliers();
 
   useEffect(() => {
     fetchCities();
@@ -26,14 +28,59 @@ export default function Cities() {
 
   const fetchCities = async () => {
     try {
-      const { data, error } = await supabase
-        .from("featured_cities")
-        .select("*")
-        .eq("featured", true)
-        .order("city_name", { ascending: true });
+      // Fetch all listings from Repliers API
+      const repliersData = await searchListings({ limit: 10000 });
+      
+      // Extract unique cities from the API
+      const cityMap = new Map<string, { city: string; state: string; count: number }>();
+      
+      repliersData.listings.forEach((listing) => {
+        if (listing.City && listing.StateOrProvince) {
+          const key = `${listing.City}-${listing.StateOrProvince}`;
+          if (cityMap.has(key)) {
+            const existing = cityMap.get(key)!;
+            cityMap.set(key, { ...existing, count: existing.count + 1 });
+          } else {
+            cityMap.set(key, {
+              city: listing.City,
+              state: listing.StateOrProvince,
+              count: 1
+            });
+          }
+        }
+      });
 
-      if (error) throw error;
-      setCities(data || []);
+      // Fetch featured cities from database for custom content
+      const { data: featuredCities } = await supabase
+        .from("featured_cities")
+        .select("*");
+
+      // Merge API cities with featured cities data
+      const citiesArray: CityData[] = Array.from(cityMap.values()).map(({ city, state, count }) => {
+        const slug = city.toLowerCase().replace(/\s+/g, "-");
+        const featured = featuredCities?.find(
+          (fc) => fc.city_name.toLowerCase() === city.toLowerCase() && fc.state === state
+        );
+
+        return {
+          city_name: city,
+          state: state,
+          slug: featured?.slug || slug,
+          description: featured?.description || `Explore ${count} properties available in ${city}, ${state}.`,
+          hero_image_url: featured?.hero_image_url || null,
+          property_count: count
+        };
+      });
+
+      // Sort by property count (most listings first) then alphabetically
+      citiesArray.sort((a, b) => {
+        if (b.property_count !== a.property_count) {
+          return (b.property_count || 0) - (a.property_count || 0);
+        }
+        return a.city_name.localeCompare(b.city_name);
+      });
+
+      setCities(citiesArray);
     } catch (error) {
       console.error("Error fetching cities:", error);
     } finally {
@@ -90,8 +137,8 @@ export default function Cities() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {cities.map((city) => (
                   <Link
-                    key={city.id}
-                    to={`/cities/${city.slug}`}
+                    key={`${city.city_name}-${city.state}`}
+                    to={`/listings?city=${encodeURIComponent(city.city_name)}&state=${city.state}&status=A`}
                     className="group"
                   >
                     <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">

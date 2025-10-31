@@ -6,19 +6,21 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MapPin } from "lucide-react";
+import { useRepliers } from "@/hooks/useRepliers";
 
-interface FeaturedCounty {
-  id: string;
+interface CountyData {
   county_name: string;
   state: string;
   slug: string;
   description: string | null;
   hero_image_url: string | null;
+  property_count?: number;
 }
 
 export default function Counties() {
-  const [counties, setCounties] = useState<FeaturedCounty[]>([]);
+  const [counties, setCounties] = useState<CountyData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { searchListings } = useRepliers();
 
   useEffect(() => {
     fetchCounties();
@@ -26,14 +28,59 @@ export default function Counties() {
 
   const fetchCounties = async () => {
     try {
-      const { data, error } = await supabase
-        .from("featured_counties")
-        .select("*")
-        .eq("featured", true)
-        .order("county_name", { ascending: true });
+      // Fetch all listings from Repliers API
+      const repliersData = await searchListings({ limit: 10000 });
+      
+      // Extract unique counties from the API
+      const countyMap = new Map<string, { county: string; state: string; count: number }>();
+      
+      repliersData.listings.forEach((listing) => {
+        if (listing.CountyOrParish && listing.StateOrProvince) {
+          const key = `${listing.CountyOrParish}-${listing.StateOrProvince}`;
+          if (countyMap.has(key)) {
+            const existing = countyMap.get(key)!;
+            countyMap.set(key, { ...existing, count: existing.count + 1 });
+          } else {
+            countyMap.set(key, {
+              county: listing.CountyOrParish,
+              state: listing.StateOrProvince,
+              count: 1
+            });
+          }
+        }
+      });
 
-      if (error) throw error;
-      setCounties(data || []);
+      // Fetch featured counties from database for custom content
+      const { data: featuredCounties } = await supabase
+        .from("featured_counties")
+        .select("*");
+
+      // Merge API counties with featured counties data
+      const countiesArray: CountyData[] = Array.from(countyMap.values()).map(({ county, state, count }) => {
+        const slug = county.toLowerCase().replace(/\s+/g, "-");
+        const featured = featuredCounties?.find(
+          (fc) => fc.county_name.toLowerCase() === county.toLowerCase() && fc.state === state
+        );
+
+        return {
+          county_name: county,
+          state: state,
+          slug: featured?.slug || slug,
+          description: featured?.description || `Explore ${count} properties available in ${county} County, ${state}.`,
+          hero_image_url: featured?.hero_image_url || null,
+          property_count: count
+        };
+      });
+
+      // Sort by property count (most listings first) then alphabetically
+      countiesArray.sort((a, b) => {
+        if (b.property_count !== a.property_count) {
+          return (b.property_count || 0) - (a.property_count || 0);
+        }
+        return a.county_name.localeCompare(b.county_name);
+      });
+
+      setCounties(countiesArray);
     } catch (error) {
       console.error("Error fetching counties:", error);
     } finally {
@@ -90,8 +137,8 @@ export default function Counties() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {counties.map((county) => (
                   <Link
-                    key={county.id}
-                    to={`/counties/${county.slug}`}
+                    key={`${county.county_name}-${county.state}`}
+                    to={`/listings?county=${encodeURIComponent(county.county_name)}&state=${county.state}&status=A`}
                     className="group"
                   >
                     <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
