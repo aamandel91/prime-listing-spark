@@ -170,7 +170,7 @@ export default function PropertyDetail() {
   useEffect(() => {
     if (property) {
       setListingPrice(property.price.toString());
-      setDownPayment((property.price * 0.2).toString());
+      setDownPayment((property.price * 0.1).toString()); // 10% down
     }
   }, [property]);
 
@@ -1122,17 +1122,17 @@ export default function PropertyDetail() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
                 <Input 
-                  type="text" 
-                  value={formatPrice(listing?.condominium?.fees?.maintenance || 0)}
-                  disabled
+                  type="number" 
+                  value={listing?.condominium?.fees?.maintenance || 0}
+                  onChange={(e) => {}} 
                 />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Insurance (Monthly)</label>
                 <Input 
-                  type="text" 
-                  value={formatPrice(Math.round((property.price * 0.005) / 12))}
-                  disabled
+                  type="number" 
+                  value={Math.round((parseFloat(listingPrice || "0") * 0.005) / 12)}
+                  onChange={(e) => {}}
                 />
                 <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
               </div>

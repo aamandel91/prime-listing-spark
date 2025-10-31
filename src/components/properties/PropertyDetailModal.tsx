@@ -174,7 +174,7 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       
       // Initialize calculator with property values
       setListingPrice(property.price.toString());
-      setDownPayment((property.price * 0.2).toString());
+      setDownPayment((property.price * 0.1).toString()); // 10% down
       setInterestRate("5.75");
       
       // Track property view in Follow Up Boss
@@ -962,17 +962,17 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                         <div>
                           <Label className="text-sm mb-2 block">Association Fees (Monthly)</Label>
                           <Input 
-                            type="text" 
-                            value={formatPrice(listing?.condominium?.fees?.maintenance || 0)}
-                            disabled
+                            type="number" 
+                            value={listing?.condominium?.fees?.maintenance || 0}
+                            onChange={(e) => {}}
                           />
                         </div>
                         <div>
                           <Label className="text-sm mb-2 block">Insurance (Monthly)</Label>
                           <Input 
-                            type="text" 
-                            value={formatPrice(Math.round((property.price * 0.005) / 12))}
-                            disabled
+                            type="number" 
+                            value={Math.round((parseFloat(listingPrice || "0") * 0.005) / 12)}
+                            onChange={(e) => {}}
                           />
                           <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
                         </div>
