@@ -98,7 +98,7 @@ const Hero = () => {
                     value={location}
                     onChange={setLocation}
                     onSelect={(city) => setSelectedState(city.state)}
-                    placeholder="Enter Location, Zip, Address or MLS #"
+                    placeholder="Search by City, Zip, Neighborhood, Address or MLS #"
                     className="h-12 border-0 focus-visible:ring-1"
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   />
