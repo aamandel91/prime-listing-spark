@@ -12,6 +12,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdvancedSearch from "./pages/AdvancedSearch";
 import Auth from "./pages/Auth";
+import BlogMigration from "./pages/admin/BlogMigration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => {
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin/blog-migration" element={<BlogMigration />} />
             <Route path="/:citySlug/:filter" element={<CityTemplate />} />
             <Route path="/:citySlug" element={<CityTemplate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
