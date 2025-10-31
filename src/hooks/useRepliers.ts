@@ -107,6 +107,8 @@ export interface RepliersSearchParams {
   status?: string;
   standardStatus?: string;
   minLotSizeSqft?: number;
+  minGarageSpaces?: number;
+  minParkingSpaces?: number;
   limit?: number;
   offset?: number;
   minSqft?: number;

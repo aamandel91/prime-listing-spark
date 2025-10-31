@@ -10,13 +10,8 @@ import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { SlidersHorizontal } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
+import { AdvancedSearchDialog } from "@/components/search/AdvancedSearchDialog";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -35,6 +30,8 @@ const Listings = () => {
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [minBeds, setMinBeds] = useState(searchParams.get("beds") || "");
   const [minBaths, setMinBaths] = useState(searchParams.get("baths") || "");
+  const [minGarage, setMinGarage] = useState(searchParams.get("garage") || "any");
+  const [minParking, setMinParking] = useState(searchParams.get("parking") || "any");
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   
   // More filters states
@@ -132,6 +129,8 @@ const Listings = () => {
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
     bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
+    minGarageSpaces: minGarage && minGarage !== "any" ? parseInt(minGarage) : undefined,
+    minParkingSpaces: minParking && minParking !== "any" ? parseInt(minParking) : undefined,
     propertyTypeOrStyle: propertyTypes.length === 1 ? mapTypeToSynonyms(propertyTypes[0]) : undefined,
     minSqft: minSqft ? parseInt(minSqft) : undefined,
     maxSqft: maxSqft ? parseInt(maxSqft) : undefined,
@@ -146,7 +145,7 @@ const Listings = () => {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, listingStatus]);
+  }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, minGarage, minParking, propertyTypes, minSqft, maxSqft, minYear, maxYear, listingStatus]);
 
   // Transform API data to match our component format
   const allProperties = useMemo(() => {
@@ -204,6 +203,8 @@ const Listings = () => {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (minBeds && minBeds !== "any") params.set("beds", minBeds);
     if (minBaths && minBaths !== "any") params.set("baths", minBaths);
+    if (minGarage && minGarage !== "any") params.set("garage", minGarage);
+    if (minParking && minParking !== "any") params.set("parking", minParking);
     if (propertyTypes.length === 1) params.set("type", propertyTypes[0]);
     if (minSqft) params.set("minSqft", minSqft);
     if (maxSqft) params.set("maxSqft", maxSqft);
@@ -238,6 +239,8 @@ const Listings = () => {
     setMaxPrice("");
     setMinBeds("any");
     setMinBaths("any");
+    setMinGarage("any");
+    setMinParking("any");
     setPropertyTypes([]);
     setMinSqft("");
     setMaxSqft("");
@@ -496,150 +499,6 @@ const Listings = () => {
     return items;
   }, [location]);
 
-  const MoreFiltersContent = () => (
-    <ScrollArea className="h-[600px] pr-4">
-      <div className="space-y-4">
-        <Accordion type="multiple" defaultValue={["type", "details"]} className="w-full">
-          {/* Property Type */}
-          <AccordionItem value="type">
-            <AccordionTrigger className="text-base font-semibold">Property Type</AccordionTrigger>
-            <AccordionContent className="space-y-2 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="homes"
-                  checked={propertyTypes.includes("homes")}
-                  onCheckedChange={() => togglePropertyType("homes")}
-                />
-                <Label htmlFor="homes" className="text-sm font-normal cursor-pointer">Homes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="townhomes"
-                  checked={propertyTypes.includes("townhomes")}
-                  onCheckedChange={() => togglePropertyType("townhomes")}
-                />
-                <Label htmlFor="townhomes" className="text-sm font-normal cursor-pointer">Townhomes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="condos"
-                  checked={propertyTypes.includes("condos")}
-                  onCheckedChange={() => togglePropertyType("condos")}
-                />
-                <Label htmlFor="condos" className="text-sm font-normal cursor-pointer">Condos/Apartments</Label>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Property Details */}
-          <AccordionItem value="details">
-            <AccordionTrigger className="text-base font-semibold">Property Details</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div>
-                <Label className="text-sm">Square Feet</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input
-                    placeholder="Min"
-                    type="number"
-                    value={minSqft}
-                    onChange={(e) => setMinSqft(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Max"
-                    type="number"
-                    value={maxSqft}
-                    onChange={(e) => setMaxSqft(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label className="text-sm">Year Built</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <Input
-                    placeholder="Min"
-                    type="number"
-                    value={minYear}
-                    onChange={(e) => setMinYear(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Max"
-                    type="number"
-                    value={maxYear}
-                    onChange={(e) => setMaxYear(e.target.value)}
-                  />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Features */}
-          <AccordionItem value="features">
-            <AccordionTrigger className="text-base font-semibold">Property Features</AccordionTrigger>
-            <AccordionContent className="space-y-2 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="pool"
-                  checked={features.includes("pool")}
-                  onCheckedChange={() => toggleFeature("pool")}
-                />
-                <Label htmlFor="pool" className="text-sm font-normal cursor-pointer">Pool</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="waterfront"
-                  checked={features.includes("waterfront")}
-                  onCheckedChange={() => toggleFeature("waterfront")}
-                />
-                <Label htmlFor="waterfront" className="text-sm font-normal cursor-pointer">Waterfront</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="open-house"
-                  checked={features.includes("open-house")}
-                  onCheckedChange={() => toggleFeature("open-house")}
-                />
-                <Label htmlFor="open-house" className="text-sm font-normal cursor-pointer">Open House & Tour</Label>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Location */}
-          <AccordionItem value="location">
-            <AccordionTrigger className="text-base font-semibold">Location</AccordionTrigger>
-            <AccordionContent className="space-y-3 pt-2">
-              <div>
-                <Label className="text-sm">City</Label>
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="all">All Cities</SelectItem>
-                    <SelectItem value="Miami">Miami</SelectItem>
-                    <SelectItem value="Fort Lauderdale">Fort Lauderdale</SelectItem>
-                    <SelectItem value="Orlando">Orlando</SelectItem>
-                    <SelectItem value="Tampa">Tampa</SelectItem>
-                    <SelectItem value="Naples">Naples</SelectItem>
-                    <SelectItem value="Sarasota">Sarasota</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="pt-4 space-y-2 sticky bottom-0 bg-background pb-4 border-t">
-          <Button className="w-full" size="lg" onClick={() => {
-            setIsFiltersOpen(false);
-            updateSearchParams();
-          }}>
-            Apply Filters
-          </Button>
-          <Button variant="outline" className="w-full" onClick={clearFilters}>Clear All</Button>
-        </div>
-      </div>
-    </ScrollArea>
-  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -676,20 +535,26 @@ const Listings = () => {
                 <UnifiedSearchBar variant="inline" />
               </div>
               
-              <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="h-10 px-6 whitespace-nowrap">
-                    <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    More Filters
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh]">
-                  <DialogHeader>
-                    <DialogTitle>More Filters</DialogTitle>
-                  </DialogHeader>
-                  <MoreFiltersContent />
-                </DialogContent>
-              </Dialog>
+              <AdvancedSearchDialog
+                open={isFiltersOpen}
+                onOpenChange={setIsFiltersOpen}
+                listingStatus={listingStatus}
+                onStatusChange={setListingStatus}
+                minBeds={minBeds}
+                onMinBedsChange={setMinBeds}
+                minBaths={minBaths}
+                onMinBathsChange={setMinBaths}
+                minGarage={minGarage}
+                onMinGarageChange={setMinGarage}
+                minParking={minParking}
+                onMinParkingChange={setMinParking}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onMinPriceChange={setMinPrice}
+                onMaxPriceChange={setMaxPrice}
+                onApply={handleSearch}
+                onClear={clearFilters}
+              />
             </div>
           </div>
         </div>
