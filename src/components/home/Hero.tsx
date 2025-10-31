@@ -15,7 +15,6 @@ const Hero = () => {
           alt="Luxury modern home exterior"
           className="w-full h-full object-cover"
           loading="eager"
-          fetchPriority="high"
           decoding="async"
           width="2000"
           height="1333"
