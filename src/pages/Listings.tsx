@@ -48,7 +48,19 @@ const Listings = () => {
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "TX");
-  const [listingStatus, setListingStatus] = useState(searchParams.get("status") || "A");
+  
+  // Map status from URL to API format (Active/Pending -> A/U)
+  const mapStatusToApi = (status: string | null): string => {
+    if (!status) return "A";
+    const normalized = status.toLowerCase();
+    if (normalized === "active" || normalized === "a") return "A";
+    if (normalized === "pending" || normalized === "under contract" || normalized === "u") return "U";
+    return "A"; // default to Active
+  };
+  
+  const [listingStatus, setListingStatus] = useState(() => 
+    mapStatusToApi(searchParams.get("status"))
+  );
 
   // Debounce location search
   useEffect(() => {
@@ -57,6 +69,17 @@ const Listings = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [location]);
+
+  // Normalize URL status parameter on mount
+  useEffect(() => {
+    const urlStatus = searchParams.get("status");
+    if (urlStatus && urlStatus !== "A" && urlStatus !== "U") {
+      const normalized = mapStatusToApi(urlStatus);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("status", normalized);
+      setSearchParams(newParams, { replace: true });
+    }
+  }, []);
   
   // Fetch properties from Repliers API with pagination support
   const [page, setPage] = useState(1);
