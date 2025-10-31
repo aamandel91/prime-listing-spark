@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
 
 const AdvancedSearch = () => {
   const navigate = useNavigate();
@@ -75,6 +75,12 @@ const AdvancedSearch = () => {
               </p>
             </div>
 
+            {/* Quick Search Bar */}
+            <div className="mb-8">
+              <UnifiedSearchBar variant="inline" />
+            </div>
+
+            {/* Advanced Filters Card */}
             <Card>
               <CardHeader>
                 <CardTitle>Search Filters</CardTitle>

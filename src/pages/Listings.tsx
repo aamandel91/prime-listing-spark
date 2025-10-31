@@ -14,11 +14,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import BedsAndBathsFilter from "@/components/search/BedsAndBathsFilter";
-import PriceFilter from "@/components/search/PriceFilter";
-import { CityAutocomplete } from "@/components/search/CityAutocomplete";
+import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 
@@ -556,33 +554,14 @@ const Listings = () => {
         {/* Top Search Bar */}
         <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col md:flex-row gap-3">
-              <CityAutocomplete
-                value={location}
-                onChange={setLocation}
-                onSelect={(city) => setSelectedState(city.state)}
-                placeholder="Enter City, Zip, or Address"
-                className="h-12"
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
+            <div className="flex gap-3 items-start">
+              <div className="flex-1">
+                <UnifiedSearchBar variant="inline" />
+              </div>
               
-              <PriceFilter 
-                minValue={minPrice} 
-                maxValue={maxPrice}
-                onMinChange={setMinPrice}
-                onMaxChange={setMaxPrice}
-              />
-              
-              <BedsAndBathsFilter 
-                bedsValue={minBeds}
-                bathsValue={minBaths}
-                onBedsChange={setMinBeds}
-                onBathsChange={setMinBaths}
-              />
-
               <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="h-12 px-6">
+                  <Button variant="outline" className="h-10 px-6 whitespace-nowrap">
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     More Filters
                   </Button>
@@ -594,14 +573,6 @@ const Listings = () => {
                   <MoreFiltersContent />
                 </DialogContent>
               </Dialog>
-              
-              <Button
-                className="h-12 px-8 bg-accent hover:bg-accent/90 text-accent-foreground"
-                onClick={handleSearch}
-              >
-                <Search className="w-5 h-5 mr-2" />
-                Search
-              </Button>
             </div>
           </div>
         </div>
