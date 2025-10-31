@@ -109,6 +109,7 @@ const CityTemplate = () => {
   const { listings: apiListings, loading, error } = useRepliersListings({
     city: cityData.name,
     state: cityData.state,
+    status: 'Active',
     limit: 50,
   });
 

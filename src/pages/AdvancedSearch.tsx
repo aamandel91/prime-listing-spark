@@ -20,17 +20,10 @@ const AdvancedSearch = () => {
   const [bathroomsMin, setBathroomsMin] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
+  const [state, setState] = useState("TX");
   const [yearBuiltMin, setYearBuiltMin] = useState("");
-  const [lotSizeMin, setLotSizeMin] = useState("");
-  const [features, setFeatures] = useState({
-    pool: false,
-    waterfront: false,
-    garage: false,
-    newConstruction: false,
-    gatedCommunity: false,
-    furnished: false,
-  });
+  const [yearBuiltMax, setYearBuiltMax] = useState("");
+  const [status, setStatus] = useState("Active");
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -43,13 +36,10 @@ const AdvancedSearch = () => {
     if (bathroomsMin) params.append('baths', bathroomsMin);
     if (propertyType) params.append('type', propertyType);
     if (city) params.append('city', city);
-    if (zipCode) params.append('zipCode', zipCode);
-    if (yearBuiltMin) params.append('yearBuilt', yearBuiltMin);
-    if (lotSizeMin) params.append('lotSize', lotSizeMin);
-    
-    Object.entries(features).forEach(([key, value]) => {
-      if (value) params.append(key, 'true');
-    });
+    if (state) params.append('state', state);
+    if (yearBuiltMin) params.append('minYearBuilt', yearBuiltMin);
+    if (yearBuiltMax) params.append('maxYearBuilt', yearBuiltMax);
+    if (status) params.append('status', status);
 
     navigate(`/listings?${params.toString()}`);
   };
@@ -105,13 +95,17 @@ const AdvancedSearch = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="zipCode">ZIP Code</Label>
-                      <Input
-                        id="zipCode"
-                        placeholder="Enter ZIP code"
-                        value={zipCode}
-                        onChange={(e) => setZipCode(e.target.value)}
-                      />
+                      <Label htmlFor="state">State</Label>
+                      <Select value={state} onValueChange={setState}>
+                        <SelectTrigger id="state">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="TX">Texas</SelectItem>
+                          <SelectItem value="FL">Florida</SelectItem>
+                          <SelectItem value="CA">California</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -208,7 +202,7 @@ const AdvancedSearch = () => {
                 {/* Additional Criteria */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Additional Criteria</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="yearBuiltMin">Min Year Built</Label>
                       <Input
@@ -220,36 +214,28 @@ const AdvancedSearch = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lotSizeMin">Min Lot Size (sq ft)</Label>
+                      <Label htmlFor="yearBuiltMax">Max Year Built</Label>
                       <Input
-                        id="lotSizeMin"
+                        id="yearBuiltMax"
                         type="number"
-                        placeholder="e.g., 5000"
-                        value={lotSizeMin}
-                        onChange={(e) => setLotSizeMin(e.target.value)}
+                        placeholder="e.g., 2024"
+                        value={yearBuiltMax}
+                        onChange={(e) => setYearBuiltMax(e.target.value)}
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Features & Amenities</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(features).map(([key, value]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={key}
-                          checked={value}
-                          onCheckedChange={(checked) =>
-                            setFeatures({ ...features, [key]: checked as boolean })
-                          }
-                        />
-                        <Label htmlFor={key} className="cursor-pointer">
-                          {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
-                        </Label>
-                      </div>
-                    ))}
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Listing Status</Label>
+                      <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger id="status">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Sold">Sold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
 

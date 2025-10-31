@@ -28,7 +28,7 @@ const Listings = () => {
   const { trackPropertySearch } = useFollowUpBoss();
   
   // Filter states - Initialize from URL params
-  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [location, setLocation] = useState(searchParams.get("location") || searchParams.get("city") || "");
   const [debouncedLocation, setDebouncedLocation] = useState(location);
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
@@ -37,13 +37,18 @@ const Listings = () => {
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   
   // More filters states
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [minSqft, setMinSqft] = useState("");
-  const [maxSqft, setMaxSqft] = useState("");
-  const [minYear, setMinYear] = useState("");
-  const [maxYear, setMaxYear] = useState("");
+  const [propertyTypes, setPropertyTypes] = useState<string[]>(() => {
+    const typeParam = searchParams.get("type");
+    return typeParam ? [typeParam] : [];
+  });
+  const [minSqft, setMinSqft] = useState(searchParams.get("minSqft") || "");
+  const [maxSqft, setMaxSqft] = useState(searchParams.get("maxSqft") || "");
+  const [minYear, setMinYear] = useState(searchParams.get("minYearBuilt") || "");
+  const [maxYear, setMaxYear] = useState(searchParams.get("maxYearBuilt") || "");
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedState, setSelectedState] = useState(searchParams.get("state") || "TX");
+  const [listingStatus, setListingStatus] = useState(searchParams.get("status") || "Active");
 
   // Debounce location search
   useEffect(() => {
@@ -59,15 +64,17 @@ const Listings = () => {
   
   const { listings: apiListings, loading, error, totalCount, hasMore } = useRepliersListings({
     city: debouncedLocation || undefined,
-    state: debouncedLocation ? "TX" : undefined,
+    state: selectedState || undefined,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
     bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
+    propertyType: propertyTypes.length === 1 ? propertyTypes[0] : undefined,
     minSqft: minSqft ? parseInt(minSqft) : undefined,
     maxSqft: maxSqft ? parseInt(maxSqft) : undefined,
     minYearBuilt: minYear ? parseInt(minYear) : undefined,
     maxYearBuilt: maxYear ? parseInt(maxYear) : undefined,
+    status: listingStatus || undefined,
     limit: pageSize,
     offset: (page - 1) * pageSize,
   });
@@ -75,7 +82,7 @@ const Listings = () => {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedLocation, minPrice, maxPrice, minBeds, minBaths, minSqft, maxSqft, minYear, maxYear]);
+  }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, listingStatus]);
 
   // Transform API data to match our component format
   const allProperties = useMemo(() => {
