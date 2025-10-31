@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
 import { Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useSiteSettings();
+
+  const siteName = settings?.siteName || "Florida Home Finder";
+  const agentName = settings?.agentFirstName && settings?.agentLastName 
+    ? `${settings.agentFirstName} ${settings.agentLastName}`
+    : "";
+  const email = settings?.emailGeneral || "info@floridahomefinder.com";
+  const phone = settings?.localNumber || settings?.mobileNumber || settings?.tollFree || "(555) 555-1234";
+  
+  const fullAddress = [
+    settings?.street1,
+    settings?.street2,
+    `${settings?.city || "Your City"}, ${settings?.state || "FL"} ${settings?.zipCode || "12345"}`
+  ].filter(Boolean);
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -11,10 +26,20 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center">
-                <Home className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <span className="text-xl font-bold">Florida Home Finder</span>
+              {settings?.logoUrl ? (
+                <img 
+                  src={settings.logoUrl} 
+                  alt={siteName}
+                  className="h-10 w-auto"
+                />
+              ) : (
+                <>
+                  <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center">
+                    <Home className="w-6 h-6 text-accent-foreground" />
+                  </div>
+                  <span className="text-xl font-bold">{siteName}</span>
+                </>
+              )}
             </div>
             <p className="text-primary-foreground/80 mb-4">
               Your trusted partner in finding the perfect Florida home. Excellence in real estate since 2024.
@@ -65,23 +90,47 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                <span className="text-primary-foreground/80">123 Real Estate Ave<br />Suite 100<br />Your City, ST 12345</span>
+                <span className="text-primary-foreground/80">
+                  {fullAddress.map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < fullAddress.length - 1 && <br />}
+                    </span>
+                  ))}
+                </span>
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-accent flex-shrink-0" />
-                <a href="tel:+15555551234" className="text-primary-foreground/80 hover:text-accent transition-colors">(555) 555-1234</a>
+                <a 
+                  href={`tel:${phone.replace(/\D/g, '')}`} 
+                  className="text-primary-foreground/80 hover:text-accent transition-colors"
+                >
+                  {phone}
+                </a>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-accent flex-shrink-0" />
-                <a href="mailto:info@floridahomefinder.com" className="text-primary-foreground/80 hover:text-accent transition-colors">info@floridahomefinder.com</a>
+                <a 
+                  href={`mailto:${email}`} 
+                  className="text-primary-foreground/80 hover:text-accent transition-colors"
+                >
+                  {email}
+                </a>
               </li>
+              {agentName && (
+                <li className="text-primary-foreground/80 text-sm mt-4">
+                  {settings?.licenseNumber && <div>License: {settings.licenseNumber}</div>}
+                  <div>{agentName}</div>
+                  {settings?.officeName && <div>{settings.officeName}</div>}
+                </li>
+              )}
             </ul>
           </div>
         </div>
 
         <div className="border-t border-primary-light mt-8 pt-8 text-center">
           <p className="text-primary-foreground/60 text-sm">
-            © {currentYear} Florida Home Finder. All rights reserved. | 
+            © {currentYear} {settings?.siteOwner || siteName}. All rights reserved. | 
             <Link to="/privacy" className="hover:text-accent transition-colors ml-1">Privacy Policy</Link> | 
             <Link to="/terms" className="hover:text-accent transition-colors ml-1">Terms of Service</Link>
           </p>

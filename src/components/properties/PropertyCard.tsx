@@ -22,6 +22,8 @@ interface PropertyCardProps {
   description?: string;
   avm?: number;
   onOpenModal?: (id: string) => void;
+  officeId?: string;
+  isHotProperty?: boolean;
 }
 
 const PropertyCard = ({
@@ -42,6 +44,8 @@ const PropertyCard = ({
   description,
   avm,
   onOpenModal,
+  officeId,
+  isHotProperty,
 }: PropertyCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -94,8 +98,17 @@ const PropertyCard = ({
           }}
         />
         
+        {/* Hot Property Badge */}
+        {isHotProperty && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold shadow-md animate-pulse">
+              🔥 Hot Property
+            </Badge>
+          </div>
+        )}
+        
         {/* Showcase Badge */}
-        {isShowcase && (
+        {!isHotProperty && isShowcase && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-primary text-primary-foreground font-semibold shadow-md">
               Showcase
@@ -104,14 +117,14 @@ const PropertyCard = ({
         )}
 
         {/* Status Badges */}
-        {status === "open-house" && (
+        {!isHotProperty && !isShowcase && status === "open-house" && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-success text-success-foreground font-semibold shadow-md">
               Open House
             </Badge>
           </div>
         )}
-        {status === "under-contract" && (
+        {!isHotProperty && !isShowcase && status === "under-contract" && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-destructive text-destructive-foreground font-semibold shadow-md">
               Under Contract

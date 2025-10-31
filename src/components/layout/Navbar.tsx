@@ -5,9 +5,13 @@ import { Menu, X, Home, MapPin, Map, Building2, DollarSign } from "lucide-react"
 import SearchDropdown from "./SearchDropdown";
 import CountiesDropdown from "./CountiesDropdown";
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: settings } = useSiteSettings();
+  
+  const siteName = settings?.siteName || "Florida Home Finder";
 
   const leftLinks = [
     { to: "/sell", label: "Sell", icon: DollarSign },
@@ -43,10 +47,20 @@ const Navbar = () => {
 
           {/* Centered Logo */}
           <Link to="/" className="flex items-center space-x-2 group absolute left-1/2 transform -translate-x-1/2">
-            <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center shadow-medium transition-transform group-hover:scale-105">
-              <Home className="w-6 h-6 text-accent-foreground" />
-            </div>
-            <span className="text-xl font-bold text-primary whitespace-nowrap">Florida Home Finder</span>
+            {settings?.logoUrl ? (
+              <img 
+                src={settings.logoUrl} 
+                alt={siteName}
+                className="h-10 w-auto transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <>
+                <div className="w-10 h-10 bg-gradient-premium rounded-lg flex items-center justify-center shadow-medium transition-transform group-hover:scale-105">
+                  <Home className="w-6 h-6 text-accent-foreground" />
+                </div>
+                <span className="text-xl font-bold text-primary whitespace-nowrap">{siteName}</span>
+              </>
+            )}
           </Link>
 
           {/* Right Navigation */}

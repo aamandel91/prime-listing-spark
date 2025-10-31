@@ -19,9 +19,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { data: siteSettings } = useSiteSettings();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const { trackPropertySearch } = useFollowUpBoss();
@@ -131,6 +133,8 @@ const Listings = () => {
   const allProperties = useMemo(() => {
     if (!apiListings || !Array.isArray(apiListings)) return [];
     
+    const officeIds = siteSettings?.officeIds || [];
+    
     return apiListings.map((listing: any) => {
       // Build full address
       const addressParts = [
@@ -138,6 +142,9 @@ const Listings = () => {
         listing.address?.streetName,
         listing.address?.streetSuffix
       ].filter(Boolean).join(' ');
+
+      const listingOfficeId = listing.office?.id || listing.officeId || "";
+      const isHotProperty = officeIds.length > 0 && officeIds.includes(listingOfficeId);
 
       return {
         id: listing.mlsNumber || Math.random().toString(),
@@ -163,9 +170,11 @@ const Listings = () => {
         description: listing.details?.description || "",
         lat: listing.map?.latitude || 0,
         lng: listing.map?.longitude || 0,
+        officeId: listingOfficeId,
+        isHotProperty,
       };
     });
-  }, [apiListings]);
+  }, [apiListings, siteSettings]);
 
   // Update URL params with current filters
   const updateSearchParams = () => {
@@ -239,6 +248,10 @@ const Listings = () => {
   const filteredProperties = useMemo(() => {
     let filtered = [...allProperties];
 
+    // First, separate hot properties from regular properties
+    const hotProperties = filtered.filter(p => p.isHotProperty);
+    const regularProperties = filtered.filter(p => !p.isHotProperty);
+
     // Filter by location (city or address)
     if (location) {
       const searchTerm = location.toLowerCase();
@@ -309,27 +322,112 @@ const Listings = () => {
       filtered = filtered.filter(p => p.status === "open-house");
     }
 
-    // Sort properties
-    switch (sortBy) {
-      case "price-low":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "price-high":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "beds":
-        filtered.sort((a, b) => b.beds - a.beds);
-        break;
-      case "sqft":
-        filtered.sort((a, b) => b.sqft - a.sqft);
-        break;
-      case "newest":
-      default:
-        filtered.sort((a, b) => (b.yearBuilt || 0) - (a.yearBuilt || 0));
-        break;
-    }
+    // Apply all other filters to both groups
+    const applyFilters = (properties: typeof filtered) => {
+      let result = [...properties];
 
-    return filtered;
+      // Filter by location (city or address)
+      if (location) {
+        const searchTerm = location.toLowerCase();
+        result = result.filter(
+          p =>
+            p.city.toLowerCase().includes(searchTerm) ||
+            p.address.toLowerCase().includes(searchTerm) ||
+            p.state.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Filter by selected city from dropdown
+      if (selectedCity && selectedCity !== "all") {
+        result = result.filter(p => p.city.toLowerCase() === selectedCity.toLowerCase());
+      }
+
+      // Filter by price range
+      if (minPrice && minPrice !== "0") {
+        const min = parseInt(minPrice);
+        result = result.filter(p => p.price >= min);
+      }
+      if (maxPrice && maxPrice !== "0") {
+        const max = parseInt(maxPrice);
+        result = result.filter(p => p.price <= max);
+      }
+
+      // Filter by minimum beds
+      if (minBeds && minBeds !== "any") {
+        const beds = parseInt(minBeds);
+        result = result.filter(p => p.beds >= beds);
+      }
+
+      // Filter by minimum baths
+      if (minBaths && minBaths !== "any") {
+        const baths = parseInt(minBaths);
+        result = result.filter(p => p.baths >= baths);
+      }
+
+      // Filter by property types
+      if (propertyTypes.length > 0) {
+        result = result.filter(p => propertyTypes.includes(p.type));
+      }
+
+      // Filter by square footage
+      if (minSqft) {
+        result = result.filter(p => p.sqft >= parseInt(minSqft));
+      }
+      if (maxSqft) {
+        result = result.filter(p => p.sqft <= parseInt(maxSqft));
+      }
+
+      // Filter by year built
+      if (minYear) {
+        result = result.filter(p => p.yearBuilt >= parseInt(minYear));
+      }
+      if (maxYear) {
+        result = result.filter(p => p.yearBuilt <= parseInt(maxYear));
+      }
+
+      // Filter by features
+      if (features.includes("pool")) {
+        result = result.filter(p => p.hasPool);
+      }
+      if (features.includes("waterfront")) {
+        result = result.filter(p => p.isWaterfront);
+      }
+      if (features.includes("open-house")) {
+        result = result.filter(p => p.status === "open-house");
+      }
+
+      return result;
+    };
+
+    const filteredHot = applyFilters(hotProperties);
+    const filteredRegular = applyFilters(regularProperties);
+
+    // Sort each group independently
+    const sortProperties = (properties: typeof filtered) => {
+      const sorted = [...properties];
+      switch (sortBy) {
+        case "price-low":
+          sorted.sort((a, b) => a.price - b.price);
+          break;
+        case "price-high":
+          sorted.sort((a, b) => b.price - a.price);
+          break;
+        case "beds":
+          sorted.sort((a, b) => b.beds - a.beds);
+          break;
+        case "sqft":
+          sorted.sort((a, b) => b.sqft - a.sqft);
+          break;
+        case "newest":
+        default:
+          sorted.sort((a, b) => (b.yearBuilt || 0) - (a.yearBuilt || 0));
+          break;
+      }
+      return sorted;
+    };
+
+    // Combine: hot properties first, then regular properties
+    return [...sortProperties(filteredHot), ...sortProperties(filteredRegular)];
   }, [location, selectedCity, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties]);
 
   // Generate dynamic SEO content

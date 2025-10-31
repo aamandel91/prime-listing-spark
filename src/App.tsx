@@ -11,6 +11,7 @@ import CityTemplate from "./pages/CityTemplate";
 import Counties from "./pages/Counties";
 import SEOSettings from "./pages/admin/SEOSettings";
 import GlobalSiteSettings from "./pages/admin/GlobalSiteSettings";
+import SiteLayoutSettings from "./pages/admin/SiteLayoutSettings";
 import Cities from "./pages/Cities";
 import FeaturedCities from "./pages/admin/FeaturedCities";
 import Blog from "./pages/Blog";
@@ -43,17 +44,18 @@ const App = () => {
             <Route path="/admin/blog-migration" element={<BlogMigration />} />
             <Route path="/admin/city-content" element={<CityContentGenerator />} />
             <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
-            <Route path="/admin/seo-settings" element={<SEOSettings />} />
-            <Route path="/admin/global-settings" element={<GlobalSiteSettings />} />
-            <Route path="/cities" element={<Cities />} />
+          <Route path="/admin/seo-settings" element={<SEOSettings />} />
+          <Route path="/admin/global-site-settings" element={<GlobalSiteSettings />} />
+          <Route path="/admin/site-layout-settings" element={<SiteLayoutSettings />} />
+          <Route path="/cities" element={<Cities />} />
           <Route path="/cities/:citySlug" element={<CityTemplate />} />
           <Route path="/counties" element={<Counties />} />
           <Route path="/counties/:countySlug" element={<CityTemplate />} />
-            <Route path="/admin/featured-cities" element={<FeaturedCities />} />
-            <Route path="/:citySlug/:filter" element={<CityTemplate />} />
-            <Route path="/:citySlug" element={<CityTemplate />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+          <Route path="/admin/featured-cities" element={<FeaturedCities />} />
+          <Route path="/:citySlug/:filter" element={<CityTemplate />} />
+          <Route path="/:citySlug" element={<CityTemplate />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
