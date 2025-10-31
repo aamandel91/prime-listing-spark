@@ -13,6 +13,8 @@ import BlogPost from "./pages/BlogPost";
 import AdvancedSearch from "./pages/AdvancedSearch";
 import Auth from "./pages/Auth";
 import BlogMigration from "./pages/admin/BlogMigration";
+import CityContentGenerator from "./pages/admin/CityContentGenerator";
+import CompetitorAnalysis from "./pages/admin/CompetitorAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => {
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin/blog-migration" element={<BlogMigration />} />
+            <Route path="/admin/city-content" element={<CityContentGenerator />} />
+            <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
             <Route path="/:citySlug/:filter" element={<CityTemplate />} />
             <Route path="/:citySlug" element={<CityTemplate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

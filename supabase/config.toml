@@ -11,3 +11,9 @@ verify_jwt = true
 
 [functions.migrate-blogs]
 verify_jwt = true
+
+[functions.generate-city-content]
+verify_jwt = false
+
+[functions.analyze-competitor-seo]
+verify_jwt = false
