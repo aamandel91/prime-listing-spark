@@ -7,43 +7,43 @@ const PropertyTypes = () => {
       title: "Single Family Homes",
       icon: Home,
       image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/single-family"
+      link: "/listings?type=Single%20Family&status=Active"
     },
     {
       title: "Townhomes",
       icon: Building,
       image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/townhouse"
+      link: "/listings?type=Townhouse&status=Active"
     },
     {
       title: "Condos",
       icon: Building2,
       image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/condo"
+      link: "/listings?type=Condo&status=Active"
     },
     {
       title: "1+ Acre Homes",
       icon: Trees,
       image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/1-plus-acres"
+      link: "/listings?minLotSize=43560&status=Active"
     },
     {
       title: "Luxury Homes",
       icon: Castle,
       image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/luxury"
+      link: "/listings?minPrice=1000000&status=Active"
     },
     {
       title: "Multi Family Homes",
       icon: Warehouse,
       image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/multi-family"
+      link: "/listings?type=Multi%20Family&status=Active"
     },
     {
       title: "New Construction",
       icon: Hammer,
       image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
-      link: "/fayetteville/new-construction"
+      link: "/listings?newConstruction=true&status=Active"
     }
   ];
 

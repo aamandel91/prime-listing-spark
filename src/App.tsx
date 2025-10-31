@@ -21,6 +21,7 @@ import Auth from "./pages/Auth";
 import BlogMigration from "./pages/admin/BlogMigration";
 import CityContentGenerator from "./pages/admin/CityContentGenerator";
 import CompetitorAnalysis from "./pages/admin/CompetitorAnalysis";
+import PropertyTypePages from "./pages/admin/PropertyTypePages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => {
             <Route path="/admin/blog-migration" element={<BlogMigration />} />
             <Route path="/admin/city-content" element={<CityContentGenerator />} />
             <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
+            <Route path="/admin/property-type-pages" element={<PropertyTypePages />} />
           <Route path="/admin/seo-settings" element={<SEOSettings />} />
           <Route path="/admin/global-site-settings" element={<GlobalSiteSettings />} />
           <Route path="/admin/site-layout-settings" element={<SiteLayoutSettings />} />
