@@ -58,9 +58,9 @@ const PropertyCard = ({
     const priceDiff = avm - price;
     const percentDiff = (priceDiff / price) * 100;
     
-    if (percentDiff > 5) {
+    if (percentDiff > 1.5) {
       return { isGoodDeal: true, label: "Good Deal", color: "text-green-600" };
-    } else if (percentDiff < -5) {
+    } else if (percentDiff < -1.5) {
       return { isGoodDeal: false, label: "Above Est.", color: "text-red-600" };
     }
     return null;
@@ -89,6 +89,9 @@ const PropertyCard = ({
           decoding="async"
           width="800"
           height="800"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
+          }}
         />
         
         {/* Showcase Badge */}

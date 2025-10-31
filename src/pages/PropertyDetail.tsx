@@ -315,6 +315,9 @@ export default function PropertyDetail() {
               src={property.images[0]}
               alt={`${property.title} - Main view`}
               className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+              }}
             />
             {/* For Sale Badge */}
             <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-2">
@@ -353,6 +356,9 @@ export default function PropertyDetail() {
                   src={property.images[1] || property.images[0]}
                   alt={`${property.title} - View 2`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
               <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(2)}>
@@ -360,6 +366,9 @@ export default function PropertyDetail() {
                   src={property.images[2] || property.images[0]}
                   alt={`${property.title} - View 3`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
             </div>
@@ -368,16 +377,22 @@ export default function PropertyDetail() {
             <div className="grid grid-cols-2 gap-2">
               <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(3)}>
                 <img
-                  src={property.images[0]}
+                  src={property.images[3] || property.images[0]}
                   alt={`${property.title} - View 4`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
               <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square">
                 <img
-                  src={property.images[1] || property.images[0]}
+                  src={property.images[4] || property.images[1] || property.images[0]}
                   alt={`${property.title} - View 5`}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
                 {/* See all photos button overlay */}
                 <div 
