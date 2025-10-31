@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, MapPin, Map, Building2, DollarSign } from "lucide-react";
 import SearchDropdown from "./SearchDropdown";
-import CitiesDropdown from "./CitiesDropdown";
 import CountiesDropdown from "./CountiesDropdown";
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
 
@@ -26,7 +25,11 @@ const Navbar = () => {
           {/* Left Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
             <SearchDropdown />
-            <CitiesDropdown />
+            <Link to="/cities">
+              <Button variant="ghost" className="text-foreground hover:text-primary">
+                Cities
+              </Button>
+            </Link>
             <CountiesDropdown />
             <PropertyTypeDropdown />
             {leftLinks.map((link) => (

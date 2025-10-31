@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
+import Cities from "./pages/Cities";
+import FeaturedCities from "./pages/admin/FeaturedCities";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdvancedSearch from "./pages/AdvancedSearch";
@@ -38,6 +40,9 @@ const App = () => {
             <Route path="/admin/blog-migration" element={<BlogMigration />} />
             <Route path="/admin/city-content" element={<CityContentGenerator />} />
             <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
+            <Route path="/cities" element={<Cities />} />
+            <Route path="/cities/:citySlug" element={<CityTemplate />} />
+            <Route path="/admin/featured-cities" element={<FeaturedCities />} />
             <Route path="/:citySlug/:filter" element={<CityTemplate />} />
             <Route path="/:citySlug" element={<CityTemplate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
