@@ -67,6 +67,9 @@ const PropertyCard = ({
           alt={altText}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          decoding="async"
+          width="800"
+          height="800"
         />
         
         {/* Showcase Badge */}
@@ -149,7 +152,7 @@ const PropertyCard = ({
   );
 
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col bg-card">
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col bg-card contain-layout">
       {onOpenModal ? (
         <div onClick={handleClick} className="flex flex-col h-full cursor-pointer">
           {CardContent}

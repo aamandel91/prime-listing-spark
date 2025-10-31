@@ -37,6 +37,11 @@ const Hero = () => {
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=80"
           alt="Luxury modern home exterior"
           className="w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          width="2000"
+          height="1333"
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
