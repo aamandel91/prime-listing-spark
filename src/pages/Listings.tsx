@@ -5,7 +5,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyMap from "@/components/map/PropertyMap";
-import { PropertyDetailModal } from "@/components/properties/PropertyDetailModal";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: siteSettings } = useSiteSettings();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const { trackPropertySearch } = useFollowUpBoss();
   
   // Filter states - Initialize from URL params
@@ -616,7 +614,6 @@ const Listings = () => {
                     <PropertyCard 
                       key={property.id} 
                       {...property} 
-                      onOpenModal={setSelectedPropertyId}
                     />
                   ))}
                 </div>
@@ -665,15 +662,6 @@ const Listings = () => {
           </div>
         </div>
       </main>
-
-      {/* Property Detail Modal */}
-      {selectedPropertyId && (
-        <PropertyDetailModal
-          isOpen={!!selectedPropertyId}
-          onClose={() => setSelectedPropertyId(null)}
-          propertyId={selectedPropertyId}
-        />
-      )}
 
       <Footer />
     </div>
