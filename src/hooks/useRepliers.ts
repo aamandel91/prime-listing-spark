@@ -124,7 +124,13 @@ export const useRepliers = () => {
         body: {
           endpoint: '/listings',
           params: Object.fromEntries(
-            Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '')
+            Object.entries(params).filter(([key, value]) => {
+              // Exclude undefined, null, and empty strings
+              if (value === undefined || value === null || value === '') return false;
+              // Exclude 0 for price fields (Repliers API requires minPrice > 0)
+              if ((key === 'minPrice' || key === 'maxPrice') && value === 0) return false;
+              return true;
+            })
           ),
         },
       });
