@@ -87,6 +87,12 @@ export interface RepliersProperty {
     high: number;
     low: number;
   };
+  estimate?: {
+    date: string;
+    high: number;
+    low: number;
+    confidence: number;
+  };
 }
 
 export interface RepliersSearchParams {

@@ -73,61 +73,6 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
   const { trackPropertyView, trackPropertySave } = useFollowUpBoss();
   const { listing, loading, error } = useRepliersListing(propertyId);
 
-  // Check if property is saved when modal opens
-  useEffect(() => {
-    const checkIfSaved = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('saved_properties')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('property_id', propertyId)
-        .maybeSingle();
-
-      setIsSaved(!!data);
-    };
-
-    if (isOpen) {
-      checkIfSaved();
-      // Track property view in Follow Up Boss
-      trackPropertyView({
-        id: property.id,
-        address: property.address,
-        city: property.city,
-        state: property.state,
-        zip: property.zip,
-        mlsNumber: property.mlsId,
-        price: property.price,
-        beds: property.beds,
-        baths: property.baths,
-        sqft: property.sqft,
-        propertyType: property.subType,
-      });
-    }
-  }, [isOpen, propertyId]);
-
-  // Handle sticky buttons on scroll
-  useEffect(() => {
-    if (!isOpen) {
-      setShowStickyButtons(false);
-      return;
-    }
-
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const scrollTop = scrollContainer.scrollTop;
-      // Show sticky buttons after scrolling 600px
-      setShowStickyButtons(scrollTop > 600);
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll);
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [isOpen]);
-
   // Transform API listing to component format
   const property = listing ? {
     id: listing.mlsNumber || propertyId,
@@ -192,16 +137,75 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
       email: listing.agents?.[0]?.email || "",
       company: listing.agents?.[0]?.brokerage?.name || listing.office?.brokerageName || "",
     },
-    avm: listing.avm ? {
+    avm: listing.estimate ? {
+      value: Math.round((listing.estimate.high + listing.estimate.low) / 2),
+      high: listing.estimate.high,
+      low: listing.estimate.low,
+    } : (listing.avm ? {
       value: listing.avm.value,
       high: listing.avm.high,
       low: listing.avm.low,
-    } : null,
+    } : null),
     source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
     images: listing.images && listing.images.length > 0 
       ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
       : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
   } : null;
+
+  // Check if property is saved when modal opens
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('saved_properties')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('property_id', propertyId)
+        .maybeSingle();
+
+      setIsSaved(!!data);
+    };
+
+    if (isOpen && property) {
+      checkIfSaved();
+      // Track property view in Follow Up Boss
+      trackPropertyView({
+        id: property.id,
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        zip: property.zip,
+        mlsNumber: property.mlsId,
+        price: property.price,
+        beds: property.beds,
+        baths: property.baths,
+        sqft: property.sqft,
+        propertyType: property.subType,
+      });
+    }
+  }, [isOpen, propertyId, property]);
+
+  // Handle sticky buttons on scroll
+  useEffect(() => {
+    if (!isOpen) {
+      setShowStickyButtons(false);
+      return;
+    }
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+      // Show sticky buttons after scrolling 600px
+      setShowStickyButtons(scrollTop > 600);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [isOpen]);
 
   // Loading and error states
   if (loading) {
