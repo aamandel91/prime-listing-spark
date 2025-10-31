@@ -10,29 +10,18 @@ import { Button } from "@/components/ui/button";
 
 const PropertyTypeDropdown = () => {
   const leftColumn = [
-    { name: "Single Family Home", filter: "single-family" },
-    { name: "Condo", filter: "condo" },
-    { name: "Townhouses", filter: "townhouse" },
-    { name: "Multi Family Home", filter: "multi-family" },
-    { name: "FHA Approved", filter: "fha-approved" },
-    { name: "Country Club", filter: "country-club" },
-    { name: "Waterfront", filter: "waterfront" },
-    { name: "Ocean Access", filter: "ocean-access" },
-    { name: "Foreclosures", filter: "foreclosures" },
-    { name: "Gated Community", filter: "gated-community" },
+    { name: "Single Family Home", type: "Single Family" },
+    { name: "Condo", type: "Condo" },
+    { name: "Townhouse", type: "Townhouse" },
+    { name: "Multi Family", type: "Multi-Family" },
+    { name: "Land", type: "Land" },
+    { name: "Commercial", type: "Commercial" },
   ];
 
   const rightColumn = [
-    { name: "1 Story Homes", filter: "1-story" },
-    { name: "2 Story Homes", filter: "2-story" },
-    { name: "Homes With Pool", filter: "pool" },
-    { name: "Pet Friendly Condos", filter: "pet-friendly" },
-    { name: "No HOA Homes", filter: "no-hoa" },
-    { name: "55+ Community", filter: "55-plus" },
-    { name: "Luxury", filter: "luxury" },
-    { name: "New Construction", filter: "new-construction" },
-    { name: "1+ Acres", filter: "1-plus-acres" },
-    { name: "VA Approved", filter: "va-approved" },
+    { name: "Residential Income", type: "Residential Income" },
+    { name: "Mobile/Manufactured", type: "Mobile" },
+    { name: "Farm/Ranch", type: "Farm" },
   ];
 
   return (
@@ -44,15 +33,15 @@ const PropertyTypeDropdown = () => {
           </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background">
+          <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background z-50">
             {/* Left Column */}
             <div>
               <ul className="space-y-3">
                 {leftColumn.map((item) => (
-                  <li key={item.filter}>
+                  <li key={item.type}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/fayetteville/${item.filter}`}
+                        to={`/listings?type=${encodeURIComponent(item.type)}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}
@@ -67,10 +56,10 @@ const PropertyTypeDropdown = () => {
             <div>
               <ul className="space-y-3">
                 {rightColumn.map((item) => (
-                  <li key={item.filter}>
+                  <li key={item.type}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/fayetteville/${item.filter}`}
+                        to={`/listings?type=${encodeURIComponent(item.type)}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}

@@ -48,7 +48,7 @@ const CountiesDropdown = () => {
           </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="grid grid-cols-3 gap-8 p-6 w-[800px] bg-background">
+          <div className="grid grid-cols-3 gap-8 p-6 w-[800px] bg-background z-50">
             {/* South Florida */}
             <div>
               <h3 className="text-lg font-semibold mb-4">South Florida</h3>
@@ -57,7 +57,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?county=${county.slug}`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}
@@ -76,7 +76,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?county=${county.slug}`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}
@@ -95,7 +95,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?county=${county.slug}`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}

@@ -9,41 +9,32 @@ import {
 import { Button } from "@/components/ui/button";
 
 const CitiesDropdown = () => {
-  const eastCoast = [
-    { name: "Boca Raton", slug: "boca-raton" },
-    { name: "Coral Gables", slug: "coral-gables" },
-    { name: "Delray Beach", slug: "delray-beach" },
-    { name: "Fort Lauderdale", slug: "fort-lauderdale" },
-    { name: "Jupiter", slug: "jupiter" },
-    { name: "Miami", slug: "miami" },
-    { name: "Parkland", slug: "parkland" },
-    { name: "Pompano Beach", slug: "pompano-beach" },
-    { name: "Port St Lucie", slug: "port-st-lucie" },
-    { name: "West Palm Beach", slug: "west-palm-beach" },
+  const texasCities = [
+    { name: "Austin", slug: "austin", state: "TX" },
+    { name: "Kyle", slug: "kyle", state: "TX" },
+    { name: "San Antonio", slug: "san-antonio", state: "TX" },
+    { name: "Houston", slug: "houston", state: "TX" },
+    { name: "Dallas", slug: "dallas", state: "TX" },
+    { name: "Fort Worth", slug: "fort-worth", state: "TX" },
+    { name: "Plano", slug: "plano", state: "TX" },
+    { name: "Arlington", slug: "arlington", state: "TX" },
   ];
 
-  const westCoast = [
-    { name: "Bradenton", slug: "bradenton" },
-    { name: "Cape Coral", slug: "cape-coral" },
-    { name: "Clearwater", slug: "clearwater" },
-    { name: "Fort Myers Metro", slug: "fort-myers" },
-    { name: "Marco Island", slug: "marco-island" },
-    { name: "Naples", slug: "naples" },
-    { name: "Sarasota", slug: "sarasota" },
-    { name: "St. Petersburg", slug: "st-petersburg" },
-    { name: "Tampa", slug: "tampa" },
+  const floridaCities = [
+    { name: "Miami", slug: "miami", state: "FL" },
+    { name: "Orlando", slug: "orlando", state: "FL" },
+    { name: "Tampa", slug: "tampa", state: "FL" },
+    { name: "Jacksonville", slug: "jacksonville", state: "FL" },
+    { name: "Fort Lauderdale", slug: "fort-lauderdale", state: "FL" },
+    { name: "Naples", slug: "naples", state: "FL" },
+    { name: "Sarasota", slug: "sarasota", state: "FL" },
   ];
 
-  const centralFlorida = [
-    { name: "Gainesville", slug: "gainesville" },
-    { name: "Kissimmee", slug: "kissimmee" },
-    { name: "Lake Mary", slug: "lake-mary" },
-    { name: "Maitland", slug: "maitland" },
-    { name: "Ocala", slug: "ocala" },
-    { name: "Orlando", slug: "orlando" },
-    { name: "Windermere", slug: "windermere" },
-    { name: "Winter Park", slug: "winter-park" },
-    { name: "Winter Springs", slug: "winter-springs" },
+  const californiaCities = [
+    { name: "Los Angeles", slug: "los-angeles", state: "CA" },
+    { name: "San Diego", slug: "san-diego", state: "CA" },
+    { name: "San Francisco", slug: "san-francisco", state: "CA" },
+    { name: "Sacramento", slug: "sacramento", state: "CA" },
   ];
 
   return (
@@ -55,16 +46,16 @@ const CitiesDropdown = () => {
           </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="grid grid-cols-3 gap-8 p-6 w-[800px] bg-background">
-            {/* East Coast */}
+          <div className="grid grid-cols-3 gap-8 p-6 w-[800px] bg-background z-50">
+            {/* Texas */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">East Coast</h3>
+              <h3 className="text-lg font-semibold mb-4">Texas</h3>
               <ul className="space-y-3">
-                {eastCoast.map((city) => (
+                {texasCities.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/${city.slug}`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -75,15 +66,15 @@ const CitiesDropdown = () => {
               </ul>
             </div>
 
-            {/* West Coast */}
+            {/* Florida */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">West Coast</h3>
+              <h3 className="text-lg font-semibold mb-4">Florida</h3>
               <ul className="space-y-3">
-                {westCoast.map((city) => (
+                {floridaCities.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/${city.slug}`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -94,15 +85,15 @@ const CitiesDropdown = () => {
               </ul>
             </div>
 
-            {/* Central Florida */}
+            {/* California */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Central Florida</h3>
+              <h3 className="text-lg font-semibold mb-4">California</h3>
               <ul className="space-y-3">
-                {centralFlorida.map((city) => (
+                {californiaCities.map((city) => (
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/${city.slug}`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}

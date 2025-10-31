@@ -10,14 +10,14 @@ import { Button } from "@/components/ui/button";
 
 const SearchDropdown = () => {
   const regions = [
-    { name: "Broward/Palm Beach", slug: "broward-palm-beach" },
-    { name: "FL Keys", slug: "fl-keys" },
-    { name: "Ft Myers/Cape Coral/Naples", slug: "ft-myers-cape-coral-naples" },
-    { name: "Miami", slug: "miami" },
-    { name: "Orlando", slug: "orlando" },
-    { name: "Port St Lucie Metro", slug: "port-st-lucie" },
-    { name: "Sarasota", slug: "sarasota" },
-    { name: "Tampa/St Pete", slug: "tampa-st-pete" },
+    { name: "Austin Metro", city: "Austin", state: "TX" },
+    { name: "San Antonio", city: "San Antonio", state: "TX" },
+    { name: "Houston", city: "Houston", state: "TX" },
+    { name: "Dallas/Fort Worth", city: "Dallas", state: "TX" },
+    { name: "Miami Metro", city: "Miami", state: "FL" },
+    { name: "Orlando", city: "Orlando", state: "FL" },
+    { name: "Tampa Bay", city: "Tampa", state: "FL" },
+    { name: "Los Angeles", city: "Los Angeles", state: "CA" },
   ];
 
   const tools = [
@@ -36,16 +36,16 @@ const SearchDropdown = () => {
           </Button>
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background">
+          <div className="grid grid-cols-2 gap-8 p-6 w-[600px] bg-background z-50">
             {/* Search By Region */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Search By Region</h3>
               <ul className="space-y-3">
                 {regions.map((region) => (
-                  <li key={region.slug}>
+                  <li key={region.city}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?region=${region.slug}`}
+                        to={`/listings?city=${encodeURIComponent(region.city)}&state=${region.state}&status=Active`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {region.name}

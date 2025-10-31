@@ -20,11 +20,15 @@ const Hero = () => {
   
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (location) params.set("location", location);
+    if (location) {
+      params.set("city", location);
+      params.set("state", "TX");
+    }
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (beds && beds !== "any") params.set("beds", beds);
     if (baths && baths !== "any") params.set("baths", baths);
+    params.set("status", "Active");
     
     navigate(`/listings?${params.toString()}`);
   };
