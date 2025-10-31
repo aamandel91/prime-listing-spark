@@ -70,13 +70,34 @@ const Listings = () => {
     return () => clearTimeout(timer);
   }, [location]);
 
-  // Normalize URL status parameter on mount
+  // Normalize URL parameters on mount
   useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    let changed = false;
+    
+    // Normalize status parameter (Active/Pending -> A/U)
     const urlStatus = searchParams.get("status");
     if (urlStatus && urlStatus !== "A" && urlStatus !== "U") {
       const normalized = mapStatusToApi(urlStatus);
-      const newParams = new URLSearchParams(searchParams);
       newParams.set("status", normalized);
+      changed = true;
+    }
+    
+    // Normalize location to city parameter
+    const locationParam = searchParams.get("location");
+    if (locationParam && !searchParams.get("city")) {
+      newParams.delete("location");
+      newParams.set("city", locationParam);
+      changed = true;
+    }
+    
+    // Ensure state parameter exists
+    if (!searchParams.get("state")) {
+      newParams.set("state", "TX");
+      changed = true;
+    }
+    
+    if (changed) {
       setSearchParams(newParams, { replace: true });
     }
   }, []);
@@ -150,11 +171,18 @@ const Listings = () => {
   // Update URL params with current filters
   const updateSearchParams = () => {
     const params = new URLSearchParams();
-    if (location) params.set("location", location);
+    if (location) params.set("city", location);
+    if (selectedState) params.set("state", selectedState);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
-    if (minBeds) params.set("beds", minBeds);
-    if (minBaths) params.set("baths", minBaths);
+    if (minBeds && minBeds !== "any") params.set("beds", minBeds);
+    if (minBaths && minBaths !== "any") params.set("baths", minBaths);
+    if (propertyTypes.length === 1) params.set("type", propertyTypes[0]);
+    if (minSqft) params.set("minSqft", minSqft);
+    if (maxSqft) params.set("maxSqft", maxSqft);
+    if (minYear) params.set("minYearBuilt", minYear);
+    if (maxYear) params.set("maxYearBuilt", maxYear);
+    if (listingStatus) params.set("status", listingStatus);
     if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
     setSearchParams(params);
   };
@@ -170,7 +198,7 @@ const Listings = () => {
       beds: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
       baths: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
       city: selectedCity || location,
-      state: "FL",
+      state: selectedState || "TX",
       subdivision: searchParams.get("subdivision") || undefined,
       county: searchParams.get("county") || undefined,
     });
