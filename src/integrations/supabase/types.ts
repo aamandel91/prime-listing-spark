@@ -98,6 +98,48 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_counties: {
+        Row: {
+          county_name: string
+          created_at: string
+          custom_content: Json | null
+          description: string | null
+          featured: boolean
+          hero_image_url: string | null
+          id: string
+          slug: string
+          sort_order: number | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          county_name: string
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          hero_image_url?: string | null
+          id?: string
+          slug: string
+          sort_order?: number | null
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          county_name?: string
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          hero_image_url?: string | null
+          id?: string
+          slug?: string
+          sort_order?: number | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hidden_properties: {
         Row: {
           created_at: string

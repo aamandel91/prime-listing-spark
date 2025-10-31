@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
+import Counties from "./pages/Counties";
 import Cities from "./pages/Cities";
 import FeaturedCities from "./pages/admin/FeaturedCities";
 import Blog from "./pages/Blog";
@@ -41,7 +42,9 @@ const App = () => {
             <Route path="/admin/city-content" element={<CityContentGenerator />} />
             <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
             <Route path="/cities" element={<Cities />} />
-            <Route path="/cities/:citySlug" element={<CityTemplate />} />
+          <Route path="/cities/:citySlug" element={<CityTemplate />} />
+          <Route path="/counties" element={<Counties />} />
+          <Route path="/counties/:countySlug" element={<CityTemplate />} />
             <Route path="/admin/featured-cities" element={<FeaturedCities />} />
             <Route path="/:citySlug/:filter" element={<CityTemplate />} />
             <Route path="/:citySlug" element={<CityTemplate />} />

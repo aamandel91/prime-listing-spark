@@ -7,35 +7,35 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MapPin } from "lucide-react";
 
-interface FeaturedCity {
+interface FeaturedCounty {
   id: string;
-  city_name: string;
+  county_name: string;
   state: string;
   slug: string;
   description: string | null;
   hero_image_url: string | null;
 }
 
-export default function Cities() {
-  const [cities, setCities] = useState<FeaturedCity[]>([]);
+export default function Counties() {
+  const [counties, setCounties] = useState<FeaturedCounty[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCities();
+    fetchCounties();
   }, []);
 
-  const fetchCities = async () => {
+  const fetchCounties = async () => {
     try {
       const { data, error } = await supabase
-        .from("featured_cities")
+        .from("featured_counties")
         .select("*")
         .eq("featured", true)
-        .order("city_name", { ascending: true });
+        .order("county_name", { ascending: true });
 
       if (error) throw error;
-      setCities(data || []);
+      setCounties(data || []);
     } catch (error) {
-      console.error("Error fetching cities:", error);
+      console.error("Error fetching counties:", error);
     } finally {
       setLoading(false);
     }
@@ -44,10 +44,10 @@ export default function Cities() {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Featured Cities | Texas Real Estate</title>
+        <title>Featured Counties | Texas Real Estate</title>
         <meta
           name="description"
-          content="Explore our featured cities across Texas. Find your dream home in the perfect location."
+          content="Explore our featured counties across Texas. Find your dream home in the perfect location."
         />
       </Helmet>
 
@@ -59,69 +59,69 @@ export default function Cities() {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Explore Featured Cities
+                Explore Featured Counties
               </h1>
               <p className="text-lg text-muted-foreground">
                 Discover the best real estate opportunities in our carefully
-                curated selection of Texas cities.
+                curated selection of Texas counties.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Cities Grid */}
+        {/* Counties Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             {loading ? (
               <div className="flex justify-center items-center min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            ) : cities.length === 0 ? (
+            ) : counties.length === 0 ? (
               <div className="text-center py-16">
                 <MapPin className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-2xl font-semibold mb-2">
-                  No cities available yet
+                  No counties available yet
                 </h2>
                 <p className="text-muted-foreground">
-                  Check back soon for featured cities.
+                  Check back soon for featured counties.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cities.map((city) => (
+                {counties.map((county) => (
                   <Link
-                    key={city.id}
-                    to={`/cities/${city.slug}`}
+                    key={county.id}
+                    to={`/counties/${county.slug}`}
                     className="group"
                   >
                     <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                      {city.hero_image_url && (
+                      {county.hero_image_url && (
                         <div className="relative h-48 overflow-hidden">
                           <img
-                            src={city.hero_image_url}
-                            alt={`${city.city_name}, ${city.state}`}
+                            src={county.hero_image_url}
+                            alt={`${county.county_name}, ${county.state}`}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute bottom-4 left-4">
                             <h3 className="text-2xl font-bold text-white">
-                              {city.city_name}
+                              {county.county_name}
                             </h3>
                             <p className="text-white/90 text-sm">
-                              {city.state}
+                              {county.state}
                             </p>
                           </div>
                         </div>
                       )}
                       <CardContent className="p-6">
-                        {!city.hero_image_url && (
+                        {!county.hero_image_url && (
                           <h3 className="text-2xl font-bold mb-2">
-                            {city.city_name}, {city.state}
+                            {county.county_name}, {county.state}
                           </h3>
                         )}
-                        {city.description && (
+                        {county.description && (
                           <p className="text-muted-foreground line-clamp-3">
-                            {city.description}
+                            {county.description}
                           </p>
                         )}
                         <div className="mt-4 text-primary font-medium group-hover:underline">
