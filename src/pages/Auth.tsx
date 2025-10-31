@@ -13,19 +13,26 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showUpdatePassword, setShowUpdatePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in or if we're in password recovery mode
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      
+      // Check if this is a password recovery session
+      if (window.location.hash.includes('type=recovery')) {
+        setShowUpdatePassword(true);
+      } else if (session && !showUpdatePassword) {
         navigate("/");
       }
     };
     checkUser();
-  }, [navigate]);
+  }, [navigate, showUpdatePassword]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +169,67 @@ const Auth = () => {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword || !confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter and confirm your new password",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Passwords do not match",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Password must be at least 8 characters",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password updated!",
+        description: "Your password has been successfully reset",
+        duration: 3000,
+      });
+      
+      setShowUpdatePassword(false);
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Failed to update password",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Helmet>
@@ -179,7 +247,51 @@ const Auth = () => {
           </p>
         </div>
 
-        {!showResetPassword ? (
+        {showUpdatePassword ? (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-semibold mb-2">Set New Password</h2>
+              <p className="text-sm text-muted-foreground">
+                Enter your new password below
+              </p>
+            </div>
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter new password (min 8 characters)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="h-12"
+                  required
+                  minLength={8}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="h-12"
+                  required
+                  minLength={8}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-12"
+                disabled={isLoading}
+              >
+                {isLoading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          </div>
+        ) : !showResetPassword ? (
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
