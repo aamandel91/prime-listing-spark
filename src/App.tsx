@@ -10,6 +10,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
 import Counties from "./pages/Counties";
 import SEOSettings from "./pages/admin/SEOSettings";
+import GlobalSiteSettings from "./pages/admin/GlobalSiteSettings";
 import Cities from "./pages/Cities";
 import FeaturedCities from "./pages/admin/FeaturedCities";
 import Blog from "./pages/Blog";
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/admin/city-content" element={<CityContentGenerator />} />
             <Route path="/admin/competitor-analysis" element={<CompetitorAnalysis />} />
             <Route path="/admin/seo-settings" element={<SEOSettings />} />
+            <Route path="/admin/global-settings" element={<GlobalSiteSettings />} />
             <Route path="/cities" element={<Cities />} />
           <Route path="/cities/:citySlug" element={<CityTemplate />} />
           <Route path="/counties" element={<Counties />} />

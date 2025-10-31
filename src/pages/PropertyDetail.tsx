@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { supabase } from "@/integrations/supabase/client";
+import { useTrafficSource } from "@/hooks/useTrafficSource";
+import RegistrationModal from "@/components/auth/RegistrationModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,14 +54,31 @@ export default function PropertyDetail() {
   const [interestRate, setInterestRate] = useState("5.75");
   const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
   const [propertyNoindex, setPropertyNoindex] = useState(false);
+  const [forceRegistration, setForceRegistration] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [user, setUser] = useState<any>(null);
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(id || "");
   const { submitTourRequest } = useTourRequest();
+  const { isPPC, loading: trafficLoading } = useTrafficSource();
 
-  // Fetch SEO settings
+  // Check authentication status
   useEffect(() => {
-    const fetchSEOSettings = async () => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch SEO and access control settings
+  useEffect(() => {
+    const fetchSettings = async () => {
       const { data } = await supabase
         .from("seo_settings")
         .select("setting_value")
@@ -69,10 +88,27 @@ export default function PropertyDetail() {
       if (data?.setting_value && typeof data.setting_value === 'object' && 'enabled' in data.setting_value) {
         setPropertyNoindex(data.setting_value.enabled as boolean);
       }
+
+      const { data: globalSettings } = await supabase
+        .from("global_site_settings")
+        .select("setting_value")
+        .eq("setting_key", "force_registration_ppc")
+        .single();
+
+      if (globalSettings?.setting_value === 'true') {
+        setForceRegistration(true);
+      }
     };
 
-    fetchSEOSettings();
+    fetchSettings();
   }, []);
+
+  // Show registration modal for PPC traffic if forced registration is enabled
+  useEffect(() => {
+    if (!trafficLoading && !loading && forceRegistration && isPPC && !user) {
+      setShowRegistrationModal(true);
+    }
+  }, [trafficLoading, loading, forceRegistration, isPPC, user]);
   
   const [contactForm, setContactForm] = useState({
     firstName: "",
@@ -311,6 +347,17 @@ export default function PropertyDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <RegistrationModal 
+        open={showRegistrationModal}
+        onClose={() => {
+          // Redirect to listings if they close without registering
+          if (!user) {
+            window.location.href = '/listings';
+          }
+        }}
+        onSuccess={() => setShowRegistrationModal(false)}
+      />
+
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
