@@ -150,7 +150,7 @@ const PropertyCard = ({
 
         {avm && avm > 0 && (
           <div className="text-xs text-muted-foreground mb-3">
-            Est. Value: <span className={avmStatus?.color || ""}>{formatPrice(avm)}</span>
+            Estimate ({new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}) <span className={avmStatus?.color || ""}>{formatPrice(avm)}</span>
           </div>
         )}
         
