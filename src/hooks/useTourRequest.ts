@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useLeadDeduplication } from './useLeadDeduplication';
 
 export interface TourRequest {
   property_mls: string;
@@ -14,6 +15,7 @@ export interface TourRequest {
 
 export const useTourRequest = () => {
   const { toast } = useToast();
+  const { createOrUpdateLeadStatus } = useLeadDeduplication();
 
   const submitTourRequest = async (request: TourRequest) => {
     try {
@@ -24,6 +26,15 @@ export const useTourRequest = () => {
         .single();
 
       if (error) throw error;
+
+      // Create or update lead status for deduplication tracking
+      await createOrUpdateLeadStatus(
+        request.visitor_email,
+        request.visitor_name,
+        request.visitor_phone,
+        "tour_request",
+        request.property_mls
+      );
 
       toast({
         title: "Tour Request Submitted!",

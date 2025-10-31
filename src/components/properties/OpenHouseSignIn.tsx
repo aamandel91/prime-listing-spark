@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
+import { useLeadDeduplication } from "@/hooks/useLeadDeduplication";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -43,6 +44,7 @@ export default function OpenHouseSignIn({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trackPropertyView } = useFollowUpBoss();
+  const { createOrUpdateLeadStatus } = useLeadDeduplication();
   
   const [formData, setFormData] = useState<OpenHouseFormData>({
     firstName: "",
@@ -102,6 +104,15 @@ export default function OpenHouseSignIn({
         });
 
       if (dbError) throw dbError;
+
+      // Create or update lead status for deduplication tracking
+      await createOrUpdateLeadStatus(
+        formData.email,
+        `${formData.firstName} ${formData.lastName}`,
+        formData.phone,
+        "open_house",
+        propertyId
+      );
 
       // Send to Follow Up Boss
       await trackPropertyView(
