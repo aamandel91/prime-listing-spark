@@ -21,11 +21,13 @@ import {
   ArrowUp,
   ArrowDown,
   User,
-  Clock
+  Clock,
+  MessageSquare
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LeadActivityDialog from "@/components/admin/LeadActivityDialog";
 
 interface OpenHouseLead {
   id: string;
@@ -65,6 +67,7 @@ export default function Leads() {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [selectedLead, setSelectedLead] = useState<{ id: string; name: string; email: string } | null>(null);
 
   // Fetch open house leads
   const { data: openHouseLeads, isLoading: loadingOpenHouse, refetch: refetchOpenHouse } = useQuery({
@@ -410,13 +413,26 @@ export default function Leads() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                const subject = encodeURIComponent(`RE: ${lead.property_address}`);
-                                const email = 'email' in lead ? lead.email : lead.visitor_email;
-                                window.location.href = `mailto:${email}?subject=${subject}`;
-                              }}>
-                                <Mail className="h-4 w-4" />
-                              </Button>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  const subject = encodeURIComponent(`RE: ${lead.property_address}`);
+                                  const email = 'email' in lead ? lead.email : lead.visitor_email;
+                                  window.location.href = `mailto:${email}?subject=${subject}`;
+                                }}>
+                                  <Mail className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setSelectedLead({
+                                    id: lead.id,
+                                    name: 'first_name' in lead ? `${lead.first_name} ${lead.last_name}` : lead.visitor_name,
+                                    email: 'email' in lead ? lead.email : lead.visitor_email
+                                  })}
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -625,6 +641,16 @@ export default function Leads() {
       </div>
 
       <Footer />
+      
+      {selectedLead && (
+        <LeadActivityDialog
+          open={!!selectedLead}
+          onOpenChange={(open) => !open && setSelectedLead(null)}
+          leadId={selectedLead.id}
+          leadName={selectedLead.name}
+          leadEmail={selectedLead.email}
+        />
+      )}
     </div>
   );
 }

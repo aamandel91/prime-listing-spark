@@ -67,6 +67,23 @@ export default function PropertyDetail() {
   const { submitTourRequest } = useTourRequest();
   const { isPPC, loading: trafficLoading } = useTrafficSource();
 
+  // Track property view
+  useEffect(() => {
+    if (listing && user) {
+      const trackView = async () => {
+        await supabase.from('property_views').insert({
+          property_mls: listing.mlsNumber || id || '',
+          property_address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
+            .filter(Boolean).join(' '),
+          visitor_email: user.email,
+          referrer: document.referrer || null,
+          session_id: user.id,
+        });
+      };
+      trackView();
+    }
+  }, [listing, user, id]);
+
   // Check authentication status
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
