@@ -29,6 +29,7 @@ const Listings = () => {
   
   // Filter states - Initialize from URL params
   const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [debouncedLocation, setDebouncedLocation] = useState(location);
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [minBeds, setMinBeds] = useState(searchParams.get("beds") || "");
@@ -43,17 +44,38 @@ const Listings = () => {
   const [maxYear, setMaxYear] = useState("");
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
+
+  // Debounce location search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedLocation(location);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [location]);
   
-  // Fetch properties from Repliers API
-  const { listings: apiListings, loading, error } = useRepliersListings({
-    city: location || undefined,
-    state: location ? "TX" : undefined,
+  // Fetch properties from Repliers API with pagination support
+  const [page, setPage] = useState(1);
+  const pageSize = 100;
+  
+  const { listings: apiListings, loading, error, totalCount, hasMore } = useRepliersListings({
+    city: debouncedLocation || undefined,
+    state: debouncedLocation ? "TX" : undefined,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
     bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
-    limit: 100,
+    minSqft: minSqft ? parseInt(minSqft) : undefined,
+    maxSqft: maxSqft ? parseInt(maxSqft) : undefined,
+    minYearBuilt: minYear ? parseInt(minYear) : undefined,
+    maxYearBuilt: maxYear ? parseInt(maxYear) : undefined,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedLocation, minPrice, maxPrice, minBeds, minBaths, minSqft, maxSqft, minYear, maxYear]);
 
   // Transform API data to match our component format
   const allProperties = useMemo(() => {
@@ -580,13 +602,35 @@ const Listings = () => {
 
               {/* Pagination */}
               {filteredProperties.length > 0 && (
-                <div className="flex justify-center mt-8">
+                <div className="flex flex-col items-center gap-4 mt-8">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, totalCount)} of {totalCount} properties
+                  </p>
                   <div className="flex gap-2">
-                    <Button variant="outline">Previous</Button>
-                    <Button variant="default">1</Button>
-                    <Button variant="outline">2</Button>
-                    <Button variant="outline">3</Button>
-                    <Button variant="outline">Next</Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1 || loading}
+                    >
+                      Previous
+                    </Button>
+                    {Array.from({ length: Math.min(5, Math.ceil(totalCount / pageSize)) }, (_, i) => i + 1).map((pageNum) => (
+                      <Button
+                        key={pageNum}
+                        variant={page === pageNum ? "default" : "outline"}
+                        onClick={() => setPage(pageNum)}
+                        disabled={loading}
+                      >
+                        {pageNum}
+                      </Button>
+                    ))}
+                    <Button 
+                      variant="outline"
+                      onClick={() => setPage(p => p + 1)}
+                      disabled={!hasMore || loading}
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               )}

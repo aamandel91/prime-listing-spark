@@ -100,6 +100,10 @@ export interface RepliersSearchParams {
   status?: string;
   limit?: number;
   offset?: number;
+  minSqft?: number;
+  maxSqft?: number;
+  minYearBuilt?: number;
+  maxYearBuilt?: number;
 }
 
 export const useRepliers = () => {
@@ -159,6 +163,8 @@ export const useRepliersListings = (params: RepliersSearchParams = {}) => {
   const [listings, setListings] = useState<RepliersProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const { searchListings } = useRepliers();
 
   useEffect(() => {
@@ -174,6 +180,12 @@ export const useRepliersListings = (params: RepliersSearchParams = {}) => {
         console.log('Parsed listings array:', listingsArray);
         
         setListings(Array.isArray(listingsArray) ? listingsArray : []);
+        setTotalCount(data?.count || 0);
+        
+        // Check if there are more pages
+        const currentPage = data?.page || 1;
+        const numPages = data?.numPages || 1;
+        setHasMore(currentPage < numPages);
       } catch (err) {
         setError(err as Error);
         console.error('Error fetching listings:', err);
@@ -186,7 +198,7 @@ export const useRepliersListings = (params: RepliersSearchParams = {}) => {
     fetchListings();
   }, [JSON.stringify(params)]);
 
-  return { listings, loading, error };
+  return { listings, loading, error, totalCount, hasMore };
 };
 
 export const useRepliersListing = (id: string) => {
@@ -200,7 +212,9 @@ export const useRepliersListing = (id: string) => {
       try {
         setLoading(true);
         setError(null);
+        console.log('Fetching property details for MLS:', id);
         const data = await getListingById(id);
+        console.log('Property detail data received:', data);
         setListing(data);
       } catch (err) {
         setError(err as Error);
