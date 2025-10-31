@@ -47,6 +47,7 @@ const Listings = () => {
   // Fetch properties from Repliers API
   const { listings: apiListings, loading, error } = useRepliersListings({
     city: location || undefined,
+    state: location ? "TX" : undefined,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,

@@ -61,7 +61,14 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Successfully fetched data from Repliers API, record count:', Array.isArray(data) ? data.length : 'not an array');
+    
+    // Log the response structure for debugging
+    console.log('Repliers API response structure:', {
+      isArray: Array.isArray(data),
+      keys: typeof data === 'object' ? Object.keys(data) : 'not an object',
+      hasListings: data?.listings ? `yes (${Array.isArray(data.listings) ? data.listings.length : 'not array'})` : 'no',
+      hasData: data?.data ? `yes (${Array.isArray(data.data) ? data.data.length : 'not array'})` : 'no'
+    });
 
     return new Response(
       JSON.stringify(data),

@@ -76,8 +76,8 @@ export const useRepliers = () => {
     try {
       const { data, error } = await supabase.functions.invoke('repliers-proxy', {
         body: {
-          endpoint: `/listing/${id}`,
-          params: {},
+          endpoint: `/listings`,
+          params: { mlsNumber: id },
         },
       });
 
@@ -86,7 +86,9 @@ export const useRepliers = () => {
         throw error;
       }
 
-      return data;
+      // Extract first listing from response
+      const listing = data?.listings?.[0] || data?.[0];
+      return listing;
     } catch (error) {
       console.error('Error in getListingById:', error);
       throw error;
