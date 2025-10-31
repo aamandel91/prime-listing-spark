@@ -1073,6 +1073,23 @@ export default function PropertyDetail() {
                 <label className="text-sm font-medium mb-2 block">Amortization</label>
                 <Input type="text" defaultValue="30 Years" readOnly />
               </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
+                <Input 
+                  type="text" 
+                  value={formatPrice(listing?.condominium?.fees?.maintenance || 0)}
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Insurance (Monthly)</label>
+                <Input 
+                  type="text" 
+                  value={formatPrice(Math.round((property.price * 0.005) / 12))}
+                  disabled
+                />
+                <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
+              </div>
               <Button className="w-full">Calculate</Button>
             </div>
           </div>

@@ -929,6 +929,23 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                           <Label className="text-sm mb-2 block">Amortization</Label>
                           <Input type="text" value="30 Years" disabled />
                         </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Association Fees (Monthly)</Label>
+                          <Input 
+                            type="text" 
+                            value={formatPrice(listing?.condominium?.fees?.maintenance || 0)}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm mb-2 block">Insurance (Monthly)</Label>
+                          <Input 
+                            type="text" 
+                            value={formatPrice(Math.round((property.price * 0.005) / 12))}
+                            disabled
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
+                        </div>
                         <Button className="w-full" size="lg">Calculate</Button>
                         <Separator />
                         <div className="bg-primary/10 p-4 rounded-lg">
