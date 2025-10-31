@@ -103,7 +103,10 @@ export interface RepliersSearchParams {
   bedrooms?: number;
   bathrooms?: number;
   propertyType?: string;
+  propertyTypeOrStyle?: string | string[];
   status?: string;
+  standardStatus?: string;
+  minLotSizeSqft?: number;
   limit?: number;
   offset?: number;
   minSqft?: number;

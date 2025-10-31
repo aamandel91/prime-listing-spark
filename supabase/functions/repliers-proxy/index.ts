@@ -23,7 +23,7 @@ serve(async (req) => {
 
     // Get parameters from request body or URL
     let endpoint = '/listings';
-    let queryParams: Record<string, string> = {};
+    let queryParams: Record<string, any> = {};
     
     if (req.method === 'POST') {
       const body = await req.json();
@@ -39,7 +39,16 @@ serve(async (req) => {
       });
     }
 
-    const searchParams = new URLSearchParams(queryParams);
+    // Build search params, supporting array values by repeating keys
+    const searchParams = new URLSearchParams();
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => searchParams.append(key, String(v)));
+      } else if (value !== undefined && value !== null && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+
     const apiUrl = `https://api.repliers.io${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     
     console.log('Fetching from Repliers API:', apiUrl);

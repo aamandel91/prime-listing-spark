@@ -25,7 +25,7 @@ const PropertyTypes = () => {
       title: "1+ Acre Homes",
       icon: Trees,
       image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=House%20With%20Acreage&status=A"
+      link: "/listings?minLotSizeSqft=43560&status=A"
     },
     {
       title: "Luxury Homes",
@@ -37,7 +37,7 @@ const PropertyTypes = () => {
       title: "Multi Family Homes",
       icon: Warehouse,
       image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-      link: "/listings?type=Multi-Family%20Commercial&status=A"
+      link: "/listings?type=Multi%20Family&status=A"
     },
     {
       title: "New Construction",

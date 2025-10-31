@@ -63,7 +63,25 @@ const Listings = () => {
     mapStatusToApi(searchParams.get("status"))
   );
 
-  // Debounce location search
+  // Map status to Repliers standardStatus values
+  const mapStatusToStandard = (status: string | null): string => {
+    if (!status) return "Active";
+    const normalized = status.toLowerCase();
+    if (normalized === "active" || normalized === "a") return "Active";
+    if (normalized === "pending" || normalized === "under contract" || normalized === "u") return "Pending";
+    return "Active";
+  };
+
+  // Map friendly type to API acceptable values across MLS variations
+  const mapTypeToSynonyms = (type: string): string[] => {
+    const t = type.toLowerCase();
+    if (t.includes("single")) return ["House/Single Family", "Single Family Residence", "Single Family"];
+    if (t.includes("condo") || t.includes("apartment")) return ["Apartment/Condo", "Condominium", "Condo"];
+    if (t.includes("town")) return ["Townhouse", "Townhome"];
+    if (t.includes("multi")) return ["Multi Family", "Multi-Family", "Duplex", "Triplex", "Fourplex", "2-4 Unit", "5+ Unit"];
+    if (t.includes("acre")) return ["House With Acreage"];
+    return [type];
+  };
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedLocation(location);
@@ -114,12 +132,13 @@ const Listings = () => {
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
     bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
-    propertyType: propertyTypes.length === 1 ? propertyTypes[0] : undefined,
+    propertyTypeOrStyle: propertyTypes.length === 1 ? mapTypeToSynonyms(propertyTypes[0]) : undefined,
     minSqft: minSqft ? parseInt(minSqft) : undefined,
     maxSqft: maxSqft ? parseInt(maxSqft) : undefined,
     minYearBuilt: minYear ? parseInt(minYear) : undefined,
     maxYearBuilt: maxYear ? parseInt(maxYear) : undefined,
-    status: listingStatus || undefined,
+    standardStatus: mapStatusToStandard(listingStatus),
+    minLotSizeSqft: searchParams.get("minLotSizeSqft") ? parseInt(searchParams.get("minLotSizeSqft")!) : undefined,
     limit: pageSize,
     offset: (page - 1) * pageSize,
   });
