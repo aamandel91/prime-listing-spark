@@ -60,6 +60,7 @@ export default function PropertyDetail() {
   const [forceRegistration, setForceRegistration] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [enhancement, setEnhancement] = useState<any>(null);
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(id || "");
@@ -101,10 +102,23 @@ export default function PropertyDetail() {
       if (globalSettings?.setting_value === 'true') {
         setForceRegistration(true);
       }
+      
+      // Fetch listing enhancement if exists
+      if (id) {
+        const { data: enhancementData } = await supabase
+          .from("listing_enhancements")
+          .select("*")
+          .eq("property_mls", id)
+          .single();
+        
+        if (enhancementData) {
+          setEnhancement(enhancementData);
+        }
+      }
     };
 
     fetchSettings();
-  }, []);
+  }, [id]);
 
   // Show registration modal for PPC traffic if forced registration is enabled
   useEffect(() => {
@@ -381,8 +395,8 @@ export default function PropertyDetail() {
         <meta name="description" content={pageDescription} />
         <link rel="canonical" href={pageUrl} />
         
-        {/* Conditionally add noindex/nofollow based on SEO settings */}
-        {propertyNoindex && (
+        {/* Conditionally add noindex/nofollow for enhanced listings or based on SEO settings */}
+        {(enhancement || propertyNoindex) && (
           <meta name="robots" content="noindex, nofollow" />
         )}
         
@@ -722,6 +736,119 @@ export default function PropertyDetail() {
         </div>
 
         <Separator />
+
+        {/* Enhanced Listing Content - Floor Plans & Videos */}
+        {enhancement && (
+          <>
+            {/* Floor Plans Section */}
+            {enhancement.floor_plans && enhancement.floor_plans.length > 0 && (
+              <>
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
+                  <div className="p-8">
+                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                      Floor Plans
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {enhancement.floor_plans.map((plan: any, idx: number) => (
+                        <Card key={idx} className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
+                          <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                            <img 
+                              src={plan.url} 
+                              alt={plan.title}
+                              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="p-4 bg-gradient-to-b from-background to-muted/10">
+                            <h3 className="font-bold text-lg mb-2">{plan.title}</h3>
+                            {plan.description && (
+                              <p className="text-sm text-muted-foreground">{plan.description}</p>
+                            )}
+                            <Button 
+                              variant="outline" 
+                              className="mt-4 w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                              onClick={() => window.open(plan.url, '_blank')}
+                            >
+                              View Full Size
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+                <Separator />
+              </>
+            )}
+
+            {/* Video Section */}
+            {enhancement.video_embeds && enhancement.video_embeds.length > 0 && (
+              <>
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
+                  <div className="p-8">
+                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                      Property Videos
+                    </h2>
+                    <div className="space-y-6">
+                      {enhancement.video_embeds.map((video: any, idx: number) => (
+                        <div key={idx} className="space-y-3">
+                          {video.title && (
+                            <h3 className="font-bold text-xl">{video.title}</h3>
+                          )}
+                          <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl border-2 border-primary/20">
+                            <iframe
+                              src={video.url}
+                              title={video.title || `Property Video ${idx + 1}`}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+                <Separator />
+              </>
+            )}
+
+            {/* Documents Section */}
+            {enhancement.documents && enhancement.documents.length > 0 && (
+              <>
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
+                  <div className="p-8">
+                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                      Property Documents
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {enhancement.documents.map((doc: any, idx: number) => (
+                        <Card key={idx} className="hover:shadow-lg transition-shadow duration-300 border-2 hover:border-primary/50">
+                          <div className="p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <FileText className="w-8 h-8 text-primary" />
+                              <div>
+                                <h3 className="font-semibold">{doc.title}</h3>
+                                <p className="text-xs text-muted-foreground">{doc.type || 'PDF Document'}</p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => window.open(doc.url, '_blank')}
+                            >
+                              View
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+                <Separator />
+              </>
+            )}
+          </>
+        )}
 
         {/* Home Details Section */}
         <Card className="border-0 shadow-none bg-card">
