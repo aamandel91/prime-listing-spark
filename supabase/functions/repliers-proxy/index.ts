@@ -21,17 +21,25 @@ serve(async (req) => {
       );
     }
 
-    const url = new URL(req.url);
-    const endpoint = url.searchParams.get('endpoint') || '/listings';
-    const searchParams = new URLSearchParams();
+    // Get parameters from request body or URL
+    let endpoint = '/listings';
+    let queryParams: Record<string, string> = {};
     
-    // Forward all query parameters except 'endpoint'
-    url.searchParams.forEach((value, key) => {
-      if (key !== 'endpoint') {
-        searchParams.append(key, value);
-      }
-    });
+    if (req.method === 'POST') {
+      const body = await req.json();
+      endpoint = body.endpoint || endpoint;
+      queryParams = body.params || {};
+    } else {
+      const url = new URL(req.url);
+      endpoint = url.searchParams.get('endpoint') || endpoint;
+      url.searchParams.forEach((value, key) => {
+        if (key !== 'endpoint') {
+          queryParams[key] = value;
+        }
+      });
+    }
 
+    const searchParams = new URLSearchParams(queryParams);
     const apiUrl = `https://api.repliers.io${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     
     console.log('Fetching from Repliers API:', apiUrl);
@@ -53,7 +61,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Successfully fetched data from Repliers API');
+    console.log('Successfully fetched data from Repliers API, record count:', Array.isArray(data) ? data.length : 'not an array');
 
     return new Response(
       JSON.stringify(data),

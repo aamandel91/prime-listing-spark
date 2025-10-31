@@ -19,6 +19,9 @@ export interface RepliersProperty {
   listingDate?: string;
   latitude?: number;
   longitude?: number;
+  yearBuilt?: number;
+  hasPool?: boolean;
+  isWaterfront?: boolean;
 }
 
 export interface RepliersSearchParams {
@@ -37,19 +40,13 @@ export interface RepliersSearchParams {
 export const useRepliers = () => {
   const searchListings = async (params: RepliersSearchParams = {}) => {
     try {
-      const queryParams = new URLSearchParams();
-      
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          queryParams.append(key, String(value));
-        }
-      });
-
-      const queryString = queryParams.toString();
-      const url = queryString ? `?endpoint=/listings&${queryString}` : '?endpoint=/listings';
-
-      const { data, error } = await supabase.functions.invoke('repliers-proxy' + url, {
-        method: 'GET',
+      const { data, error } = await supabase.functions.invoke('repliers-proxy', {
+        body: {
+          endpoint: '/listings',
+          params: Object.fromEntries(
+            Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '')
+          ),
+        },
       });
 
       if (error) {
@@ -66,8 +63,11 @@ export const useRepliers = () => {
 
   const getListingById = async (id: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke(`repliers-proxy?endpoint=/listing/${id}`, {
-        method: 'GET',
+      const { data, error } = await supabase.functions.invoke('repliers-proxy', {
+        body: {
+          endpoint: `/listing/${id}`,
+          params: {},
+        },
       });
 
       if (error) {
@@ -100,10 +100,17 @@ export const useRepliersListings = (params: RepliersSearchParams = {}) => {
         setLoading(true);
         setError(null);
         const data = await searchListings(params);
-        setListings(data?.listings || []);
+        console.log('Repliers API response:', data);
+        
+        // Handle different response structures
+        const listingsArray = data?.listings || data?.data || data || [];
+        console.log('Parsed listings array:', listingsArray);
+        
+        setListings(Array.isArray(listingsArray) ? listingsArray : []);
       } catch (err) {
         setError(err as Error);
         console.error('Error fetching listings:', err);
+        setListings([]);
       } finally {
         setLoading(false);
       }

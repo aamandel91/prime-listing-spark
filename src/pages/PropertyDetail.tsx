@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
+import { useRepliersListing } from "@/hooks/useRepliers";
 import {
   ChevronLeft,
   ChevronRight,
@@ -32,6 +33,7 @@ import {
   Send,
   ChevronRight as ChevronRightIcon,
   Video,
+  Loader2,
 } from "lucide-react";
 
 export default function PropertyDetail() {
@@ -42,6 +44,10 @@ export default function PropertyDetail() {
   const [comment, setComment] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  
+  // Fetch property from Repliers API
+  const { listing, loading, error } = useRepliersListing(id || "");
+  
   const [contactForm, setContactForm] = useState({
     firstName: "",
     lastName: "",
@@ -69,66 +75,75 @@ export default function PropertyDetail() {
 
   const tourDates = getNextSevenDays();
 
-  // Mock data - replace with actual API call
-  const property = {
-    id: id || "1",
-    title: "505 Edwalton Way LOT 82",
-    address: "505 Edwalton Way LOT 82",
-    city: "Fayetteville",
-    state: "North Carolina",
-    zip: "28311",
-    county: "Cumberland",
-    subdivision: "The Hills At Stonegate",
-    mlsId: "LP752128",
-    price: 379999,
-    beds: 5,
-    baths: 3,
-    sqft: 2469,
-    acres: 0.35,
-    yearBuilt: 2025,
+  // Transform API listing to component format
+  const property = listing ? {
+    id: listing.id || id || "1",
+    title: listing.address || "Property",
+    address: listing.address || "",
+    city: listing.city || "",
+    state: listing.state || "FL",
+    zip: listing.zipCode || "",
+    county: "",
+    subdivision: "",
+    mlsId: listing.mlsNumber || "",
+    price: listing.price || 0,
+    beds: listing.bedrooms || 0,
+    baths: listing.bathrooms || 0,
+    sqft: listing.sqft || 0,
+    acres: 0,
+    yearBuilt: listing.yearBuilt || 2024,
     daysOnSite: 1,
-    propertyType: "Residential",
-    subType: "Single Family",
-    pricePerSqFt: 154,
-    dateListed: "Oct 20, 2025",
-    status: "Active",
-    description:
-      "This beautiful new construction home in The Hills at Stone Gate is under construction! Featuring 5 bedrooms, 2.5 bathrooms, and a 2-car garage, this home offers modern living at its finest. The open floor plan seamlessly connects the living spaces, perfect for both everyday living and entertaining.",
-    interiorFeatures: [
-      { label: "Interior Features", value: "Double Vanity, Kitchen Island and Separate Shower" },
-      { label: "Appliances", value: "Dishwasher, Microwave, Range and Washer/Dryer" },
-      { label: "Heating", value: "Heat Pump" },
-      { label: "Cooling", value: "Central Air and Electric" },
-      { label: "Fireplace", value: "Yes" },
-      { label: "# of Fireplaces", value: "1" },
-    ],
-    exteriorFeatures: [
-      { label: "Exterior", value: "Rain Gutters" },
-      { label: "Roof", value: "" },
-      { label: "Garage Spaces", value: "2" },
-      { label: "Foundation", value: "" },
-    ],
-    hoaFeatures: [
-      { label: "Has HOA", value: "Yes" },
-      { label: "Services included", value: "None" },
-      { label: "HOA fee", value: "$450 Annually" },
-    ],
-    additionalInfo: [
-      { label: "Styles", value: "" },
-      { label: "Price per Sq Ft", value: "$154" },
-    ],
+    propertyType: listing.propertyType || "Residential",
+    subType: listing.propertyType || "Single Family",
+    pricePerSqFt: listing.sqft ? Math.round(listing.price / listing.sqft) : 0,
+    dateListed: "Recently",
+    status: listing.status || "Active",
+    description: listing.description || "Beautiful property available for sale.",
+    interiorFeatures: [],
+    exteriorFeatures: [],
+    hoaFeatures: [],
+    additionalInfo: [],
     listingAgent: {
-      name: "LAUREN FURR",
-      phone: "336-501-0442",
-      company: "COLDWELL BANKER ADVANTAGE - FAYETTEVILLE",
+      name: "Contact Agent",
+      phone: "",
+      company: "",
     },
-    source: "Triangle, MLS, MLS#: LP752128",
-    images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
-    ],
-  };
+    source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
+    images: listing.images && listing.images.length > 0 
+      ? listing.images 
+      : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
+  } : null;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Navbar />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <p className="text-lg text-muted-foreground">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error or not found state
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-3xl font-bold mb-4">Property Not Found</h1>
+          <p className="text-muted-foreground mb-6">
+            We couldn't find the property you're looking for.
+          </p>
+          <Link to="/listings">
+            <Button>Browse All Listings</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -241,8 +256,7 @@ export default function PropertyDetail() {
       <div className="container mx-auto px-4 py-4 max-w-4xl">
         <BreadcrumbSEO 
           items={[
-            { label: property.city, href: `/city/${property.city.toLowerCase()}` },
-            { label: property.subdivision, href: `/listings?subdivision=${encodeURIComponent(property.subdivision)}` },
+            { label: property.city, href: `/${property.city.toLowerCase().replace(/\s+/g, '-')}` },
             { label: property.address, href: `/property/${id}` }
           ]} 
         />
