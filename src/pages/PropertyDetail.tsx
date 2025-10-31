@@ -1,7 +1,8 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,10 +51,28 @@ export default function PropertyDetail() {
   const [downPayment, setDownPayment] = useState("0");
   const [interestRate, setInterestRate] = useState("5.75");
   const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
+  const [propertyNoindex, setPropertyNoindex] = useState(false);
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(id || "");
   const { submitTourRequest } = useTourRequest();
+
+  // Fetch SEO settings
+  useEffect(() => {
+    const fetchSEOSettings = async () => {
+      const { data } = await supabase
+        .from("seo_settings")
+        .select("setting_value")
+        .eq("setting_key", "property_pages_noindex")
+        .single();
+
+      if (data?.setting_value && typeof data.setting_value === 'object' && 'enabled' in data.setting_value) {
+        setPropertyNoindex(data.setting_value.enabled as boolean);
+      }
+    };
+
+    fetchSEOSettings();
+  }, []);
   
   const [contactForm, setContactForm] = useState({
     firstName: "",
@@ -189,22 +208,9 @@ export default function PropertyDetail() {
     );
   }
 
-  // Error or not found state
+  // Error or not found state - Return 404
   if (error || !property) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-3xl font-bold mb-4">Property Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            We couldn't find the property you're looking for.
-          </p>
-          <Link to="/listings">
-            <Button>Browse All Listings</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return <Navigate to="/404" replace />;
   }
 
   const formatPrice = (price: number) => {
@@ -309,6 +315,11 @@ export default function PropertyDetail() {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <link rel="canonical" href={pageUrl} />
+        
+        {/* Conditionally add noindex/nofollow based on SEO settings */}
+        {propertyNoindex && (
+          <meta name="robots" content="noindex, nofollow" />
+        )}
         
         {/* Open Graph tags */}
         <meta property="og:title" content={pageTitle} />

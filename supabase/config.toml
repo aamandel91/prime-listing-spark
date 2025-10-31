@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.analyze-competitor-seo]
 verify_jwt = false
+
+[functions.generate-sitemap-content]
+verify_jwt = false
+
+[functions.generate-sitemap-listings]
+verify_jwt = false
