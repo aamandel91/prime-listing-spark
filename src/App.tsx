@@ -27,6 +27,7 @@ import Analytics from "./pages/admin/Analytics";
 import RoleManagement from "./pages/admin/RoleManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Leads from "./pages/admin/Leads";
+import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => {
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/advanced-search" element={<AdvancedSearch />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/sell" element={<Sell />} />
             
             {/* Protected Admin Routes */}
             <Route path="/admin/blog-migration" element={<ProtectedRoute requireRole="admin"><BlogMigration /></ProtectedRoute>} />
