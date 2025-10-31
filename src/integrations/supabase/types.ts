@@ -146,6 +146,51 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_requests: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          property_address: string
+          property_mls: string
+          status: string | null
+          tour_date: string
+          tour_type: string
+          updated_at: string | null
+          visitor_email: string
+          visitor_name: string
+          visitor_phone: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          property_address: string
+          property_mls: string
+          status?: string | null
+          tour_date: string
+          tour_type: string
+          updated_at?: string | null
+          visitor_email: string
+          visitor_name: string
+          visitor_phone?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          property_address?: string
+          property_mls?: string
+          status?: string | null
+          tour_date?: string
+          tour_type?: string
+          updated_at?: string | null
+          visitor_email?: string
+          visitor_name?: string
+          visitor_phone?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

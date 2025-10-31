@@ -1,18 +1,75 @@
-import { Building2, Users, MapPin, TrendingUp } from "lucide-react";
+import { Building2, MapPin, Home, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRepliers } from "@/hooks/useRepliers";
 
 const Stats = () => {
-  const stats = [
-    { icon: Building2, value: "15,000+", label: "Active Listings" },
-    { icon: Users, value: "50,000+", label: "Happy Clients" },
-    { icon: MapPin, value: "200+", label: "Cities Covered" },
-    { icon: TrendingUp, value: "$2.5B+", label: "Properties Sold" },
+  const [stats, setStats] = useState({
+    activeListings: 0,
+    citiesCount: 0,
+    avgPrice: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const { searchListings } = useRepliers();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch Florida-wide stats
+        const data = await searchListings({ state: 'FL', limit: 100 });
+        const listings = data?.listings || data?.data || data || [];
+        
+        if (Array.isArray(listings) && listings.length > 0) {
+          // Calculate stats from API data
+          const cities = new Set(listings.map((l: any) => l.address?.city).filter(Boolean));
+          const prices = listings.map((l: any) => l.listPrice || 0).filter(p => p > 0);
+          const avgPrice = prices.length > 0 
+            ? prices.reduce((a, b) => a + b, 0) / prices.length 
+            : 0;
+          
+          setStats({
+            activeListings: data?.count || listings.length,
+            citiesCount: cities.size,
+            avgPrice: Math.round(avgPrice),
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const displayStats = [
+    { 
+      icon: Building2, 
+      value: loading ? "..." : `${stats.activeListings.toLocaleString()}+`, 
+      label: "Active Listings" 
+    },
+    { 
+      icon: MapPin, 
+      value: loading ? "..." : `${stats.citiesCount}+`, 
+      label: "Cities Covered" 
+    },
+    { 
+      icon: Home, 
+      value: loading ? "..." : `$${Math.round(stats.avgPrice / 1000)}K`, 
+      label: "Average Price" 
+    },
+    { 
+      icon: TrendingUp, 
+      value: "98%", 
+      label: "Client Satisfaction" 
+    },
   ];
 
   return (
     <section className="py-16 bg-secondary">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
+          {displayStats.map((stat, index) => (
             <div
               key={index}
               className="text-center animate-fade-up"

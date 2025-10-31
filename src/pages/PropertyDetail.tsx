@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { useRepliersListing } from "@/hooks/useRepliers";
+import { useTourRequest } from "@/hooks/useTourRequest";
 import {
   ChevronLeft,
   ChevronRight,
@@ -52,6 +53,7 @@ export default function PropertyDetail() {
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(id || "");
+  const { submitTourRequest } = useTourRequest();
   
   const [contactForm, setContactForm] = useState({
     firstName: "",
@@ -1008,23 +1010,40 @@ export default function PropertyDetail() {
                 Tour with FloridaHomeFinder and one of our agents will be there to answer all your questions.
               </p>
 
-              {/* Sample Tour Times */}
-              <div className="border-2 rounded-lg p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Home className="w-6 h-6 text-primary" />
-                  <div>
-                    <div className="font-semibold">Wednesday, Oct 22</div>
-                    <div className="flex items-center gap-2 text-primary font-medium">
-                      <span>9am</span>
-                      <span>•</span>
-                      <span>10am</span>
-                      <span>•</span>
-                      <span>11am</span>
-                      <span>•</span>
-                      <button className="hover:underline">Check for more</button>
-                    </div>
-                  </div>
-                </div>
+              {/* Tour Date Selection */}
+              <div className="grid grid-cols-3 gap-2">
+                {tourDates.slice(0, 6).map((date) => (
+                  <Button
+                    key={date.fullDate}
+                    variant={selectedDate === date.fullDate ? "default" : "outline"}
+                    className="flex flex-col h-auto py-3"
+                    onClick={() => setSelectedDate(date.fullDate)}
+                  >
+                    <span className="text-xs">{date.dayOfWeek}</span>
+                    <span className="text-lg font-bold">{date.day}</span>
+                    <span className="text-xs">{date.month}</span>
+                  </Button>
+                ))}
+              </div>
+
+              {/* Tour Type Selection */}
+              <div className="flex gap-2">
+                <Button
+                  variant={tourType === "in-person" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTourType("in-person")}
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  In Person
+                </Button>
+                <Button
+                  variant={tourType === "video" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTourType("video")}
+                >
+                  <Video className="w-4 h-4 mr-2" />
+                  Video Chat
+                </Button>
               </div>
 
               {/* Schedule Button */}
@@ -1032,6 +1051,7 @@ export default function PropertyDetail() {
                 className="w-full h-14 text-lg"
                 size="lg"
                 onClick={() => setIsContactDialogOpen(true)}
+                disabled={!selectedDate}
               >
                 Schedule a tour
               </Button>
@@ -1424,7 +1444,32 @@ export default function PropertyDetail() {
             <p className="text-xs text-muted-foreground">
               By proceeding, you consent to receive calls, texts and voicemails at the number you provided (may be recorded and may be autodialed and use prerecorded and artificial voices), and email, from Florida Home Finder about your inquiry and other home-related matters. Msg/data rates may apply. This consent applies even if you are on a do not call list and is not a condition of any purchase.
             </p>
-            <Button className="w-full" onClick={() => setIsContactDialogOpen(false)}>Contact Agent</Button>
+            <Button 
+              className="w-full" 
+              onClick={async () => {
+                if (!contactForm.firstName || !contactForm.lastName || !contactForm.email) {
+                  return;
+                }
+                
+                // If we have a selected date, submit as tour request
+                if (selectedDate) {
+                  await submitTourRequest({
+                    property_mls: property.mlsId,
+                    property_address: `${property.address}, ${property.city}, ${property.state} ${property.zip}`,
+                    visitor_name: `${contactForm.firstName} ${contactForm.lastName}`,
+                    visitor_email: contactForm.email,
+                    visitor_phone: contactForm.phone,
+                    tour_date: selectedDate,
+                    tour_type: tourType,
+                    comments: contactForm.comments,
+                  });
+                }
+                
+                setIsContactDialogOpen(false);
+              }}
+            >
+              {selectedDate ? 'Schedule Tour' : 'Contact Agent'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
