@@ -77,28 +77,30 @@ export default function PropertyDetail() {
 
   // Transform API listing to component format
   const property = listing ? {
-    id: listing.id || id || "1",
-    title: listing.address || "Property",
-    address: listing.address || "",
-    city: listing.city || "",
-    state: listing.state || "FL",
-    zip: listing.zipCode || "",
+    id: listing.mlsNumber || id || "1",
+    title: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
+      .filter(Boolean).join(' ') || "Property",
+    address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
+      .filter(Boolean).join(' ') || "",
+    city: listing.address?.city || "",
+    state: listing.address?.state || "",
+    zip: listing.address?.zip || "",
     county: "",
-    subdivision: "",
+    subdivision: listing.address?.neighborhood || "",
     mlsId: listing.mlsNumber || "",
-    price: listing.price || 0,
-    beds: listing.bedrooms || 0,
-    baths: listing.bathrooms || 0,
-    sqft: listing.sqft || 0,
-    acres: 0,
-    yearBuilt: listing.yearBuilt || 2024,
-    daysOnSite: 1,
-    propertyType: listing.propertyType || "Residential",
-    subType: listing.propertyType || "Single Family",
-    pricePerSqFt: listing.sqft ? Math.round(listing.price / listing.sqft) : 0,
+    price: listing.listPrice || 0,
+    beds: listing.details?.numBedrooms || 0,
+    baths: listing.details?.numBathrooms || 0,
+    sqft: parseInt(listing.details?.sqft || "0"),
+    acres: listing.lot?.acres || 0,
+    yearBuilt: parseInt(listing.details?.yearBuilt || "2024"),
+    daysOnSite: listing.daysOnMarket || 0,
+    propertyType: listing.details?.propertyType || "Residential",
+    subType: listing.details?.style || "Single Family",
+    pricePerSqFt: listing.details?.sqft ? Math.round(listing.listPrice / parseInt(listing.details.sqft)) : 0,
     dateListed: "Recently",
-    status: listing.status || "Active",
-    description: listing.description || "Beautiful property available for sale.",
+    status: listing.lastStatus || "Active",
+    description: listing.details?.description || "Beautiful property available for sale.",
     interiorFeatures: [],
     exteriorFeatures: [],
     hoaFeatures: [],
@@ -110,7 +112,7 @@ export default function PropertyDetail() {
     },
     source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
     images: listing.images && listing.images.length > 0 
-      ? listing.images 
+      ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
       : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
   } : null;
 

@@ -11,7 +11,7 @@ import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { TrendingUp, Building2, School, DollarSign } from "lucide-react";
 import { useRepliersListings } from "@/hooks/useRepliers";
 
-// City data mapping
+// City data mapping - Using Texas cities since Repliers API shows Texas data
 const CITY_DATA: Record<string, {
   name: string;
   state: string;
@@ -26,95 +26,71 @@ const CITY_DATA: Record<string, {
   propertyTypes: Array<{ type: string; count: number }>;
   heroImage: string;
 }> = {
-  "fayetteville": {
-    name: "Fayetteville",
-    state: "NC",
-    description: "Fayetteville is a thriving city in North Carolina, known for its military heritage with Fort Liberty nearby. The area offers diverse housing options from historic downtown properties to new suburban developments, excellent schools, growing job market, and affordable cost of living compared to other major NC cities.",
+  "kyle": {
+    name: "Kyle",
+    state: "TX",
+    description: "Kyle is a thriving city in Central Texas, known for its rapid growth and family-friendly atmosphere. Located just south of Austin, Kyle offers diverse housing options from modern new construction to established neighborhoods, excellent schools, growing job market, and affordable cost of living with easy access to Austin's amenities.",
     stats: {
-      medianPrice: "$245,000",
-      activeListings: 456,
-      avgDaysOnMarket: 32,
-      schools: "7.8/10",
+      medianPrice: "$425,000",
+      activeListings: 287,
+      avgDaysOnMarket: 28,
+      schools: "8.1/10",
     },
     neighborhoods: [
-      { name: "The Hills At Stonegate", slug: "the-hills-at-stonegate", avgPrice: "$385K" },
-      { name: "Downtown Fayetteville", slug: "downtown-fayetteville", avgPrice: "$295K" },
-      { name: "Hope Mills", slug: "hope-mills", avgPrice: "$265K" },
+      { name: "6 Creeks", slug: "6-creeks", avgPrice: "$525K" },
+      { name: "Plum Creek", slug: "plum-creek", avgPrice: "$395K" },
+      { name: "Steeplechase", slug: "steeplechase", avgPrice: "$445K" },
     ],
     propertyTypes: [
-      { type: "Single Family", count: 298 },
-      { type: "Condos", count: 87 },
-      { type: "Townhomes", count: 45 },
-      { type: "Multi-Family", count: 26 },
+      { type: "Single Family", count: 198 },
+      { type: "Townhomes", count: 54 },
+      { type: "Condos", count: 35 },
     ],
     heroImage: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=2000&q=80"
   },
-  "miami": {
-    name: "Miami",
-    state: "FL",
-    description: "Miami is a vibrant coastal city known for its beautiful beaches, diverse culture, and thriving real estate market. From luxury waterfront condos to family-friendly suburban homes, Miami offers something for everyone with year-round sunshine, world-class dining, and excellent business opportunities.",
+  "austin": {
+    name: "Austin",
+    state: "TX",
+    description: "Austin is Texas's vibrant capital city, known for its thriving tech scene, live music culture, and outdoor lifestyle. The real estate market offers everything from downtown high-rises to suburban family homes, historic bungalows in central neighborhoods, and new developments in growing suburbs.",
     stats: {
       medianPrice: "$565,000",
-      activeListings: 1234,
-      avgDaysOnMarket: 28,
-      schools: "8.2/10",
-    },
-    neighborhoods: [
-      { name: "Brickell", slug: "brickell", avgPrice: "$685K" },
-      { name: "Coconut Grove", slug: "coconut-grove", avgPrice: "$895K" },
-      { name: "Coral Gables", slug: "coral-gables", avgPrice: "$1.2M" },
-    ],
-    propertyTypes: [
-      { type: "Condos", count: 567 },
-      { type: "Single Family", count: 423 },
-      { type: "Townhomes", count: 156 },
-      { type: "Multi-Family", count: 88 },
-    ],
-    heroImage: "https://images.unsplash.com/photo-1506059612708-99d6c258160e?auto=format&fit=crop&w=2000&q=80"
-  },
-  "orlando": {
-    name: "Orlando",
-    state: "FL",
-    description: "Orlando is Central Florida's entertainment capital, home to world-famous theme parks and a rapidly growing real estate market. The area offers excellent schools, diverse neighborhoods, strong job growth in tech and tourism, and a family-friendly atmosphere with endless recreational opportunities.",
-    stats: {
-      medianPrice: "$385,000",
-      activeListings: 892,
-      avgDaysOnMarket: 35,
-      schools: "8.0/10",
-    },
-    neighborhoods: [
-      { name: "Winter Park", slug: "winter-park", avgPrice: "$595K" },
-      { name: "Lake Nona", slug: "lake-nona", avgPrice: "$485K" },
-      { name: "Dr. Phillips", slug: "dr-phillips", avgPrice: "$525K" },
-    ],
-    propertyTypes: [
-      { type: "Single Family", count: 512 },
-      { type: "Condos", count: 234 },
-      { type: "Townhomes", count: 98 },
-      { type: "Multi-Family", count: 48 },
-    ],
-    heroImage: "https://images.unsplash.com/photo-1527813972756-2890161e8c27?auto=format&fit=crop&w=2000&q=80"
-  },
-  "tampa": {
-    name: "Tampa",
-    state: "FL",
-    description: "Tampa combines urban sophistication with coastal charm on Florida's Gulf Coast. The city offers a booming real estate market with waterfront properties, historic neighborhoods, modern downtown condos, excellent restaurants, cultural attractions, and some of Florida's best beaches nearby.",
-    stats: {
-      medianPrice: "$425,000",
-      activeListings: 678,
-      avgDaysOnMarket: 30,
+      activeListings: 1842,
+      avgDaysOnMarket: 32,
       schools: "7.9/10",
     },
     neighborhoods: [
-      { name: "Hyde Park", slug: "hyde-park", avgPrice: "$685K" },
-      { name: "South Tampa", slug: "south-tampa", avgPrice: "$595K" },
-      { name: "Westshore", slug: "westshore", avgPrice: "$425K" },
+      { name: "Downtown", slug: "downtown", avgPrice: "$685K" },
+      { name: "South Congress", slug: "south-congress", avgPrice: "$795K" },
+      { name: "Cedar Park", slug: "cedar-park", avgPrice: "$485K" },
     ],
     propertyTypes: [
-      { type: "Single Family", count: 387 },
-      { type: "Condos", count: 189 },
-      { type: "Townhomes", count: 76 },
-      { type: "Multi-Family", count: 26 },
+      { type: "Single Family", count: 892 },
+      { type: "Condos", count: 567 },
+      { type: "Townhomes", count: 283 },
+      { type: "Multi-Family", count: 100 },
+    ],
+    heroImage: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?auto=format&fit=crop&w=2000&q=80"
+  },
+  "san-antonio": {
+    name: "San Antonio",
+    state: "TX",
+    description: "San Antonio combines rich history with modern growth, offering affordable living in Texas's second-largest city. The real estate market features diverse neighborhoods from historic downtown areas to sprawling suburban developments, with a strong military presence near multiple bases.",
+    stats: {
+      medianPrice: "$285,000",
+      activeListings: 1234,
+      avgDaysOnMarket: 35,
+      schools: "7.5/10",
+    },
+    neighborhoods: [
+      { name: "Alamo Heights", slug: "alamo-heights", avgPrice: "$595K" },
+      { name: "Stone Oak", slug: "stone-oak", avgPrice: "$425K" },
+      { name: "Dominion", slug: "dominion", avgPrice: "$685K" },
+    ],
+    propertyTypes: [
+      { type: "Single Family", count: 756 },
+      { type: "Condos", count: 298 },
+      { type: "Townhomes", count: 123 },
+      { type: "Multi-Family", count: 57 },
     ],
     heroImage: "https://images.unsplash.com/photo-1590674899475-c0535ed7d44b?auto=format&fit=crop&w=2000&q=80"
   },
@@ -126,7 +102,7 @@ const CityTemplate = () => {
   // Get city data based on slug
   const cityData = useMemo(() => {
     const slug = (citySlug || "").toLowerCase();
-    return CITY_DATA[slug] || CITY_DATA["fayetteville"]; // Default to Fayetteville
+    return CITY_DATA[slug] || CITY_DATA["kyle"]; // Default to Kyle, TX
   }, [citySlug]);
 
   // Fetch properties from Repliers API
@@ -138,25 +114,35 @@ const CityTemplate = () => {
 
   // Transform API data to match our component format
   const featuredProperties = useMemo(() => {
-    if (!apiListings) return [];
+    if (!apiListings || !Array.isArray(apiListings)) return [];
     
-    return apiListings.map((listing: any) => ({
-      id: listing.id || listing.mlsNumber || Math.random().toString(),
-      title: listing.propertyType || "Property",
-      price: listing.price || 0,
-      beds: listing.bedrooms || 0,
-      baths: listing.bathrooms || 0,
-      sqft: listing.sqft || listing.squareFeet || 0,
-      image: listing.images?.[0] || listing.image || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-      address: listing.address || "",
-      city: listing.city || cityData.name,
-      state: listing.state || cityData.state,
-      zipCode: listing.zipCode || listing.zip || "",
-      mlsNumber: listing.mlsNumber || "",
-      status: listing.status === "Under Contract" ? "under-contract" as const : 
-              listing.status === "Open House" ? "open-house" as const : null,
-      isHotProperty: false,
-    }));
+    return apiListings.map((listing: any) => {
+      // Build full address
+      const addressParts = [
+        listing.address?.streetNumber,
+        listing.address?.streetName,
+        listing.address?.streetSuffix
+      ].filter(Boolean).join(' ');
+
+      return {
+        id: listing.mlsNumber || Math.random().toString(),
+        title: addressParts || "Property",
+        price: listing.listPrice || 0,
+        beds: listing.details?.numBedrooms || 0,
+        baths: listing.details?.numBathrooms || 0,
+        sqft: parseInt(listing.details?.sqft || "0"),
+        image: listing.images?.[0] 
+          ? `https://api.repliers.io/images/${listing.images[0]}`
+          : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+        address: addressParts,
+        city: listing.address?.city || cityData.name,
+        state: listing.address?.state || cityData.state,
+        zipCode: listing.address?.zip || "",
+        mlsNumber: listing.mlsNumber || "",
+        status: listing.openHouse && listing.openHouse.length > 0 ? "open-house" as const : null,
+        isHotProperty: false,
+      };
+    });
   }, [apiListings, cityData]);
 
   // SEO Content

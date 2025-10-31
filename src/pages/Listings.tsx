@@ -56,31 +56,41 @@ const Listings = () => {
 
   // Transform API data to match our component format
   const allProperties = useMemo(() => {
-    if (!apiListings) return [];
+    if (!apiListings || !Array.isArray(apiListings)) return [];
     
-    return apiListings.map((listing: any) => ({
-      id: listing.id || listing.mlsNumber || Math.random().toString(),
-      title: listing.propertyType || "Property",
-      price: listing.price || 0,
-      beds: listing.bedrooms || 0,
-      baths: listing.bathrooms || 0,
-      sqft: listing.sqft || listing.squareFeet || 0,
-      image: listing.images?.[0] || listing.image || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-      address: listing.address || "",
-      city: listing.city || "",
-      state: listing.state || "FL",
-      zipCode: listing.zipCode || listing.zip || "",
-      mlsNumber: listing.mlsNumber || "",
-      status: listing.status === "Under Contract" ? "under-contract" as const : 
-              listing.status === "Open House" ? "open-house" as const : null,
-      type: listing.propertyType?.toLowerCase() || "homes",
-      yearBuilt: listing.yearBuilt || 2020,
-      hasPool: listing.hasPool || false,
-      isWaterfront: listing.isWaterfront || false,
-      description: listing.description || "",
-      lat: listing.latitude || 0,
-      lng: listing.longitude || 0,
-    }));
+    return apiListings.map((listing: any) => {
+      // Build full address
+      const addressParts = [
+        listing.address?.streetNumber,
+        listing.address?.streetName,
+        listing.address?.streetSuffix
+      ].filter(Boolean).join(' ');
+
+      return {
+        id: listing.mlsNumber || Math.random().toString(),
+        title: addressParts || "Property",
+        price: listing.listPrice || 0,
+        beds: listing.details?.numBedrooms || 0,
+        baths: listing.details?.numBathrooms || 0,
+        sqft: parseInt(listing.details?.sqft || "0"),
+        image: listing.images?.[0] 
+          ? `https://api.repliers.io/images/${listing.images[0]}`
+          : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+        address: addressParts,
+        city: listing.address?.city || "",
+        state: listing.address?.state || "",
+        zipCode: listing.address?.zip || "",
+        mlsNumber: listing.mlsNumber || "",
+        status: listing.openHouse && listing.openHouse.length > 0 ? "open-house" as const : null,
+        type: (listing.details?.propertyType || "homes").toLowerCase(),
+        yearBuilt: parseInt(listing.details?.yearBuilt || "2020"),
+        hasPool: listing.details?.swimmingPool && listing.details.swimmingPool !== "None",
+        isWaterfront: listing.details?.waterfront === "Yes",
+        description: listing.details?.description || "",
+        lat: listing.map?.latitude || 0,
+        lng: listing.map?.longitude || 0,
+      };
+    });
   }, [apiListings]);
 
   // Update URL params with current filters

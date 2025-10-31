@@ -2,26 +2,37 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface RepliersProperty {
-  id: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode?: string;
-  price: number;
-  bedrooms: number;
-  bathrooms: number;
-  sqft: number;
-  propertyType?: string;
-  status?: string;
-  mlsNumber?: string;
-  description?: string;
-  images?: string[];
-  listingDate?: string;
-  latitude?: number;
-  longitude?: number;
-  yearBuilt?: number;
-  hasPool?: boolean;
-  isWaterfront?: boolean;
+  mlsNumber: string;
+  listPrice: number;
+  address: {
+    streetNumber: string;
+    streetName: string;
+    streetSuffix: string;
+    city: string;
+    state: string;
+    zip: string;
+    neighborhood?: string;
+  };
+  details: {
+    numBedrooms: number;
+    numBathrooms: number;
+    sqft: string;
+    yearBuilt: string;
+    description: string;
+    propertyType: string;
+    style: string;
+  };
+  images: string[];
+  map: {
+    latitude: number;
+    longitude: number;
+  };
+  lastStatus: string;
+  daysOnMarket: number;
+  lot?: {
+    acres: number;
+  };
+  openHouse?: Array<any>;
 }
 
 export interface RepliersSearchParams {
