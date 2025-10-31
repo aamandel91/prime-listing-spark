@@ -573,6 +573,18 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
                       </div>
                     </div>
 
+                    {/* Estimated Value */}
+                    <div className="mb-4 text-sm">
+                      <span className="text-muted-foreground">
+                        Estimate ({new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}){" "}
+                      </span>
+                      {property.avm && property.avm.value > 0 ? (
+                        <span className="font-semibold">{formatPrice(property.avm.value)}</span>
+                      ) : (
+                        <span className="font-semibold">Not available</span>
+                      )}
+                    </div>
+
                     {/* CTA buttons - mobile */}
                     <div className="flex flex-col sm:flex-row gap-3 mb-6 lg:hidden">
                       <Button className="flex-1" size="lg" onClick={() => setIsContactFormOpen(true)}>Request a Tour</Button>

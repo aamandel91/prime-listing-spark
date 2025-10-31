@@ -148,11 +148,13 @@ const PropertyCard = ({
           )}
         </div>
 
-        {avm && avm > 0 && (
-          <div className="text-xs text-muted-foreground mb-3">
-            Estimate ({new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}) <span className={avmStatus?.color || ""}>{formatPrice(avm)}</span>
-          </div>
-        )}
+        <div className="text-xs text-muted-foreground mb-3">
+          Estimate ({new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}) {avm && avm > 0 ? (
+            <span className={avmStatus?.color || ""}>{formatPrice(avm)}</span>
+          ) : (
+            <span>Not available</span>
+          )}
+        </div>
         
         <div className="flex items-center gap-2 mb-3 text-sm">
           <span className="text-foreground">
