@@ -147,11 +147,15 @@ export default function PropertyDetail() {
       company: listing.agents?.[0]?.brokerage?.name || listing.office?.brokerageName || "",
     },
     // AVM data
-    avm: listing.avm ? {
+    avm: listing.estimate ? {
+      value: Math.round((listing.estimate.high + listing.estimate.low) / 2),
+      high: listing.estimate.high,
+      low: listing.estimate.low,
+    } : (listing.avm ? {
       value: listing.avm.value,
       high: listing.avm.high,
       low: listing.avm.low,
-    } : null,
+    } : null),
     source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
     images: listing.images && listing.images.length > 0 
       ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
