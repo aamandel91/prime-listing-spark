@@ -128,6 +128,7 @@ const CityTemplate = () => {
         id: listing.mlsNumber || Math.random().toString(),
         title: addressParts || "Property",
         price: listing.listPrice || 0,
+        avm: listing.avm?.value || 0,
         beds: listing.details?.numBedrooms || 0,
         baths: listing.details?.numBathrooms || 0,
         sqft: parseInt(listing.details?.sqft || "0"),

@@ -20,6 +20,7 @@ interface PropertyCardProps {
   isShowcase?: boolean;
   status?: "open-house" | "under-contract" | null;
   description?: string;
+  avm?: number;
   onOpenModal?: (id: string) => void;
 }
 
@@ -39,6 +40,7 @@ const PropertyCard = ({
   isShowcase,
   status,
   description,
+  avm,
   onOpenModal,
 }: PropertyCardProps) => {
   const formatPrice = (price: number) => {
@@ -48,6 +50,23 @@ const PropertyCard = ({
       minimumFractionDigits: 0,
     }).format(price);
   };
+
+  // Determine if it's a good deal based on AVM
+  const getAvmStatus = () => {
+    if (!avm || avm === 0) return null;
+    
+    const priceDiff = avm - price;
+    const percentDiff = (priceDiff / price) * 100;
+    
+    if (percentDiff > 5) {
+      return { isGoodDeal: true, label: "Good Deal", color: "text-green-600" };
+    } else if (percentDiff < -5) {
+      return { isGoodDeal: false, label: "Above Est.", color: "text-red-600" };
+    }
+    return null;
+  };
+
+  const avmStatus = getAvmStatus();
 
   // Generate SEO-optimized alt text
   const altText = `${beds} bedroom, ${baths} bathroom ${title.toLowerCase()} for sale in ${city}, ${state} - ${formatPrice(price)}`;
@@ -112,9 +131,25 @@ const PropertyCard = ({
       </div>
 
       <div className="p-4 flex flex-col flex-1">
-        <div className="text-2xl font-bold text-primary mb-3">
-          {formatPrice(price)}
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-2xl font-bold text-primary">
+            {formatPrice(price)}
+          </div>
+          {avmStatus && (
+            <Badge 
+              variant="outline" 
+              className={`${avmStatus.color} border-current font-semibold text-xs`}
+            >
+              {avmStatus.label}
+            </Badge>
+          )}
         </div>
+
+        {avm && avm > 0 && (
+          <div className="text-xs text-muted-foreground mb-3">
+            Est. Value: <span className={avmStatus?.color || ""}>{formatPrice(avm)}</span>
+          </div>
+        )}
         
         <div className="flex items-center gap-2 mb-3 text-sm">
           <span className="text-foreground">
