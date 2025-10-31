@@ -45,7 +45,7 @@ const SearchDropdown = () => {
                   <li key={region.city}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?city=${encodeURIComponent(region.city)}&state=${region.state}&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(region.city)}&state=${region.state}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {region.name}

@@ -28,7 +28,7 @@ const Hero = () => {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (beds && beds !== "any") params.set("beds", beds);
     if (baths && baths !== "any") params.set("baths", baths);
-    params.set("status", "Active");
+    params.set("status", "A");
     
     navigate(`/listings?${params.toString()}`);
   };

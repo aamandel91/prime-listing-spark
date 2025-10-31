@@ -48,7 +48,7 @@ const Listings = () => {
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "TX");
-  const [listingStatus, setListingStatus] = useState(searchParams.get("status") || "Active");
+  const [listingStatus, setListingStatus] = useState(searchParams.get("status") || "A");
 
   // Debounce location search
   useEffect(() => {

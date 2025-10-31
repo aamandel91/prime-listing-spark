@@ -57,7 +57,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}
@@ -76,7 +76,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}
@@ -95,7 +95,7 @@ const CountiesDropdown = () => {
                   <li key={county.slug}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(county.name.replace(' County', ''))}&state=FL&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {county.name}

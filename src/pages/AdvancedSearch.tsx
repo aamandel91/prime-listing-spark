@@ -23,7 +23,7 @@ const AdvancedSearch = () => {
   const [state, setState] = useState("TX");
   const [yearBuiltMin, setYearBuiltMin] = useState("");
   const [yearBuiltMax, setYearBuiltMax] = useState("");
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("A");
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -230,9 +230,8 @@ const AdvancedSearch = () => {
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Sold">Sold</SelectItem>
+                          <SelectItem value="A">Active</SelectItem>
+                          <SelectItem value="U">Under Contract</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

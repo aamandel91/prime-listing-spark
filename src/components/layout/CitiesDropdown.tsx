@@ -55,7 +55,7 @@ const CitiesDropdown = () => {
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -74,7 +74,7 @@ const CitiesDropdown = () => {
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}
@@ -93,7 +93,7 @@ const CitiesDropdown = () => {
                   <li key={city.slug}>
                     <NavigationMenuLink asChild>
                        <Link
-                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=Active`}
+                        to={`/listings?city=${encodeURIComponent(city.name)}&state=${city.state}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {city.name}

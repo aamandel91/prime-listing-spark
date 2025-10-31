@@ -41,7 +41,7 @@ const PropertyTypeDropdown = () => {
                   <li key={item.type}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?type=${encodeURIComponent(item.type)}&status=Active`}
+                        to={`/listings?type=${encodeURIComponent(item.type)}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}
@@ -59,7 +59,7 @@ const PropertyTypeDropdown = () => {
                   <li key={item.type}>
                     <NavigationMenuLink asChild>
                       <Link
-                        to={`/listings?type=${encodeURIComponent(item.type)}&status=Active`}
+                        to={`/listings?type=${encodeURIComponent(item.type)}&status=A`}
                         className="block text-foreground hover:text-primary transition-colors"
                       >
                         {item.name}
