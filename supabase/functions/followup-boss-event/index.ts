@@ -1,12 +1,80 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const FUB_API_KEY = Deno.env.get('FOLLOWUP_BOSS_API_KEY');
 const FUB_API_URL = 'https://api.followupboss.com/v1/events';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-request-signature, x-request-timestamp',
 };
+
+// Simple rate limiting using in-memory store (resets on function restart)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 50; // requests per window
+const RATE_WINDOW = 60000; // 1 minute in ms
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
+// Verify request signature to prevent abuse
+async function verifyRequestSignature(req: Request, body: string): Promise<boolean> {
+  const signature = req.headers.get('x-request-signature');
+  const timestamp = req.headers.get('x-request-timestamp');
+  
+  if (!signature || !timestamp) {
+    console.log('Missing signature or timestamp');
+    return false;
+  }
+  
+  // Check timestamp is within 5 minutes
+  const requestTime = parseInt(timestamp);
+  const now = Date.now();
+  if (Math.abs(now - requestTime) > 300000) {
+    console.log('Request timestamp too old');
+    return false;
+  }
+  
+  // Verify signature using API key as secret
+  const apiKey = Deno.env.get('VITE_SUPABASE_ANON_KEY') || '';
+  const message = `${timestamp}.${body}`;
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(apiKey);
+  const messageData = encoder.encode(message);
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
+  const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  
+  return signature === expectedSignature;
+}
 
 interface PersonData {
   firstName?: string;
@@ -63,6 +131,21 @@ serve(async (req) => {
 
   try {
     console.log('Follow Up Boss event request received');
+    
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    
+    // Check rate limit
+    if (!checkRateLimit(clientIP)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     if (!FUB_API_KEY) {
       console.error('FOLLOWUP_BOSS_API_KEY not configured');
@@ -75,8 +158,34 @@ serve(async (req) => {
       );
     }
 
-    const eventData: FUBEventRequest = await req.json();
+    const bodyText = await req.text();
+    const eventData: FUBEventRequest = JSON.parse(bodyText);
+    
+    // Verify request signature
+    const isValidSignature = await verifyRequestSignature(req, bodyText);
+    if (!isValidSignature) {
+      console.warn('Invalid request signature from IP:', clientIP);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request signature' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     console.log('Event data received:', JSON.stringify(eventData, null, 2));
+    
+    // Input validation
+    if (!eventData.type || typeof eventData.type !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid event type' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // Build the FUB event payload
     const fubPayload: any = {

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_summary: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+        }
+        Relationships: []
+      }
       blogs: {
         Row: {
           author_id: string
@@ -53,6 +80,54 @@ export type Database = {
           slug?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      email_notifications: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          html_content: string
+          id: string
+          retry_count: number | null
+          sent_at: string | null
+          status: string
+          subject: string
+          template_data: Json | null
+          template_name: string | null
+          to_email: string
+          to_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          html_content: string
+          id?: string
+          retry_count?: number | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          template_data?: Json | null
+          template_name?: string | null
+          to_email: string
+          to_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          html_content?: string
+          id?: string
+          retry_count?: number | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          template_data?: Json | null
+          template_name?: string | null
+          to_email?: string
+          to_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -191,6 +266,99 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_activities: {
+        Row: {
+          activity_content: string | null
+          activity_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          lead_email: string
+          lead_name: string | null
+          metadata: Json | null
+          new_status: Database["public"]["Enums"]["lead_status"] | null
+          old_status: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Insert: {
+          activity_content?: string | null
+          activity_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_email: string
+          lead_name?: string | null
+          metadata?: Json | null
+          new_status?: Database["public"]["Enums"]["lead_status"] | null
+          old_status?: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Update: {
+          activity_content?: string | null
+          activity_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_email?: string
+          lead_name?: string | null
+          metadata?: Json | null
+          new_status?: Database["public"]["Enums"]["lead_status"] | null
+          old_status?: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Relationships: []
+      }
+      lead_statuses: {
+        Row: {
+          assigned_agent: string | null
+          conversion_date: string | null
+          created_at: string
+          first_contact_date: string | null
+          id: string
+          last_contact_date: string | null
+          lead_email: string
+          lead_name: string | null
+          lead_phone: string | null
+          notes: string | null
+          source: string | null
+          source_property_mls: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          conversion_date?: string | null
+          created_at?: string
+          first_contact_date?: string | null
+          id?: string
+          last_contact_date?: string | null
+          lead_email: string
+          lead_name?: string | null
+          lead_phone?: string | null
+          notes?: string | null
+          source?: string | null
+          source_property_mls?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          conversion_date?: string | null
+          created_at?: string
+          first_contact_date?: string | null
+          id?: string
+          last_contact_date?: string | null
+          lead_email?: string
+          lead_name?: string | null
+          lead_phone?: string | null
+          notes?: string | null
+          source?: string | null
+          source_property_mls?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       listing_enhancements: {
         Row: {
           created_at: string
@@ -314,6 +482,45 @@ export type Database = {
           id?: string
           logo_url?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      property_views: {
+        Row: {
+          created_at: string
+          id: string
+          property_address: string | null
+          property_mls: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          view_duration_seconds: number | null
+          visitor_email: string | null
+          visitor_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_address?: string | null
+          property_mls: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          view_duration_seconds?: number | null
+          visitor_email?: string | null
+          visitor_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_address?: string | null
+          property_mls?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          view_duration_seconds?: number | null
+          visitor_email?: string | null
+          visitor_ip?: string | null
         }
         Relationships: []
       }
@@ -443,6 +650,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "viewer"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "nurturing"
+        | "converted"
+        | "lost"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -571,6 +786,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "viewer"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "nurturing",
+        "converted",
+        "lost",
+        "archived",
+      ],
     },
   },
 } as const

@@ -39,6 +39,30 @@ interface PropertySearchData {
 export const useFollowUpBoss = () => {
   const { toast } = useToast();
 
+  // Generate request signature for secure API calls
+  const generateSignature = async (body: string, timestamp: number): Promise<string> => {
+    const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    const message = `${timestamp}.${body}`;
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(apiKey);
+    const messageData = encoder.encode(message);
+    
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
+    const signature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    return signature;
+  };
+
   const sendEvent = async (
     type: string,
     options: {
@@ -54,17 +78,26 @@ export const useFollowUpBoss = () => {
     try {
       console.log('Sending FUB event:', type, options);
 
+      const body = JSON.stringify({
+        type,
+        person: options.person,
+        property: options.property,
+        propertySearch: options.propertySearch,
+        message: options.message,
+        description: options.description,
+        pageUrl: options.pageUrl || window.location.href,
+        pageTitle: options.pageTitle || document.title,
+        pageReferrer: document.referrer,
+      });
+
+      const timestamp = Date.now();
+      const signature = await generateSignature(body, timestamp);
+
       const { data, error } = await supabase.functions.invoke('followup-boss-event', {
-        body: {
-          type,
-          person: options.person,
-          property: options.property,
-          propertySearch: options.propertySearch,
-          message: options.message,
-          description: options.description,
-          pageUrl: options.pageUrl || window.location.href,
-          pageTitle: options.pageTitle || document.title,
-          pageReferrer: document.referrer,
+        body: JSON.parse(body),
+        headers: {
+          'x-request-signature': signature,
+          'x-request-timestamp': timestamp.toString(),
         },
       });
 
