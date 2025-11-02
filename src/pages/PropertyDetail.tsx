@@ -1036,6 +1036,7 @@ export default function PropertyDetail() {
                         <p className="text-sm text-muted-foreground mb-2">School information would appear here</p>
                         <p className="text-sm text-muted-foreground">Public district, 6-8</p>
                       </div>
+                    </div>
                   </div>
                 </div>
               </Card>
