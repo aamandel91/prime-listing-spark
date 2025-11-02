@@ -72,13 +72,13 @@ export default function PropertyDetail() {
   // Parse the URL to get property identifier
   let propertyId = id;
   if (!id && propertySlug) {
-    // For SEO-friendly URLs, try to extract MLS from the slug pattern
-    // Check if slug contains digits that might be an MLS number
-    const mlsMatch = propertySlug.match(/(?:^|-)([A-Z0-9]{6,})(?:-|$)/i);
-    if (mlsMatch) {
-      propertyId = mlsMatch[1];
+    // Normalize and extract trailing MLS segment: supports "...-MLS123456" or "...-123456"
+    const cleanedSlug = propertySlug.replace(/^\/|\/$/g, '');
+    const endMatch = cleanedSlug.match(/(?:^|-)(?:MLS)?([A-Z0-9]{6,})$/i);
+    if (endMatch) {
+      propertyId = endMatch[1];
     } else {
-      // If no MLS found in URL, this is likely an invalid property URL
+      // If no MLS found in URL, this is likely an invalid property URL for MLS lookup
       propertyId = "";
     }
   } else if (!id && !propertySlug) {
@@ -459,7 +459,7 @@ export default function PropertyDetail() {
         <BreadcrumbSEO 
           items={[
             { label: property.city, href: `/${property.city.toLowerCase().replace(/\s+/g, '-')}` },
-            { label: property.address, href: `/property/${id}` }
+            { label: property.address, href: pageUrl }
           ]} 
         />
       </div>
