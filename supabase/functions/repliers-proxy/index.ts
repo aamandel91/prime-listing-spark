@@ -81,17 +81,21 @@ serve(async (req) => {
     }
 
     // Map status values to Repliers API format
+    const statusMap: Record<string, string> = {
+      'Active': 'A',
+      'Pending': 'U',
+      'Sold': 'S',
+      'Expired': 'X',
+      'Cancelled': 'C',
+      'Hold': 'H',
+    };
+    
+    // Map both 'status' and 'standardStatus' parameters
     if (queryParams.status) {
-      const statusMap: Record<string, string> = {
-        'Active': 'A',
-        'Pending': 'U',
-        'Sold': 'S',
-        'Expired': 'X',
-        'Cancelled': 'C',
-        'Hold': 'H',
-      };
-      const mappedStatus = statusMap[queryParams.status] || queryParams.status;
-      queryParams.status = mappedStatus;
+      queryParams.status = statusMap[queryParams.status] || queryParams.status;
+    }
+    if (queryParams.standardStatus) {
+      queryParams.standardStatus = statusMap[queryParams.standardStatus] || queryParams.standardStatus;
     }
 
     // Ensure endpoint starts with /
