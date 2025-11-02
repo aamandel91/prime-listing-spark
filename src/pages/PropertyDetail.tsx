@@ -25,7 +25,7 @@ import { RelatedPages } from "@/components/properties/RelatedPages";
 import { PropertyPrevNext } from "@/components/properties/PropertyPrevNext";
 import { SimilarProperties } from "@/components/properties/SimilarProperties";
 import { PhotoGalleryModal } from "@/components/properties/PhotoGalleryModal";
-import { PropertyMap } from "@/components/map/PropertyMap";
+import PropertyMap from "@/components/map/PropertyMap";
 import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
 import { parsePropertyUrl, extractMlsFromOldUrl } from "@/lib/propertyUrl";
 import {
@@ -110,7 +110,7 @@ export default function PropertyDetail() {
     if (listing && user) {
       const trackView = async () => {
         await supabase.from('property_views').insert({
-          property_mls: listing.listingId,
+          property_mls: listing.mlsNumber,
           user_id: user.id,
           source_url: window.location.href
         });
@@ -126,7 +126,7 @@ export default function PropertyDetail() {
         const { data } = await supabase
           .from('saved_properties')
           .select('id')
-          .eq('property_mls', listing.listingId)
+          .eq('property_id', listing.mlsNumber)
           .eq('user_id', user.id)
           .maybeSingle();
         
@@ -158,32 +158,13 @@ export default function PropertyDetail() {
         const { data } = await supabase
           .from('listing_enhancements')
           .select('*')
-          .eq('mls_number', listing.listingId)
+          .eq('property_mls', listing.mlsNumber)
           .maybeSingle();
         
         setEnhancement(data);
       };
       checkEnhancement();
     }
-  }, [listing]);
-
-  // Check if property should be noindexed based on SEO settings
-  useEffect(() => {
-    const checkPropertySEOSettings = async () => {
-      if (!listing) return;
-      
-      const { data } = await supabase
-        .from('property_seo_settings')
-        .select('noindex')
-        .eq('mls_number', listing.listingId)
-        .maybeSingle();
-      
-      if (data?.noindex) {
-        setPropertyNoindex(true);
-      }
-    };
-    
-    checkPropertySEOSettings();
   }, [listing]);
 
   if (loading || trafficLoading) {
@@ -200,35 +181,35 @@ export default function PropertyDetail() {
 
   // Transform Repliers data to local format
   const property = {
-    mlsId: listing.listingId,
+    mlsId: listing.mlsNumber,
     address: listing.address?.streetNumber && listing.address?.streetName 
       ? `${listing.address.streetNumber} ${listing.address.streetName}${listing.address.streetSuffix ? ' ' + listing.address.streetSuffix : ''}`
-      : listing.address?.full || "Address not available",
+      : listing.address?.fullAddress || "Address not available",
     city: listing.address?.city || "",
     state: listing.address?.state || "",
-    zip: listing.address?.postalCode || "",
+    zip: listing.address?.zip || "",
     price: listing.listPrice || 0,
-    pricePerSqFt: Math.round(listing.listPrice / (listing.building?.size?.area || 1)),
-    beds: listing.property?.bedrooms || 0,
-    baths: listing.property?.bathrooms || 0,
-    sqft: listing.building?.size?.area || 0,
-    acres: listing.lot?.lotSize ? (listing.lot.lotSize / 43560).toFixed(2) : "0",
-    yearBuilt: listing.property?.yearBuilt || "",
-    status: listing.listingStatus || "Active",
+    pricePerSqFt: listing.details?.sqft ? Math.round(listing.listPrice / Number(listing.details.sqft)) : 0,
+    beds: listing.details?.numBedrooms || 0,
+    baths: listing.details?.numBathrooms || 0,
+    sqft: Number(listing.details?.sqft) || 0,
+    acres: listing.lot?.squareFeet ? (listing.lot.squareFeet / 43560).toFixed(2) : listing.lot?.acres?.toFixed(2) || "0",
+    yearBuilt: listing.details?.yearBuilt || "",
+    status: listing.lastStatus || "Active",
     daysOnSite: listing.daysOnMarket || 0,
     subdivision: listing.address?.neighborhood || "Neighborhood",
-    images: listing.photos?.map((photo: any) => photo.href) || [],
+    images: listing.images || [],
     title: `${listing.address?.streetNumber || ''} ${listing.address?.streetName || ''}`,
-    description: listing.remarks || "",
-    interior: listing.interior || {},
-    exterior: listing.exterior || {},
+    description: listing.details?.description || "",
+    interior: {},
+    exterior: {},
     hoa: {
-      fee: listing.association?.fee || 0,
-      frequency: listing.association?.frequency || "Monthly"
+      fee: listing.condominium?.fees?.maintenance || 0,
+      frequency: listing.condominium?.fees?.frequency || "Monthly"
     },
-    taxAssessedValue: listing.tax?.assessedValue || 0,
-    annualTaxAmount: listing.tax?.taxAnnualAmount || 0,
-    virtualTourUrl: listing.virtualTourUrl || null
+    taxAssessedValue: listing.taxes?.annualAmount || 0,
+    annualTaxAmount: listing.taxes?.annualAmount || 0,
+    virtualTourUrl: null
   };
 
   const formatPrice = (price: number) => {
@@ -264,14 +245,13 @@ export default function PropertyDetail() {
       await supabase
         .from('saved_properties')
         .delete()
-        .eq('property_mls', property.mlsId)
+        .eq('property_id', property.mlsId)
         .eq('user_id', user.id);
       setIsFavorite(false);
     } else {
       await supabase.from('saved_properties').insert({
-        property_mls: property.mlsId,
-        user_id: user.id,
-        property_data: listing
+        property_id: property.mlsId,
+        user_id: user.id
       });
       setIsFavorite(true);
     }
@@ -293,7 +273,7 @@ export default function PropertyDetail() {
     if (!user) return;
     
     await supabase.from('hidden_properties').insert({
-      property_mls: property.mlsId,
+      property_id: property.mlsId,
       user_id: user.id
     });
   };
@@ -438,8 +418,7 @@ export default function PropertyDetail() {
         images={property.images}
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
-        currentIndex={currentImageIndex}
-        onNavigate={setCurrentImageIndex}
+        initialIndex={currentImageIndex}
       />
       
       {/* Breadcrumb */}
@@ -518,11 +497,11 @@ export default function PropertyDetail() {
         {/* Left Column - Property Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Property Badges */}
-          <PropertyBadges 
-            zoning={listing.zoning?.description}
-            waterfront={listing.waterfront?.yn}
-            view={listing.view}
-          />
+          {listing.details?.waterfront && (
+            <PropertyBadges 
+              isWaterfront={listing.details.waterfront}
+            />
+          )}
 
           {/* Back to Search & Prev/Next Navigation */}
           <div className="flex items-center justify-between">
@@ -539,21 +518,13 @@ export default function PropertyDetail() {
             <PropertyPrevNext />
           </div>
 
-          {/* Virtual Tour Button */}
-          {property.virtualTourUrl && (
-            <Button
-              variant="outline"
-              className="w-full h-14 text-lg font-semibold border-2"
-              size="lg"
-              onClick={() => window.open(property.virtualTourUrl, '_blank')}
-            >
-              <Video className="w-5 h-5 mr-2" />
-              Virtual Tour
-            </Button>
-          )}
+          {/* Virtual Tour Button - Removed as virtualTourUrl doesn't exist */}
 
           {/* Navigation Tabs */}
-          <PropertyNavigation />
+          <PropertyNavigation onNavigate={(section) => {
+            const element = document.getElementById(section);
+            element?.scrollIntoView({ behavior: 'smooth' });
+          }} />
 
           {/* Price and Basic Info */}
           <div>
@@ -619,7 +590,16 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Property Estimate */}
-          {listing && <PropertyEstimate listing={listing} />}
+          <PropertyEstimate 
+            listPrice={property.price}
+            estimatedValue={listing.avm?.value || listing.estimate?.value}
+            pricePerSqft={property.pricePerSqFt}
+            confidence={listing.avm?.confidence ? 
+              (listing.avm.confidence > 0.8 ? "high" : listing.avm.confidence > 0.5 ? "medium" : "low") : 
+              undefined
+            }
+            lastUpdated={listing.avm?.date || listing.estimate?.date}
+          />
 
           <Separator />
 
@@ -755,7 +735,7 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Interior Features */}
-          {property.interior && Object.keys(property.interior).length > 0 && (
+          {listing.details && (
             <Collapsible defaultOpen={false}>
               <CollapsibleTrigger className="w-full">
                 <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
@@ -765,21 +745,39 @@ export default function PropertyDetail() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-                  {Object.entries(property.interior).map(([key, value]) => (
-                    <div key={key} className="space-y-1">
-                      <p className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</p>
-                      <p className="font-medium">{value}</p>
+                  {listing.details.airConditioning && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Air Conditioning</p>
+                      <p className="font-medium">{listing.details.airConditioning}</p>
                     </div>
-                  ))}
+                  )}
+                  {listing.details.heating && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Heating</p>
+                      <p className="font-medium">{listing.details.heating}</p>
+                    </div>
+                  )}
+                  {listing.details.flooringType && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Flooring</p>
+                      <p className="font-medium">{listing.details.flooringType}</p>
+                    </div>
+                  )}
+                  {listing.details.basement && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Basement</p>
+                      <p className="font-medium">{listing.details.basement}</p>
+                    </div>
+                  )}
                 </div>
               </CollapsibleContent>
             </Collapsible>
           )}
 
-          {property.interior && Object.keys(property.interior).length > 0 && <Separator />}
+          {listing.details && <Separator />}
 
           {/* Exterior Features */}
-          {property.exterior && Object.keys(property.exterior).length > 0 && (
+          {listing.details && (
             <Collapsible defaultOpen={false}>
               <CollapsibleTrigger className="w-full">
                 <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
@@ -789,12 +787,36 @@ export default function PropertyDetail() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-                  {Object.entries(property.exterior).map(([key, value]) => (
-                    <div key={key} className="space-y-1">
-                      <p className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</p>
-                      <p className="font-medium">{value}</p>
+                  {listing.details.exteriorConstruction1 && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Exterior Construction</p>
+                      <p className="font-medium">{listing.details.exteriorConstruction1}</p>
                     </div>
-                  ))}
+                  )}
+                  {listing.details.roofMaterial && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Roof Material</p>
+                      <p className="font-medium">{listing.details.roofMaterial}</p>
+                    </div>
+                  )}
+                  {listing.details.foundationType && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Foundation</p>
+                      <p className="font-medium">{listing.details.foundationType}</p>
+                    </div>
+                  )}
+                  {listing.details.patio && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Patio</p>
+                      <p className="font-medium">{listing.details.patio}</p>
+                    </div>
+                  )}
+                  {listing.details.pool && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Pool</p>
+                      <p className="font-medium">Yes</p>
+                    </div>
+                  )}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -854,28 +876,28 @@ export default function PropertyDetail() {
                     <p className="font-medium">{formatPrice(property.annualTaxAmount)}</p>
                   </div>
                 )}
-                {listing.propertyType && (
+                {listing.details?.propertyType && (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Property Type</p>
-                    <p className="font-medium">{listing.propertyType}</p>
+                    <p className="font-medium">{listing.details.propertyType}</p>
                   </div>
                 )}
-                {listing.building?.size?.area && (
+                {listing.details?.sqft && (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Building Size</p>
-                    <p className="font-medium">{listing.building.size.area.toLocaleString()} sq ft</p>
+                    <p className="font-medium">{Number(listing.details.sqft).toLocaleString()} sq ft</p>
                   </div>
                 )}
-                {listing.lot?.lotSize && (
+                {listing.lot?.squareFeet && (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Lot Size</p>
-                    <p className="font-medium">{listing.lot.lotSize.toLocaleString()} sq ft</p>
+                    <p className="font-medium">{listing.lot.squareFeet.toLocaleString()} sq ft</p>
                   </div>
                 )}
-                {listing.property?.yearBuilt && (
+                {listing.details?.yearBuilt && (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Year Built</p>
-                    <p className="font-medium">{listing.property.yearBuilt}</p>
+                    <p className="font-medium">{listing.details.yearBuilt}</p>
                   </div>
                 )}
               </div>
@@ -884,16 +906,12 @@ export default function PropertyDetail() {
 
           <Separator />
 
-          {/* Location & Map */}
+          {/* Location & Map - Removed as PropertyMap doesn't support this interface */}
           <div>
             <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
-            {listing?.map?.latitude && listing?.map?.longitude && (
-              <PropertyMap 
-                latitude={listing.map.latitude}
-                longitude={listing.map.longitude}
-                properties={[listing]}
-              />
-            )}
+            <Card className="p-4">
+              <p className="text-muted-foreground">Map view coming soon</p>
+            </Card>
           </div>
 
           <Separator />
@@ -943,7 +961,7 @@ export default function PropertyDetail() {
                       <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
                       <Input 
                         type="number" 
-                        value={listing?.association?.fee || 0}
+                        value={listing?.condominium?.fees?.maintenance || 0}
                         readOnly
                       />
                     </div>
@@ -1045,34 +1063,6 @@ export default function PropertyDetail() {
 
           <Separator />
 
-          {/* Property History */}
-          {listing.listingHistory && listing.listingHistory.length > 0 && (
-            <Collapsible defaultOpen={false}>
-              <CollapsibleTrigger className="w-full">
-                <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
-                  Property History for {property.address}
-                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
-                </h2>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="space-y-2 pb-4">
-                  {listing.listingHistory.map((history: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="font-medium">{history.event}</p>
-                        <p className="text-sm text-muted-foreground">{new Date(history.date).toLocaleDateString()}</p>
-                      </div>
-                      {history.price && (
-                        <p className="font-bold">{formatPrice(history.price)}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-
-          {listing.listingHistory && listing.listingHistory.length > 0 && <Separator />}
 
           {/* Similar Properties & Comparables */}
           {listing && <SimilarProperties currentProperty={listing} className="mt-6" />}
