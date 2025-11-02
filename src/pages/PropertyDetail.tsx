@@ -649,8 +649,10 @@ export default function PropertyDetail() {
 
           {/* Market Statistics */}
           <MarketStatistics 
-            neighborhood={property.subdivision || "this area"}
+            neighborhood={property.subdivision || undefined}
             city={property.city}
+            state={property.state}
+            propertyType={listing.details?.propertyType}
             className="mt-6"
           />
 
