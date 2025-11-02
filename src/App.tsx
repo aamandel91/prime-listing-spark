@@ -52,11 +52,6 @@ const RecoveryRouter = () => {
         <Route path="/" element={<Index />} />
         <Route path="/agents" element={<AgentDirectory />} />
         <Route path="/listings" element={<Listings />} />
-        {/* Old property URL format - redirect to new format */}
-        <Route path="/property/:id" element={<PropertyDetail />} />
-        <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
-        {/* New SEO-friendly property URL format */}
-        <Route path="/:propertySlug/" element={<PropertyDetail />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogPost />} />
         <Route path="/advanced-search" element={<AdvancedSearch />} />
@@ -77,13 +72,23 @@ const RecoveryRouter = () => {
         <Route path="/admin/site-layout-settings" element={<ProtectedRoute requireRole="admin"><SiteLayoutSettings /></ProtectedRoute>} />
         <Route path="/admin/featured-cities" element={<ProtectedRoute requireRole="admin"><FeaturedCities /></ProtectedRoute>} />
         
-        {/* Public Routes */}
+        {/* Public Routes - More specific routes first */}
         <Route path="/cities" element={<Cities />} />
         <Route path="/cities/:citySlug" element={<CityTemplate />} />
         <Route path="/counties" element={<Counties />} />
         <Route path="/counties/:countySlug" element={<CityTemplate />} />
+        
+        {/* Old property URL format */}
+        <Route path="/property/:id" element={<PropertyDetail />} />
+        <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
+        
+        {/* City routes with filters */}
         <Route path="/:citySlug/:filter" element={<CityTemplate />} />
         <Route path="/:citySlug" element={<CityTemplate />} />
+        
+        {/* New SEO-friendly property URL format - must come after city routes */}
+        <Route path="/:propertySlug/" element={<PropertyDetail />} />
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
