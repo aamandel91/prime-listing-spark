@@ -4,13 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "./PropertyCard";
 import { useRepliers } from "@/hooks/useRepliers";
 import { RepliersProperty } from "@/types/repliers";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Home } from "lucide-react";
 
@@ -122,10 +116,10 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                 No similar active listings found
               </p>
             ) : (
-              <Carousel className="w-full">
-                <CarouselContent>
+              <ScrollArea className="w-full">
+                <div className="flex gap-4 pb-4">
                   {similarActive.map((property) => (
-                    <CarouselItem key={property.mlsNumber} className="md:basis-1/2 lg:basis-1/3">
+                    <div key={property.mlsNumber} className="flex-none w-[320px]">
                       <PropertyCard 
                         id={property.mlsNumber}
                         title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
@@ -140,12 +134,11 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                         zipCode={property.address.zip}
                         mlsNumber={property.mlsNumber}
                       />
-                    </CarouselItem>
+                    </div>
                   ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             )}
           </TabsContent>
 
@@ -155,10 +148,10 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                 No sold comparables found
               </p>
             ) : (
-              <Carousel className="w-full">
-                <CarouselContent>
+              <ScrollArea className="w-full">
+                <div className="flex gap-4 pb-4">
                   {soldComparables.map((property) => (
-                    <CarouselItem key={property.mlsNumber} className="md:basis-1/2 lg:basis-1/3">
+                    <div key={property.mlsNumber} className="flex-none w-[320px]">
                       <PropertyCard 
                         id={property.mlsNumber}
                         title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
@@ -173,12 +166,11 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                         zipCode={property.address.zip}
                         mlsNumber={property.mlsNumber}
                       />
-                    </CarouselItem>
+                    </div>
                   ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             )}
           </TabsContent>
         </Tabs>
