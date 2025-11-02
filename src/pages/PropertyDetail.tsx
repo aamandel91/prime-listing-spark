@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,13 +136,31 @@ export default function PropertyDetail() {
     }
   }, [listing, user]);
 
-  // Initialize mortgage calculator values
+  // Initialize mortgage calculator values and calculate automatically
   useEffect(() => {
     if (listing) {
       setListingPrice(listing.listPrice?.toString() || "0");
       setDownPayment((listing.listPrice * 0.2).toString() || "0");
     }
   }, [listing]);
+
+  // Auto-calculate mortgage when values change
+  useEffect(() => {
+    if (listingPrice && downPayment && interestRate && listing) {
+      const principal = parseFloat(listingPrice) - parseFloat(downPayment);
+      const rate = parseFloat(interestRate) / 100 / 12;
+      const payments = 30 * 12;
+      
+      const monthlyPrincipalInterest = principal * (rate * Math.pow(1 + rate, payments)) / (Math.pow(1 + rate, payments) - 1);
+      const annualTaxAmount = listing.taxes?.annualAmount || 0;
+      const monthlyTax = (annualTaxAmount || (parseFloat(listingPrice) * 0.01)) / 12;
+      const monthlyHOA = listing.condominium?.fees?.maintenance || 0;
+      const monthlyInsurance = Math.round((parseFloat(listingPrice) * 0.005) / 12);
+      
+      const total = monthlyPrincipalInterest + monthlyTax + monthlyHOA + monthlyInsurance;
+      setMonthlyPayment(total);
+    }
+  }, [listingPrice, downPayment, interestRate, listing]);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -219,20 +237,6 @@ export default function PropertyDetail() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
-  };
-
-  const calculateMortgage = () => {
-    const principal = parseFloat(listingPrice) - parseFloat(downPayment);
-    const rate = parseFloat(interestRate) / 100 / 12;
-    const payments = 30 * 12;
-    
-    const monthlyPrincipalInterest = principal * (rate * Math.pow(1 + rate, payments)) / (Math.pow(1 + rate, payments) - 1);
-    const monthlyTax = (property.annualTaxAmount || (parseFloat(listingPrice) * 0.01)) / 12;
-    const monthlyHOA = property.hoa.fee || 0;
-    const monthlyInsurance = Math.round((parseFloat(listingPrice) * 0.005) / 12);
-    
-    const total = monthlyPrincipalInterest + monthlyTax + monthlyHOA + monthlyInsurance;
-    setMonthlyPayment(total);
   };
 
   const handleSave = async () => {
@@ -532,6 +536,14 @@ export default function PropertyDetail() {
               <h1 className="text-4xl md:text-5xl font-bold">{formatPrice(property.price)}</h1>
               <span className="text-xl text-muted-foreground">${property.pricePerSqFt}/sqft</span>
             </div>
+            
+            {monthlyPayment !== null && (
+              <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-sm text-muted-foreground mb-1">Est. Monthly Payment</div>
+                <div className="text-2xl font-bold text-primary">{formatPrice(monthlyPayment)}<span className="text-base font-normal text-muted-foreground">/mo</span></div>
+                <p className="text-xs text-muted-foreground mt-1">Includes principal, interest, taxes, HOA & insurance</p>
+              </div>
+            )}
             
             <div className="flex flex-wrap items-center gap-4 text-lg mb-4">
               <div className="flex items-center gap-1">
@@ -974,7 +986,6 @@ export default function PropertyDetail() {
                       />
                       <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
                     </div>
-                    <Button className="w-full" onClick={calculateMortgage}>Calculate</Button>
                     
                     {monthlyPayment !== null && (
                       <div className="bg-primary/10 p-4 rounded-lg mt-4">
