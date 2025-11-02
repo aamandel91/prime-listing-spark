@@ -80,6 +80,25 @@ serve(async (req) => {
       });
     }
 
+    // Map status values to Repliers API format
+    if (queryParams.status) {
+      const statusMap: Record<string, string> = {
+        'Active': 'A',
+        'Pending': 'U',
+        'Sold': 'S',
+        'Expired': 'X',
+        'Cancelled': 'C',
+        'Hold': 'H',
+      };
+      const mappedStatus = statusMap[queryParams.status] || queryParams.status;
+      queryParams.status = mappedStatus;
+    }
+
+    // Ensure endpoint starts with /
+    if (endpoint && !endpoint.startsWith('/')) {
+      endpoint = `/${endpoint}`;
+    }
+
     // Build search params, supporting array values by repeating keys
     const searchParams = new URLSearchParams();
     Object.entries(queryParams).forEach(([key, value]) => {
