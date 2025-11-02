@@ -10,14 +10,14 @@ import { Button } from "@/components/ui/button";
 
 const SearchDropdown = () => {
   const regions = [
-    { name: "Austin Metro", city: "Austin", state: "TX" },
-    { name: "San Antonio", city: "San Antonio", state: "TX" },
-    { name: "Houston", city: "Houston", state: "TX" },
-    { name: "Dallas/Fort Worth", city: "Dallas", state: "TX" },
     { name: "Miami Metro", city: "Miami", state: "FL" },
-    { name: "Orlando", city: "Orlando", state: "FL" },
     { name: "Tampa Bay", city: "Tampa", state: "FL" },
-    { name: "Los Angeles", city: "Los Angeles", state: "CA" },
+    { name: "Orlando", city: "Orlando", state: "FL" },
+    { name: "Jacksonville", city: "Jacksonville", state: "FL" },
+    { name: "St Petersburg", city: "St Petersburg", state: "FL" },
+    { name: "Kansas City", city: "Kansas City", state: "KS" },
+    { name: "Olathe", city: "Olathe", state: "KS" },
+    { name: "Overland Park", city: "Overland Park", state: "KS" },
   ];
 
   const tools = [

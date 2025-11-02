@@ -20,16 +20,6 @@ interface CityAutocompleteProps {
 }
 
 const SEARCH_DATA: SearchItem[] = [
-  // Texas Cities
-  { value: "Austin", label: "Austin", type: "city", state: "TX" },
-  { value: "Kyle", label: "Kyle", type: "city", state: "TX" },
-  { value: "San Antonio", label: "San Antonio", type: "city", state: "TX" },
-  { value: "Houston", label: "Houston", type: "city", state: "TX" },
-  { value: "Dallas", label: "Dallas", type: "city", state: "TX" },
-  { value: "Fort Worth", label: "Fort Worth", type: "city", state: "TX" },
-  { value: "Plano", label: "Plano", type: "city", state: "TX" },
-  { value: "Arlington", label: "Arlington", type: "city", state: "TX" },
-  
   // Florida Cities
   { value: "Miami", label: "Miami", type: "city", state: "FL" },
   { value: "Orlando", label: "Orlando", type: "city", state: "FL" },
@@ -39,58 +29,54 @@ const SEARCH_DATA: SearchItem[] = [
   { value: "Naples", label: "Naples", type: "city", state: "FL" },
   { value: "Sarasota", label: "Sarasota", type: "city", state: "FL" },
   { value: "Clearwater", label: "Clearwater", type: "city", state: "FL" },
-  { value: "St. Petersburg", label: "St. Petersburg", type: "city", state: "FL" },
+  { value: "St Petersburg", label: "St Petersburg", type: "city", state: "FL" },
   { value: "Cape Coral", label: "Cape Coral", type: "city", state: "FL" },
   { value: "Fort Myers", label: "Fort Myers", type: "city", state: "FL" },
   { value: "Boca Raton", label: "Boca Raton", type: "city", state: "FL" },
   { value: "West Palm Beach", label: "West Palm Beach", type: "city", state: "FL" },
   { value: "Port St Lucie", label: "Port St Lucie", type: "city", state: "FL" },
   
-  // California Cities
-  { value: "Los Angeles", label: "Los Angeles", type: "city", state: "CA" },
-  { value: "San Diego", label: "San Diego", type: "city", state: "CA" },
-  { value: "San Francisco", label: "San Francisco", type: "city", state: "CA" },
-  { value: "Sacramento", label: "Sacramento", type: "city", state: "CA" },
+  // Kansas Cities
+  { value: "Kansas City", label: "Kansas City", type: "city", state: "KS" },
+  { value: "Olathe", label: "Olathe", type: "city", state: "KS" },
+  { value: "Overland Park", label: "Overland Park", type: "city", state: "KS" },
+  { value: "Topeka", label: "Topeka", type: "city", state: "KS" },
+  { value: "Wichita", label: "Wichita", type: "city", state: "KS" },
+  { value: "Lawrence", label: "Lawrence", type: "city", state: "KS" },
+  { value: "Lenexa", label: "Lenexa", type: "city", state: "KS" },
+  { value: "Shawnee", label: "Shawnee", type: "city", state: "KS" },
+  { value: "Eudora", label: "Eudora", type: "city", state: "KS" },
 
-  // Texas Zip Codes
-  { value: "78701", label: "78701", type: "zip", state: "TX" },
-  { value: "78702", label: "78702", type: "zip", state: "TX" },
-  { value: "78751", label: "78751", type: "zip", state: "TX" },
-  { value: "78704", label: "78704", type: "zip", state: "TX" },
-  { value: "77001", label: "77001", type: "zip", state: "TX" },
-  { value: "75201", label: "75201", type: "zip", state: "TX" },
-  
   // Florida Zip Codes
   { value: "33101", label: "33101", type: "zip", state: "FL" },
   { value: "32801", label: "32801", type: "zip", state: "FL" },
   { value: "33602", label: "33602", type: "zip", state: "FL" },
   { value: "34102", label: "34102", type: "zip", state: "FL" },
   { value: "34236", label: "34236", type: "zip", state: "FL" },
+  { value: "33703", label: "33703", type: "zip", state: "FL" },
+  { value: "33139", label: "33139", type: "zip", state: "FL" },
+  { value: "33131", label: "33131", type: "zip", state: "FL" },
   
-  // California Zip Codes
-  { value: "90001", label: "90001", type: "zip", state: "CA" },
-  { value: "92101", label: "92101", type: "zip", state: "CA" },
-  { value: "94102", label: "94102", type: "zip", state: "CA" },
+  // Kansas Zip Codes
+  { value: "66062", label: "66062", type: "zip", state: "KS" },
+  { value: "66215", label: "66215", type: "zip", state: "KS" },
+  { value: "66204", label: "66204", type: "zip", state: "KS" },
+  { value: "66025", label: "66025", type: "zip", state: "KS" },
+  { value: "66049", label: "66049", type: "zip", state: "KS" },
 
-  // Texas Neighborhoods
-  { value: "Downtown Austin", label: "Downtown Austin", type: "neighborhood", state: "TX" },
-  { value: "South Congress", label: "South Congress", type: "neighborhood", state: "TX" },
-  { value: "East Austin", label: "East Austin", type: "neighborhood", state: "TX" },
-  { value: "Hyde Park", label: "Hyde Park", type: "neighborhood", state: "TX" },
-  { value: "The Heights", label: "The Heights (Houston)", type: "neighborhood", state: "TX" },
-  { value: "Uptown Dallas", label: "Uptown Dallas", type: "neighborhood", state: "TX" },
-  
   // Florida Neighborhoods
   { value: "South Beach", label: "South Beach", type: "neighborhood", state: "FL" },
   { value: "Wynwood", label: "Wynwood", type: "neighborhood", state: "FL" },
   { value: "Winter Park", label: "Winter Park", type: "neighborhood", state: "FL" },
   { value: "Hyde Park Tampa", label: "Hyde Park (Tampa)", type: "neighborhood", state: "FL" },
   { value: "Old Naples", label: "Old Naples", type: "neighborhood", state: "FL" },
+  { value: "Brickell", label: "Brickell", type: "neighborhood", state: "FL" },
+  { value: "Shore Acres", label: "Shore Acres", type: "neighborhood", state: "FL" },
   
-  // California Neighborhoods
-  { value: "Beverly Hills", label: "Beverly Hills", type: "neighborhood", state: "CA" },
-  { value: "La Jolla", label: "La Jolla", type: "neighborhood", state: "CA" },
-  { value: "Pacific Heights", label: "Pacific Heights", type: "neighborhood", state: "CA" },
+  // Kansas Neighborhoods
+  { value: "Stonebridge Trails", label: "Stonebridge Trails", type: "neighborhood", state: "KS" },
+  { value: "Prairie Village", label: "Prairie Village", type: "neighborhood", state: "KS" },
+  { value: "Leawood", label: "Leawood", type: "neighborhood", state: "KS" },
 ];
 
 export const CityAutocomplete = ({
