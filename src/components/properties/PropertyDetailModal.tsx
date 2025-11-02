@@ -17,6 +17,7 @@ import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import PropertyMap from "@/components/map/PropertyMap";
 import PropertyCard from "./PropertyCard";
 import { useRepliersListing } from "@/hooks/useRepliers";
+import { generatePropertyUrl } from "@/lib/propertyUrl";
 import {
   Carousel,
   CarouselContent,
@@ -462,7 +463,13 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         <title>{property.address} - {property.city}, {property.state} | Homes for Sale</title>
         <meta name="description" content={`${property.beds} bed, ${property.baths} bath home for sale at ${property.address} in ${property.city}, ${property.state}. ${property.sqft} sqft listed at ${formatPrice(property.price)}. MLS #${property.mlsId}.`} />
         <meta name="keywords" content={`${property.city} real estate, ${property.city} homes for sale, ${property.subdivision}, ${property.zip} homes, ${property.county} real estate`} />
-        <link rel="canonical" href={`${window.location.origin}/property/${propertyId}`} />
+        <link rel="canonical" href={`${window.location.origin}${generatePropertyUrl({
+          address: property.address,
+          city: property.city,
+          state: property.state,
+          zip: property.zip,
+          mlsNumber: property.mlsId
+        })}`} />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />

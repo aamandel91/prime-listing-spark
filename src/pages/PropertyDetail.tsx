@@ -31,7 +31,7 @@ import { NeighborhoodFollow } from "@/components/properties/NeighborhoodFollow";
 import { EnhancedTimePicker } from "@/components/properties/EnhancedTimePicker";
 import PropertyMap from "@/components/map/PropertyMap";
 import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
-import { parsePropertyUrl, extractMlsFromOldUrl } from "@/lib/propertyUrl";
+import { parsePropertyUrl, extractMlsFromOldUrl, generatePropertyUrl } from "@/lib/propertyUrl";
 import {
   ChevronLeft,
   ChevronRight,
@@ -72,9 +72,15 @@ export default function PropertyDetail() {
   // Parse the URL to get property identifier
   let propertyId = id;
   if (!id && propertySlug) {
-    // Try to extract from new URL format
-    const parsed = parsePropertyUrl(propertySlug);
-    propertyId = parsed.zip; // We'll search by zip and other details
+    // For SEO-friendly URLs, try to extract MLS from the slug pattern
+    // Check if slug contains digits that might be an MLS number
+    const mlsMatch = propertySlug.match(/(?:^|-)([A-Z0-9]{6,})(?:-|$)/i);
+    if (mlsMatch) {
+      propertyId = mlsMatch[1];
+    } else {
+      // If no MLS found in URL, this is likely an invalid property URL
+      propertyId = "";
+    }
   } else if (!id && !propertySlug) {
     // Try old URL format
     propertyId = extractMlsFromOldUrl(location.pathname) || "";
@@ -199,6 +205,18 @@ export default function PropertyDetail() {
   }
 
   if (error || !listing) {
+    // Avoid infinite redirect loop - check if we're already on a 404-like path
+    if (location.pathname === '/404' || location.pathname.includes('404')) {
+      return (
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+          <h1 className="text-4xl font-bold mb-4">Property Not Found</h1>
+          <p className="text-muted-foreground mb-8">The property you're looking for doesn't exist or has been removed.</p>
+          <Link to="/listings">
+            <Button>Browse All Listings</Button>
+          </Link>
+        </div>
+      );
+    }
     return <Navigate to="/404" replace />;
   }
 
@@ -313,7 +331,13 @@ export default function PropertyDetail() {
     `${property.address}, ${property.city}, ${property.state} ${property.zip} | For Sale ${formatPrice(property.price)}`;
   const pageDescription = enhancement?.custom_description || 
     `View photos and details for ${property.address}, ${property.city}, ${property.state} ${property.zip}. This ${property.beds} bed, ${property.baths} bath, ${property.sqft.toLocaleString()} sqft home is for sale at ${formatPrice(property.price)}.`;
-  const pageUrl = `${window.location.origin}${window.location.pathname}`;
+  const pageUrl = `${window.location.origin}${generatePropertyUrl({
+    address: property.address,
+    city: property.city,
+    state: property.state,
+    zip: property.zip,
+    mlsNumber: property.mlsId
+  })}`;
 
   // Structured data for SEO
   const propertySchema = {

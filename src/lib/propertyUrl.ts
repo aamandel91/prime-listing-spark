@@ -12,7 +12,8 @@ interface PropertyUrlData {
 
 /**
  * Generates a SEO-friendly URL slug from property data
- * Format: /212-W-Alexander-Palm-Rd-Boca-Raton-FL-33432/
+ * Format: /212-W-Alexander-Palm-Rd-Boca-Raton-FL-33432-MLS123456/
+ * Now includes MLS number at the end for proper lookup
  */
 export const generatePropertyUrl = (property: PropertyUrlData): string => {
   const parts = [
@@ -21,6 +22,11 @@ export const generatePropertyUrl = (property: PropertyUrlData): string => {
     property.state,
     property.zip,
   ];
+
+  // Add MLS number if available
+  if (property.mlsNumber) {
+    parts.push(property.mlsNumber);
+  }
 
   const slug = parts
     .filter(Boolean)
