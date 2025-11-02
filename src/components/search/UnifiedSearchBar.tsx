@@ -23,7 +23,7 @@ const UnifiedSearchBar = ({ variant = "inline", className = "" }: UnifiedSearchB
   const { parseAddress, extractCity, extractState, extractZipCode } = useAddressParser();
   
   const [location, setLocation] = useState(searchParams.get("city") || "");
-  const [selectedState, setSelectedState] = useState(searchParams.get("state") || "FL");
+  const [selectedState, setSelectedState] = useState(searchParams.get("state") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "A");
   const [propertyType, setPropertyType] = useState(searchParams.get("propertyType") || "all");
   const [beds, setBeds] = useState(parseInt(searchParams.get("beds") || "0"));
@@ -74,7 +74,7 @@ const UnifiedSearchBar = ({ variant = "inline", className = "" }: UnifiedSearchB
         }
         if (parsed.stateAbbreviation) {
           params.set("state", parsed.stateAbbreviation);
-        } else {
+        } else if (selectedState) {
           params.set("state", selectedState);
         }
         if (parsed.zipCode) {
@@ -86,7 +86,9 @@ const UnifiedSearchBar = ({ variant = "inline", className = "" }: UnifiedSearchB
       } else {
         // Fallback to original input
         params.set("city", location);
-        params.set("state", selectedState);
+        if (selectedState) {
+          params.set("state", selectedState);
+        }
       }
     }
     
