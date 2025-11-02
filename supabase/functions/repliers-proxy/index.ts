@@ -61,11 +61,15 @@ serve(async (req) => {
     // Get parameters from request body or URL
     let endpoint = '/listings';
     let queryParams: Record<string, any> = {};
+    let httpMethod = 'GET';
+    let bodyData: any = null;
     
     if (req.method === 'POST') {
       const body = await req.json();
       endpoint = body.endpoint || endpoint;
       queryParams = body.params || {};
+      httpMethod = body.method || 'GET';
+      bodyData = body.data || null;
     } else {
       const url = new URL(req.url);
       endpoint = url.searchParams.get('endpoint') || endpoint;
@@ -88,14 +92,23 @@ serve(async (req) => {
 
     const apiUrl = `https://api.repliers.io${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     
-    console.log('Fetching from Repliers API:', apiUrl);
+    console.log('Fetching from Repliers API:', apiUrl, 'Method:', httpMethod);
 
-    const response = await fetch(apiUrl, {
+    // Prepare fetch options
+    const fetchOptions: RequestInit = {
+      method: httpMethod,
       headers: {
         'REPLIERS-API-KEY': apiKey,
         'Content-Type': 'application/json',
       },
-    });
+    };
+
+    // Add body for POST/PUT requests
+    if (bodyData && (httpMethod === 'POST' || httpMethod === 'PUT')) {
+      fetchOptions.body = JSON.stringify(bodyData);
+    }
+
+    const response = await fetch(apiUrl, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text();
