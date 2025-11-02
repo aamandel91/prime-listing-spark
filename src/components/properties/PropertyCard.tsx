@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { BedDouble, Bath, Square, MapPin, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { generatePropertyUrl } from "@/lib/propertyUrl";
 
 interface PropertyCardProps {
   id: string;
@@ -81,6 +82,15 @@ const PropertyCard = ({
       onOpenModal(id);
     }
   };
+
+  // Generate SEO-friendly URL
+  const propertyUrl = generatePropertyUrl({
+    address,
+    city,
+    state,
+    zip: zipCode || '',
+    mlsNumber: mlsNumber || id,
+  });
 
   const CardContent = (
     <>
@@ -211,7 +221,7 @@ const PropertyCard = ({
           {CardContent}
         </div>
       ) : (
-        <Link to={`/property/${id}`} className="flex flex-col h-full">
+        <Link to={propertyUrl} className="flex flex-col h-full">
           {CardContent}
         </Link>
       )}

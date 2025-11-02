@@ -52,8 +52,11 @@ const RecoveryRouter = () => {
         <Route path="/" element={<Index />} />
         <Route path="/agents" element={<AgentDirectory />} />
         <Route path="/listings" element={<Listings />} />
+        {/* Old property URL format - redirect to new format */}
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
+        {/* New SEO-friendly property URL format */}
+        <Route path="/:propertySlug/" element={<PropertyDetail />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogPost />} />
         <Route path="/advanced-search" element={<AdvancedSearch />} />

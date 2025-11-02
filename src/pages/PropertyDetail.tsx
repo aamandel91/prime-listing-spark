@@ -17,6 +17,14 @@ import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { useRepliersListing } from "@/hooks/useRepliers";
 import { useTourRequest } from "@/hooks/useTourRequest";
 import { PropertyEstimate } from "@/components/properties/PropertyEstimate";
+import { PropertyNavigation } from "@/components/properties/PropertyNavigation";
+import { PropertyBadges } from "@/components/properties/PropertyBadges";
+import { CommunityListings } from "@/components/properties/CommunityListings";
+import { RelatedPages } from "@/components/properties/RelatedPages";
+import { PropertyPrevNext } from "@/components/properties/PropertyPrevNext";
+import { SimilarProperties } from "@/components/properties/SimilarProperties";
+import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
+import { parsePropertyUrl, extractMlsFromOldUrl } from "@/lib/propertyUrl";
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,12 +49,28 @@ import {
   Video,
   Loader2,
   FileText,
+  Eye,
+  Mountain,
+  Waves,
+  Check,
+  X as XIcon,
 } from "lucide-react";
 
 export default function PropertyDetail() {
-  const { id } = useParams();
+  const { id, propertySlug } = useParams();
   const location = useLocation();
   const isOpenHouse = location.pathname.endsWith('/openhouse');
+  
+  // Parse the URL to get property identifier
+  let propertyId = id;
+  if (!id && propertySlug) {
+    // Try to extract from new URL format
+    const parsed = parsePropertyUrl(propertySlug);
+    propertyId = parsed.zip; // We'll search by zip and other details
+  } else if (!id && !propertySlug) {
+    // Try old URL format
+    propertyId = extractMlsFromOldUrl(location.pathname) || "";
+  }
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
@@ -62,9 +86,10 @@ export default function PropertyDetail() {
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [enhancement, setEnhancement] = useState<any>(null);
+  const [selectedTiming, setSelectedTiming] = useState<string>("select");
   
   // Fetch property from Repliers API
-  const { listing, loading, error } = useRepliersListing(id || "");
+  const { listing, loading, error } = useRepliersListing(propertyId || "");
   const { submitTourRequest } = useTourRequest();
   const { isPPC, loading: trafficLoading } = useTrafficSource();
 
@@ -73,7 +98,7 @@ export default function PropertyDetail() {
     if (listing && user) {
       const trackView = async () => {
         await supabase.from('property_views').insert({
-          property_mls: listing.mlsNumber || id || '',
+          property_mls: listing.mlsNumber || propertyId || '',
           property_address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
             .filter(Boolean).join(' '),
           visitor_email: user.email,
@@ -83,7 +108,7 @@ export default function PropertyDetail() {
       };
       trackView();
     }
-  }, [listing, user, id]);
+  }, [listing, user, propertyId]);
 
   // Check authentication status
   useEffect(() => {
@@ -122,11 +147,11 @@ export default function PropertyDetail() {
       }
       
       // Fetch listing enhancement if exists
-      if (id) {
+      if (propertyId) {
         const { data: enhancementData } = await supabase
           .from("listing_enhancements")
           .select("*")
-          .eq("property_mls", id)
+          .eq("property_mls", propertyId)
           .single();
         
         if (enhancementData) {
@@ -136,7 +161,7 @@ export default function PropertyDetail() {
     };
 
     fetchSettings();
-  }, [id]);
+  }, [propertyId]);
 
   // Show registration modal for PPC traffic if forced registration is enabled
   useEffect(() => {
@@ -150,7 +175,7 @@ export default function PropertyDetail() {
     lastName: "",
     email: "",
     phone: "",
-    comments: `Hi, I am interested in ${id ? `property ${id}` : "this property"}`,
+    comments: `Hi, I am interested in ${propertyId ? `property ${propertyId}` : "this property"}`,
   });
 
   // Generate next 7 days for tour scheduling
@@ -339,6 +364,13 @@ export default function PropertyDetail() {
         text: `Check out this property: ${property.address}`,
         url: window.location.href,
       });
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -570,8 +602,24 @@ export default function PropertyDetail() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6 space-y-6 max-w-4xl">
         
+        {/* Virtual Tour & Navigation */}
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          {enhancement?.video_embeds && enhancement.video_embeds.length > 0 && (
+            <Button 
+              variant="default" 
+              size="lg"
+              onClick={() => scrollToSection('property-videos')}
+              className="gap-2"
+            >
+              <Video className="w-5 h-5" />
+              Virtual Tour
+            </Button>
+          )}
+          <PropertyNavigation onNavigate={scrollToSection} className="flex-1" />
+        </div>
+
         {/* Property Header */}
-        <div>
+        <div id="overview">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{property.address}</h1>
           <p className="text-lg text-muted-foreground mb-4">
             {property.city}, {property.state} {property.zip}
@@ -607,6 +655,14 @@ export default function PropertyDetail() {
               <span className="font-bold">{property.sqft.toLocaleString()}</span>
             </div>
           </div>
+
+          {/* Prominent Property Badges */}
+          <PropertyBadges 
+            zoning={listing?.details?.style || undefined}
+            isWaterfront={false}
+            view={undefined}
+            className="mt-4"
+          />
         </div>
 
         {/* Mortgage Prequalification CTA */}
@@ -1440,95 +1496,56 @@ export default function PropertyDetail() {
 
         <Separator />
 
-        {/* Similar Properties Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Homes Similar to {property.address}, {property.city}, {property.state} {property.zip}</h2>
-          
-          <div className="space-y-4">
-            <Card className="overflow-hidden">
-              <div className="relative">
-                <Badge className="absolute top-2 left-2 bg-primary z-10">New - Just Now</Badge>
-                <img 
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
-                  alt="Similar property"
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold">$349,999</span>
-                  <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">Active</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-2 mb-3 text-sm">
-                  <div>
-                    <div className="font-bold">4</div>
-                    <div className="text-muted-foreground">Beds</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">3</div>
-                    <div className="text-muted-foreground">Baths</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">2469</div>
-                    <div className="text-muted-foreground">Sqft</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">0.27</div>
-                    <div className="text-muted-foreground">Acres</div>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">501 Edwalton Way LOT 83, Fayetteville, NC 28311</p>
-                <p className="text-xs text-muted-foreground">MLS#: LP752129</p>
-              </div>
-            </Card>
-
-            <Card className="overflow-hidden">
-              <div className="relative">
-                <Badge className="absolute top-2 left-2 bg-primary z-10">New - Just Now</Badge>
-                <img 
-                  src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80" 
-                  alt="Similar property"
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold">$379,000</span>
-                  <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">Active</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-2 mb-3 text-sm">
-                  <div>
-                    <div className="font-bold">5</div>
-                    <div className="text-muted-foreground">Beds</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">3</div>
-                    <div className="text-muted-foreground">Baths</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">2519</div>
-                    <div className="text-muted-foreground">Sqft</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">0.29</div>
-                    <div className="text-muted-foreground">Acres</div>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">503 Edwalton Way, Fayetteville, NC 28311</p>
-                <p className="text-xs text-muted-foreground">MLS#: LP752130</p>
-              </div>
-            </Card>
-          </div>
-        </div>
-
+        {/* Similar Properties & Comparables */}
+        {listing && <SimilarProperties currentProperty={listing} className="mt-6" />}
+        
         <Separator />
 
-        {/* Related Blogs Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Related Blogs</h2>
-          
-          <div className="space-y-4">
-            <Link to="/blog/1">
+        {/* Nearby Places */}
+        {listing && <NearbyPlaces propertyAddress={listing.address} className="mt-6" />}
+        
+        <Separator />
+
+        {/* Community Listings */}
+        <CommunityListings 
+          city={property.city}
+          state={property.state}
+          currentMlsNumber={property.mlsId}
+          className="mt-6"
+        />
+        
+        <Separator />
+
+        {/* Related Pages */}
+        <RelatedPages 
+          city={property.city}
+          state={property.state}
+          className="mt-6"
+        />
+        
+        <Separator />
+
+        {/* Previous/Next Navigation */}
+        <PropertyPrevNext className="mt-6" />
+      </div>
+
+      {/* Contact Dialog */}
+      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="relative h-48 -mx-6 -mt-6">
+              <img
+                src={property.images[0]}
+                alt={property.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 flex items-end justify-center pb-4">
+                <DialogTitle className="text-white text-center text-lg">
+                  Interested in {property.address}, {property.city} {property.state}, {property.zip}?
+                </DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
               <Card className="overflow-hidden hover-scale group cursor-pointer">
                 <img 
                   src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" 
@@ -1635,6 +1652,47 @@ export default function PropertyDetail() {
                 value={contactForm.phone}
                 onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
               />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">When would you like to view this property?</label>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <Button
+                  type="button"
+                  variant={selectedTiming === "asap" ? "default" : "outline"}
+                  className="h-10"
+                  onClick={() => setSelectedTiming("asap")}
+                >
+                  <Check className={`w-4 h-4 mr-2 ${selectedTiming === "asap" ? "" : "opacity-0"}`} />
+                  ASAP
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedTiming === "this-week" ? "default" : "outline"}
+                  className="h-10"
+                  onClick={() => setSelectedTiming("this-week")}
+                >
+                  <Check className={`w-4 h-4 mr-2 ${selectedTiming === "this-week" ? "" : "opacity-0"}`} />
+                  This Week
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedTiming === "next-week" ? "default" : "outline"}
+                  className="h-10"
+                  onClick={() => setSelectedTiming("next-week")}
+                >
+                  <Check className={`w-4 h-4 mr-2 ${selectedTiming === "next-week" ? "" : "opacity-0"}`} />
+                  Next Week
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedTiming === "select" ? "default" : "outline"}
+                  className="h-10"
+                  onClick={() => setSelectedTiming("select")}
+                >
+                  <Check className={`w-4 h-4 mr-2 ${selectedTiming === "select" ? "" : "opacity-0"}`} />
+                  Select Day
+                </Button>
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Comments</label>
