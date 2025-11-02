@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useRepliersListing } from "@/hooks/useRepliers";
 import { useTourRequest } from "@/hooks/useTourRequest";
 import { PropertyEstimate } from "@/components/properties/PropertyEstimate";
@@ -23,11 +24,14 @@ import { CommunityListings } from "@/components/properties/CommunityListings";
 import { RelatedPages } from "@/components/properties/RelatedPages";
 import { PropertyPrevNext } from "@/components/properties/PropertyPrevNext";
 import { SimilarProperties } from "@/components/properties/SimilarProperties";
+import { PhotoGalleryModal } from "@/components/properties/PhotoGalleryModal";
+import { PropertyMap } from "@/components/map/PropertyMap";
 import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
 import { parsePropertyUrl, extractMlsFromOldUrl } from "@/lib/propertyUrl";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ArrowLeft,
   Search,
   Phone,
@@ -87,6 +91,14 @@ export default function PropertyDetail() {
   const [user, setUser] = useState<any>(null);
   const [enhancement, setEnhancement] = useState<any>(null);
   const [selectedTiming, setSelectedTiming] = useState<string>("select");
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    comments: ''
+  });
   
   // Fetch property from Repliers API
   const { listing, loading, error } = useRepliersListing(propertyId || "");
@@ -98,294 +110,247 @@ export default function PropertyDetail() {
     if (listing && user) {
       const trackView = async () => {
         await supabase.from('property_views').insert({
-          property_mls: listing.mlsNumber || propertyId || '',
-          property_address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
-            .filter(Boolean).join(' '),
-          visitor_email: user.email,
-          referrer: document.referrer || null,
-          session_id: user.id,
+          property_mls: listing.listingId,
+          user_id: user.id,
+          source_url: window.location.href
         });
       };
       trackView();
     }
-  }, [listing, user, propertyId]);
+  }, [listing, user]);
 
-  // Check authentication status
+  // Check if property is saved
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    if (listing && user) {
+      const checkSaved = async () => {
+        const { data } = await supabase
+          .from('saved_properties')
+          .select('id')
+          .eq('property_mls', listing.listingId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        setIsFavorite(!!data);
+      };
+      checkSaved();
+    }
+  }, [listing, user]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+  // Initialize mortgage calculator values
+  useEffect(() => {
+    if (listing) {
+      setListingPrice(listing.listPrice?.toString() || "0");
+      setDownPayment((listing.listPrice * 0.2).toString() || "0");
+    }
+  }, [listing]);
 
-    return () => subscription.unsubscribe();
+  // Check if user is authenticated
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
   }, []);
 
-  // Fetch SEO and access control settings
+  // Check listing enhancement
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase
-        .from("seo_settings")
-        .select("setting_value")
-        .eq("setting_key", "property_pages_noindex")
-        .single();
-
-      if (data?.setting_value && typeof data.setting_value === 'object' && 'enabled' in data.setting_value) {
-        setPropertyNoindex(data.setting_value.enabled as boolean);
-      }
-
-      const { data: globalSettings } = await supabase
-        .from("global_site_settings")
-        .select("setting_value")
-        .eq("setting_key", "force_registration_ppc")
-        .single();
-
-      if (globalSettings?.setting_value === 'true') {
-        setForceRegistration(true);
-      }
-      
-      // Fetch listing enhancement if exists
-      if (propertyId) {
-        const { data: enhancementData } = await supabase
-          .from("listing_enhancements")
-          .select("*")
-          .eq("property_mls", propertyId)
-          .single();
+    if (listing) {
+      const checkEnhancement = async () => {
+        const { data } = await supabase
+          .from('listing_enhancements')
+          .select('*')
+          .eq('mls_number', listing.listingId)
+          .maybeSingle();
         
-        if (enhancementData) {
-          setEnhancement(enhancementData);
-        }
+        setEnhancement(data);
+      };
+      checkEnhancement();
+    }
+  }, [listing]);
+
+  // Check if property should be noindexed based on SEO settings
+  useEffect(() => {
+    const checkPropertySEOSettings = async () => {
+      if (!listing) return;
+      
+      const { data } = await supabase
+        .from('property_seo_settings')
+        .select('noindex')
+        .eq('mls_number', listing.listingId)
+        .maybeSingle();
+      
+      if (data?.noindex) {
+        setPropertyNoindex(true);
       }
     };
+    
+    checkPropertySEOSettings();
+  }, [listing]);
 
-    fetchSettings();
-  }, [propertyId]);
-
-  // Show registration modal for PPC traffic if forced registration is enabled
-  useEffect(() => {
-    if (!trafficLoading && !loading && forceRegistration && isPPC && !user) {
-      setShowRegistrationModal(true);
-    }
-  }, [trafficLoading, loading, forceRegistration, isPPC, user]);
-  
-  const [contactForm, setContactForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    comments: `Hi, I am interested in ${propertyId ? `property ${propertyId}` : "this property"}`,
-  });
-
-  // Generate next 7 days for tour scheduling
-  const getNextSevenDays = () => {
-    const days = [];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      days.push({
-        dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
-        day: date.getDate(),
-        month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-        fullDate: date.toISOString(),
-      });
-    }
-    return days;
-  };
-
-  const tourDates = getNextSevenDays();
-
-  // Transform API listing to component format
-  const property = listing ? {
-    id: listing.mlsNumber || id || "1",
-    title: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
-      .filter(Boolean).join(' ') || "Property",
-    address: [listing.address?.streetNumber, listing.address?.streetName, listing.address?.streetSuffix]
-      .filter(Boolean).join(' ') || "",
-    city: listing.address?.city || "",
-    state: listing.address?.state || "",
-    zip: listing.address?.zip || "",
-    county: listing.address?.area || "",
-    subdivision: listing.address?.neighborhood || "",
-    mlsId: listing.mlsNumber || "",
-    price: listing.listPrice || 0,
-    originalPrice: listing.originalPrice || listing.listPrice || 0,
-    beds: listing.details?.numBedrooms || 0,
-    baths: listing.details?.numBathrooms || 0,
-    sqft: typeof listing.details?.sqft === 'number' ? listing.details.sqft : parseInt(listing.details?.sqft || "0"),
-    acres: listing.lot?.acres || 0,
-    lotSize: listing.lot?.squareFeet || 0,
-    lotFeatures: listing.lot?.features || "",
-    legalDescription: listing.lot?.legalDescription || "",
-    yearBuilt: typeof listing.details?.yearBuilt === 'number' ? listing.details.yearBuilt : parseInt(listing.details?.yearBuilt || "2024"),
-    daysOnSite: listing.daysOnMarket || 0,
-    listDate: listing.listDate || "",
-    propertyType: listing.details?.propertyType || "Residential",
-    propertyClass: listing.class || "",
-    subType: listing.details?.style || "Single Family",
-    pricePerSqFt: listing.details?.sqft ? Math.round(listing.listPrice / (typeof listing.details.sqft === 'number' ? listing.details.sqft : parseInt(String(listing.details.sqft)))) : 0,
-    dateListed: listing.listDate ? new Date(listing.listDate).toLocaleDateString() : "Recently",
-    status: listing.standardStatus || listing.lastStatus || "Active",
-    description: listing.details?.description || "Beautiful property available for sale.",
-    // Interior features from details
-    interiorFeatures: [
-      listing.details?.airConditioning && `Air Conditioning: ${listing.details.airConditioning}`,
-      listing.details?.heating && `Heating: ${listing.details.heating}`,
-      listing.details?.flooringType && `Flooring: ${listing.details.flooringType}`,
-      listing.details?.extras && `Appliances: ${listing.details.extras}`,
-    ].filter(Boolean),
-    // Exterior features
-    exteriorFeatures: [
-      listing.details?.exteriorConstruction1 && `Construction: ${listing.details.exteriorConstruction1}`,
-      listing.details?.roofMaterial && `Roof: ${listing.details.roofMaterial}`,
-      listing.details?.foundationType && `Foundation: ${listing.details.foundationType}`,
-      listing.details?.patio && `Outdoor: ${listing.details.patio}`,
-      listing.details?.sewer && `Sewer: ${listing.details.sewer}`,
-    ].filter(Boolean),
-    // HOA/Community features
-    hoaFeatures: [
-      listing.condominium?.fees?.maintenance && `HOA Fee: $${listing.condominium.fees.maintenance}/mo`,
-      listing.condominium?.condoCorp && `Association: ${listing.condominium.condoCorp}`,
-      listing.condominium?.parkingType && `Parking: ${listing.condominium.parkingType}`,
-      listing.nearby?.amenities && `Amenities: ${listing.nearby.amenities.join(', ')}`,
-    ].filter(Boolean),
-    // Additional info
-    additionalInfo: [
-      listing.details?.numGarageSpaces && `Garage Spaces: ${listing.details.numGarageSpaces}`,
-      listing.details?.numParkingSpaces && `Parking Spaces: ${listing.details.numParkingSpaces}`,
-      listing.taxes?.annualAmount && `Annual Taxes: $${listing.taxes.annualAmount}`,
-      listing.taxes?.assessmentYear && `Tax Year: ${listing.taxes.assessmentYear}`,
-    ].filter(Boolean),
-    // Rooms array
-    rooms: listing.rooms || [],
-    // Agent info
-    listingAgent: {
-      name: listing.agents?.[0]?.name || "Contact Agent",
-      phone: listing.agents?.[0]?.phones?.[0] || "",
-      email: listing.agents?.[0]?.email || "",
-      company: listing.agents?.[0]?.brokerage?.name || listing.office?.brokerageName || "",
-    },
-    // AVM data
-    avm: listing.estimate ? {
-      value: Math.round((listing.estimate.high + listing.estimate.low) / 2),
-      high: listing.estimate.high,
-      low: listing.estimate.low,
-    } : (listing.avm ? {
-      value: listing.avm.value,
-      high: listing.avm.high,
-      low: listing.avm.low,
-    } : null),
-    source: listing.mlsNumber ? `MLS#: ${listing.mlsNumber}` : "",
-    images: listing.images && listing.images.length > 0 
-      ? listing.images.map((img: string) => `https://api.repliers.io/images/${img}`)
-      : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
-  } : null;
-
-  // Initialize calculator when property loads
-  useEffect(() => {
-    if (property) {
-      setListingPrice(property.price.toString());
-      setDownPayment((property.price * 0.1).toString()); // 10% down
-    }
-  }, [property]);
-
-  // Loading state
-  if (loading) {
+  if (loading || trafficLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Navbar />
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-lg text-muted-foreground">Loading property details...</p>
-        </div>
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Error or not found state - Return 404
-  if (error || !property) {
+  if (error || !listing) {
     return <Navigate to="/404" replace />;
   }
 
-  // Show Open House Sign-In form if /openhouse is in URL
-  if (isOpenHouse) {
-    return (
-      <OpenHouseSignIn
-        propertyId={property.id}
-        propertyAddress={`${property.address}, ${property.city}, ${property.state} ${property.zip}`}
-        propertyPrice={property.price}
-        propertyImage={property.images[0]}
-        propertyBeds={property.beds}
-        propertyBaths={property.baths}
-        propertySqft={property.sqft}
-      />
-    );
-  }
+  // Transform Repliers data to local format
+  const property = {
+    mlsId: listing.listingId,
+    address: listing.address?.streetNumber && listing.address?.streetName 
+      ? `${listing.address.streetNumber} ${listing.address.streetName}${listing.address.streetSuffix ? ' ' + listing.address.streetSuffix : ''}`
+      : listing.address?.full || "Address not available",
+    city: listing.address?.city || "",
+    state: listing.address?.state || "",
+    zip: listing.address?.postalCode || "",
+    price: listing.listPrice || 0,
+    pricePerSqFt: Math.round(listing.listPrice / (listing.building?.size?.area || 1)),
+    beds: listing.property?.bedrooms || 0,
+    baths: listing.property?.bathrooms || 0,
+    sqft: listing.building?.size?.area || 0,
+    acres: listing.lot?.lotSize ? (listing.lot.lotSize / 43560).toFixed(2) : "0",
+    yearBuilt: listing.property?.yearBuilt || "",
+    status: listing.listingStatus || "Active",
+    daysOnSite: listing.daysOnMarket || 0,
+    subdivision: listing.address?.neighborhood || "Neighborhood",
+    images: listing.photos?.map((photo: any) => photo.href) || [],
+    title: `${listing.address?.streetNumber || ''} ${listing.address?.streetName || ''}`,
+    description: listing.remarks || "",
+    interior: listing.interior || {},
+    exterior: listing.exterior || {},
+    hoa: {
+      fee: listing.association?.fee || 0,
+      frequency: listing.association?.frequency || "Monthly"
+    },
+    taxAssessedValue: listing.tax?.assessedValue || 0,
+    annualTaxAmount: listing.tax?.taxAnnualAmount || 0,
+    virtualTourUrl: listing.virtualTourUrl || null
+  };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
   };
 
   const calculateMortgage = () => {
     const principal = parseFloat(listingPrice) - parseFloat(downPayment);
-    const monthlyRate = parseFloat(interestRate) / 100 / 12;
-    const numPayments = 30 * 12; // 30 years
+    const rate = parseFloat(interestRate) / 100 / 12;
+    const payments = 30 * 12;
     
-    // Monthly principal & interest
-    const monthlyPI = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+    const monthlyPrincipalInterest = principal * (rate * Math.pow(1 + rate, payments)) / (Math.pow(1 + rate, payments) - 1);
+    const monthlyTax = (property.annualTaxAmount || (parseFloat(listingPrice) * 0.01)) / 12;
+    const monthlyHOA = property.hoa.fee || 0;
+    const monthlyInsurance = Math.round((parseFloat(listingPrice) * 0.005) / 12);
     
-    // Add taxes, insurance, and HOA
-    const monthlyTaxes = (listing?.taxes?.annualAmount || 0) / 12;
-    const monthlyHOA = listing?.condominium?.fees?.maintenance || 0;
-    const monthlyInsurance = (parseFloat(listingPrice) * 0.005) / 12;
-    
-    const total = monthlyPI + monthlyTaxes + monthlyHOA + monthlyInsurance;
-    setMonthlyPayment(Math.round(total));
+    const total = monthlyPrincipalInterest + monthlyTax + monthlyHOA + monthlyInsurance;
+    setMonthlyPayment(total);
   };
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
+  const handleSave = async () => {
+    if (!user) {
+      // Show login modal or redirect
+      return;
+    }
+
+    if (isFavorite) {
+      await supabase
+        .from('saved_properties')
+        .delete()
+        .eq('property_mls', property.mlsId)
+        .eq('user_id', user.id);
+      setIsFavorite(false);
+    } else {
+      await supabase.from('saved_properties').insert({
+        property_mls: property.mlsId,
+        user_id: user.id,
+        property_data: listing
+      });
+      setIsFavorite(true);
+    }
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + property.images.length) % property.images.length);
-  };
-
-  const handleShare = () => {
+  const handleShare = async () => {
     if (navigator.share) {
-      navigator.share({
+      await navigator.share({
         title: property.title,
         text: `Check out this property: ${property.address}`,
-        url: window.location.href,
+        url: window.location.href
+      });
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const handleHide = async () => {
+    if (!user) return;
+    
+    await supabase.from('hidden_properties').insert({
+      property_mls: property.mlsId,
+      user_id: user.id
+    });
+  };
+
+  // Generate next 7 days for tour scheduling
+  const getNextSevenDays = () => {
+    const days = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      days.push({
+        dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        day: date.getDate(),
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        fullDate: date.toISOString().split('T')[0]
       });
     }
+    
+    return days;
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  const tourDates = getNextSevenDays();
 
-  // SEO Content
-  const pageTitle = `${property.address}, ${property.city}, ${property.state} ${property.zip} | ${formatPrice(property.price)}`;
-  const pageDescription = `${property.beds} bed, ${property.baths} bath ${property.subType} for sale at ${formatPrice(property.price)}. ${property.sqft.toLocaleString()} sqft on ${property.acres} acres in ${property.subdivision}. MLS# ${property.mlsId}. ${property.description.substring(0, 100)}...`;
-  const pageUrl = `${window.location.origin}/property/${id}`;
+  // SEO meta data
+  const pageTitle = enhancement?.custom_title || 
+    `${property.address}, ${property.city}, ${property.state} ${property.zip} | For Sale ${formatPrice(property.price)}`;
+  const pageDescription = enhancement?.custom_description || 
+    `View photos and details for ${property.address}, ${property.city}, ${property.state} ${property.zip}. This ${property.beds} bed, ${property.baths} bath, ${property.sqft.toLocaleString()} sqft home is for sale at ${formatPrice(property.price)}.`;
+  const pageUrl = `${window.location.origin}${window.location.pathname}`;
 
-  // Structured data for Product/RealEstateProperty
+  // Structured data for SEO
   const propertySchema = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    "name": property.address,
-    "description": property.description,
-    "image": property.images,
+    "@type": "SingleFamilyResidence",
+    "name": property.title,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": property.address,
+      "addressLocality": property.city,
+      "addressRegion": property.state,
+      "postalCode": property.zip,
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": listing.map?.latitude,
+      "longitude": listing.map?.longitude
+    },
+    "floorSize": {
+      "@type": "QuantitativeValue",
+      "value": property.sqft,
+      "unitCode": "FTK"
+    },
+    "numberOfRooms": property.beds,
+    "numberOfBathroomsTotal": property.baths,
     "offers": {
       "@type": "Offer",
       "price": property.price,
@@ -393,10 +358,7 @@ export default function PropertyDetail() {
       "availability": "https://schema.org/InStock",
       "url": pageUrl
     },
-    "brand": {
-      "@type": "Organization",
-      "name": property.listingAgent.company
-    },
+    "image": property.images,
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "5",
@@ -471,6 +433,15 @@ export default function PropertyDetail() {
       
       <Navbar />
       
+      {/* Photo Gallery Modal */}
+      <PhotoGalleryModal
+        images={property.images}
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        currentIndex={currentImageIndex}
+        onNavigate={setCurrentImageIndex}
+      />
+      
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4 max-w-4xl">
         <BreadcrumbSEO 
@@ -485,7 +456,7 @@ export default function PropertyDetail() {
       <div className="container mx-auto px-4 py-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-[70vh]">
           {/* Main large image - takes up 2 columns */}
-          <div className="md:col-span-2 relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setCurrentImageIndex(0)}>
+          <div className="md:col-span-2 relative rounded-lg overflow-hidden cursor-pointer group" onClick={() => setIsGalleryOpen(true)}>
             <img
               src={property.images[0]}
               alt={`${property.title} - Main view`}
@@ -500,1042 +471,793 @@ export default function PropertyDetail() {
               <span className="font-semibold text-sm">For sale</span>
             </div>
             
-            {/* Top Right Controls */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background">
-                <Search className="w-5 h-5" />
-              </Button>
-              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background">
-                <Phone className="w-5 h-5" />
-              </Button>
-              <Button size="icon" variant="secondary" className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background" onClick={handleShare}>
-                <Share2 className="w-5 h-5" />
-              </Button>
+            {/* View All Photos Button */}
+            <div className="absolute bottom-4 right-4">
               <Button 
-                size="icon" 
                 variant="secondary" 
-                className="rounded-lg bg-background/95 backdrop-blur-sm hover:bg-background"
-                onClick={() => setIsFavorite(!isFavorite)}
+                size="sm"
+                className="bg-background/95 backdrop-blur-sm hover:bg-background"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsGalleryOpen(true);
+                }}
               >
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
+                <Eye className="w-4 h-4 mr-2" />
+                View all {property.images.length} photos
               </Button>
             </div>
           </div>
           
-          {/* Right side grid - 2x2 */}
-          <div className="hidden md:grid grid-rows-2 gap-2">
-            {/* Top two images */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(1)}>
+          {/* Grid of smaller images */}
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+            {property.images.slice(1, 5).map((image, index) => (
+              <div 
+                key={index} 
+                className="relative rounded-lg overflow-hidden cursor-pointer group h-full"
+                onClick={() => {
+                  setCurrentImageIndex(index + 1);
+                  setIsGalleryOpen(true);
+                }}
+              >
                 <img
-                  src={property.images[1] || property.images[0]}
-                  alt={`${property.title} - View 2`}
+                  src={image}
+                  alt={`${property.title} - View ${index + 2}`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   onError={(e) => {
-                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80";
                   }}
                 />
               </div>
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(2)}>
-                <img
-                  src={property.images[2] || property.images[0]}
-                  alt={`${property.title} - View 3`}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-              </div>
-            </div>
-            
-            {/* Bottom two images */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square" onClick={() => setCurrentImageIndex(3)}>
-                <img
-                  src={property.images[3] || property.images[0]}
-                  alt={`${property.title} - View 4`}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-              </div>
-              <div className="relative rounded-lg overflow-hidden cursor-pointer group aspect-square">
-                <img
-                  src={property.images[4] || property.images[1] || property.images[0]}
-                  alt={`${property.title} - View 5`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = property.images[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-                {/* See all photos button overlay */}
-                <div 
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer hover:bg-black/50 transition-colors"
-                  onClick={() => setCurrentImageIndex(0)}
-                >
-                  <div className="bg-background rounded-lg px-4 py-2 flex items-center gap-2">
-                    <div className="grid grid-cols-2 gap-0.5">
-                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
-                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
-                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
-                      <div className="w-1.5 h-1.5 bg-foreground rounded-sm"></div>
-                    </div>
-                    <span className="font-semibold text-sm">See all {property.images.length} photos</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-        
-        {/* Back Button - Mobile */}
-        <div className="md:hidden fixed top-4 left-4 z-10">
-          <Link to="/listings">
-            <Button size="icon" variant="secondary" className="rounded-full bg-background/95 backdrop-blur-sm hover:bg-background">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 space-y-6 max-w-4xl">
-        
-        {/* Virtual Tour & Navigation */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          {enhancement?.video_embeds && enhancement.video_embeds.length > 0 && (
-            <Button 
-              variant="default" 
-              size="lg"
-              onClick={() => scrollToSection('property-videos')}
+      <div className="container mx-auto px-4 py-8 max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Property Details */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Property Badges */}
+          <PropertyBadges 
+            zoning={listing.zoning?.description}
+            waterfront={listing.waterfront?.yn}
+            view={listing.view}
+          />
+
+          {/* Back to Search & Prev/Next Navigation */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
               className="gap-2"
             >
-              <Video className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
+              Back to Search
+            </Button>
+            
+            <PropertyPrevNext />
+          </div>
+
+          {/* Virtual Tour Button */}
+          {property.virtualTourUrl && (
+            <Button
+              variant="outline"
+              className="w-full h-14 text-lg font-semibold border-2"
+              size="lg"
+              onClick={() => window.open(property.virtualTourUrl, '_blank')}
+            >
+              <Video className="w-5 h-5 mr-2" />
               Virtual Tour
             </Button>
           )}
-          <PropertyNavigation onNavigate={scrollToSection} className="flex-1" />
-        </div>
 
-        {/* Property Header */}
-        <div id="overview">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{property.address}</h1>
-          <p className="text-lg text-muted-foreground mb-4">
-            {property.city}, {property.state} {property.zip}
-          </p>
-          
-          <div className="flex items-center gap-4 mb-6">
-            <div className="text-3xl md:text-4xl font-bold">{formatPrice(property.price)}</div>
-            {property.originalPrice && property.originalPrice !== property.price && (
-              <span className="text-lg text-muted-foreground line-through">
-                {formatPrice(property.originalPrice)}
-              </span>
-            )}
-            <Badge className="bg-success/20 text-success hover:bg-success/30 border-0 px-3 py-1">
-              {property.status.toUpperCase()}
-            </Badge>
-          </div>
+          {/* Navigation Tabs */}
+          <PropertyNavigation />
 
-          {/* Key Stats Pills */}
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-              <Bed className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Beds</span>
-              <span className="font-bold">{property.beds}</span>
+          {/* Price and Basic Info */}
+          <div>
+            <div className="flex items-baseline gap-4 mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold">{formatPrice(property.price)}</h1>
+              <span className="text-xl text-muted-foreground">${property.pricePerSqFt}/sqft</span>
             </div>
-            <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-              <Bath className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Baths</span>
-              <span className="font-bold">{property.baths}</span>
+            
+            <div className="flex flex-wrap items-center gap-4 text-lg mb-4">
+              <div className="flex items-center gap-1">
+                <Bed className="w-5 h-5" />
+                <span className="font-semibold">{property.beds}</span> beds
+              </div>
+              <div className="flex items-center gap-1">
+                <Bath className="w-5 h-5" />
+                <span className="font-semibold">{property.baths}</span> baths
+              </div>
+              <div className="flex items-center gap-1">
+                <Square className="w-5 h-5" />
+                <span className="font-semibold">{property.sqft.toLocaleString()}</span> sqft
+              </div>
             </div>
-            <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2.5">
-              <Square className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Sqft</span>
-              <span className="font-bold">{property.sqft.toLocaleString()}</span>
-            </div>
-          </div>
-
-          {/* Prominent Property Badges */}
-          <PropertyBadges 
-            zoning={listing?.details?.style || undefined}
-            isWaterfront={false}
-            view={undefined}
-            className="mt-4"
-          />
-        </div>
-
-        {/* Mortgage Prequalification CTA */}
-        <div className="flex items-center justify-center gap-2 py-3 text-lg">
-          <span className="text-muted-foreground">Est. {formatPrice(2482)}/mo</span>
-          <span className="text-muted-foreground">-</span>
-          <button 
-            onClick={() => setIsContactDialogOpen(true)}
-            className="text-primary font-semibold hover:underline"
-          >
-            Get prequalified
-          </button>
-          <button className="text-muted-foreground hover:text-foreground">
-            ⓘ
-          </button>
-        </div>
-
-        <Separator />
-
-        {/* Additional Property Info Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-start gap-3">
-            <Ruler className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Acres</div>
-              <div className="font-semibold">{property.acres}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Year</div>
-              <div className="font-semibold">{property.yearBuilt}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Days on Site</div>
-              <div className="font-semibold">{property.daysOnSite}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Home className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Property Type</div>
-              <div className="font-semibold">{property.propertyType}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Building className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Sub Type</div>
-              <div className="font-semibold">{property.subType}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <DollarSign className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Per Square Foot</div>
-              <div className="font-semibold">${property.pricePerSqFt}</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm text-muted-foreground">Date Listed</div>
-              <div className="font-semibold">{property.dateListed}</div>
-            </div>
-          </div>
-          {property.lotSize > 0 && (
-            <div className="flex items-start gap-3">
-              <Ruler className="w-5 h-5 text-muted-foreground mt-0.5" />
+            
+            <div className="flex items-start gap-2 text-lg">
+              <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
               <div>
-                <div className="text-sm text-muted-foreground">Lot Size</div>
-                <div className="font-semibold">{property.lotSize.toLocaleString()} sq ft</div>
-              </div>
-            </div>
-          )}
-          {property.county && (
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-              <div>
-                <div className="text-sm text-muted-foreground">County</div>
-                <div className="font-semibold">{property.county}</div>
-              </div>
-            </div>
-          )}
-          {property.legalDescription && (
-            <div className="flex items-start gap-3 col-span-2">
-              <FileText className="w-5 h-5 text-muted-foreground mt-0.5" />
-              <div>
-                <div className="text-sm text-muted-foreground">Legal Description</div>
-                <div className="font-semibold text-sm">{property.legalDescription}</div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Home Evaluation CTA */}
-        <Card className="bg-muted/30 border-0">
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="flex-1">
-                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-                  Need to sell your current home to buy this one?
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Find out how much it will sell for today!
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  size="lg" 
-                  className="h-12 px-6 bg-primary hover:bg-primary/90"
-                  onClick={() => setIsContactDialogOpen(true)}
-                >
-                  <Home className="w-5 h-5 mr-2" />
-                  Home Evaluation
-                </Button>
-                <Button 
-                  size="lg" 
-                  className="h-12 px-6 bg-primary hover:bg-primary/90"
-                  onClick={() => setIsContactDialogOpen(true)}
-                >
-                  <span className="mr-2">✓</span>
-                  Guaranteed Sold*
-                </Button>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4 text-right">
-              *Some terms & Conditions apply. Guarantee by eXp Realty
-            </p>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Description */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Description of {property.address}</h2>
-          <p className="text-muted-foreground leading-relaxed">{property.description}</p>
-        </div>
-
-        <Separator />
-
-        {/* Enhanced Listing Content - Floor Plans & Videos */}
-        {enhancement && (
-          <>
-            {/* Floor Plans Section */}
-            {enhancement.floor_plans && enhancement.floor_plans.length > 0 && (
-              <>
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
-                  <div className="p-8">
-                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                      Floor Plans
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {enhancement.floor_plans.map((plan: any, idx: number) => (
-                        <Card key={idx} className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
-                          <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                            <img 
-                              src={plan.url} 
-                              alt={plan.title}
-                              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                          <div className="p-4 bg-gradient-to-b from-background to-muted/10">
-                            <h3 className="font-bold text-lg mb-2">{plan.title}</h3>
-                            {plan.description && (
-                              <p className="text-sm text-muted-foreground">{plan.description}</p>
-                            )}
-                            <Button 
-                              variant="outline" 
-                              className="mt-4 w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                              onClick={() => window.open(plan.url, '_blank')}
-                            >
-                              View Full Size
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-                <Separator />
-              </>
-            )}
-
-            {/* Video Section */}
-            {enhancement.video_embeds && enhancement.video_embeds.length > 0 && (
-              <>
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
-                  <div className="p-8">
-                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                      Property Videos
-                    </h2>
-                    <div className="space-y-6">
-                      {enhancement.video_embeds.map((video: any, idx: number) => (
-                        <div key={idx} className="space-y-3">
-                          {video.title && (
-                            <h3 className="font-bold text-xl">{video.title}</h3>
-                          )}
-                          <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl border-2 border-primary/20">
-                            <iframe
-                              src={video.url}
-                              title={video.title || `Property Video ${idx + 1}`}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-                <Separator />
-              </>
-            )}
-
-            {/* Documents Section */}
-            {enhancement.documents && enhancement.documents.length > 0 && (
-              <>
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
-                  <div className="p-8">
-                    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                      Property Documents
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {enhancement.documents.map((doc: any, idx: number) => (
-                        <Card key={idx} className="hover:shadow-lg transition-shadow duration-300 border-2 hover:border-primary/50">
-                          <div className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <FileText className="w-8 h-8 text-primary" />
-                              <div>
-                                <h3 className="font-semibold">{doc.title}</h3>
-                                <p className="text-xs text-muted-foreground">{doc.type || 'PDF Document'}</p>
-                              </div>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => window.open(doc.url, '_blank')}
-                            >
-                              View
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-                <Separator />
-              </>
-            )}
-          </>
-        )}
-
-        {/* Home Details Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Home Details</h3>
-            <p className="text-sm font-medium mb-4">{property.address}, {property.city}, {property.state} {property.zip}</p>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Status</span>
-                <span className="font-semibold">{property.status}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">MLS #ID</span>
-                <span className="font-semibold">{property.mlsId}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Price</span>
-                <span className="font-semibold">{formatPrice(property.price)}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Bedrooms</span>
-                <span className="font-semibold">{property.beds}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Bathrooms</span>
-                <span className="font-semibold">{property.baths}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Square Footage</span>
-                <span className="font-semibold">{property.sqft.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Acres</span>
-                <span className="font-semibold">{property.acres}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Year</span>
-                <span className="font-semibold">{property.yearBuilt}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2">
-                <span className="text-muted-foreground">Days on Site</span>
-                <span className="font-semibold">{property.daysOnSite}</span>
+                <p className="font-semibold">{property.address}</p>
+                <p className="text-muted-foreground">{property.city}, {property.state} {property.zip}</p>
               </div>
             </div>
           </div>
-        </Card>
 
-        <Separator />
+          <Separator />
 
-        {/* Community Information */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Community Information for {property.address}</h3>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Address</span>
-                <span className="font-semibold">{property.address}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">City</span>
-                <Link to={`/listings?city=${encodeURIComponent(property.city)}`} className="font-semibold text-primary hover:underline">
-                  {property.city}
-                </Link>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">State</span>
-                <span className="font-semibold">{property.state}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">Zip Code</span>
-                <Link to={`/listings?zip=${property.zip}`} className="font-semibold text-primary hover:underline">
-                  {property.zip}
-                </Link>
-              </div>
-              <div className="flex justify-between items-center border-b border-dotted pb-2">
-                <span className="text-muted-foreground">County</span>
-                <Link to={`/listings?county=${encodeURIComponent(property.county)}`} className="font-semibold text-primary hover:underline">
-                  {property.county}
-                </Link>
-              </div>
-              <div className="flex justify-between items-center pb-2">
-                <span className="text-muted-foreground">Subdivision</span>
-                <Link to={`/listings?subdivision=${encodeURIComponent(property.subdivision)}`} className="font-semibold text-primary hover:underline">
-                  {property.subdivision}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Interior Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Interior</h3>
-            
-            <div className="space-y-3">
-              {property.interiorFeatures.map((feature, index) => (
-                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Exterior Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Exterior</h3>
-            
-            <div className="space-y-3">
-              {property.exteriorFeatures.map((feature, index) => (
-                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* HOA Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">HOA</h3>
-            
-            <div className="space-y-3">
-              {property.hoaFeatures.map((feature, index) => (
-                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Additional Information Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Additional Information</h3>
-            
-            <div className="space-y-3 mb-6">
-              {property.additionalInfo.map((info, index) => (
-                <div key={index} className="flex justify-between items-start border-b border-dotted pb-2">
-                  <span className="text-sm">{info}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4 pt-4 border-t">
-              <div>
-                <h4 className="font-semibold mb-2">Listed By</h4>
-                <p className="text-sm text-muted-foreground">
-                  {property.listingAgent.name}
-                </p>
-                {property.listingAgent.phone && (
-                  <p className="text-sm text-muted-foreground">
-                    {property.listingAgent.phone}
-                  </p>
-                )}
-                {property.listingAgent.company && (
-                  <p className="text-sm text-muted-foreground">
-                    {property.listingAgent.company}
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Source</h4>
-                <p className="text-sm text-muted-foreground">{property.source}</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Rooms Section - if available */}
-        {property.rooms && property.rooms.length > 0 && (
-          <>
-            <Separator />
-            <Card className="border-0 shadow-none bg-card">
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-6">Room Details</h3>
-                
-                <div className="space-y-4">
-                  {property.rooms.map((room, index) => (
-                    <div key={index} className="border-b pb-3 last:border-0">
-                      <h4 className="font-semibold mb-1">{room.description}</h4>
-                      {room.level && (
-                        <p className="text-sm text-muted-foreground">Level: {room.level}</p>
-                      )}
-                      {room.features && (
-                        <p className="text-sm text-muted-foreground">{room.features}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </>
-        )}
-
-        {/* Home Value Estimate - Enhanced with PropertyEstimate */}
-        {property.avm && (
-          <>
-            <Separator />
-            <PropertyEstimate
-              listPrice={property.price}
-              estimatedValue={property.avm.value}
-              pricePerSqft={property.pricePerSqFt}
-              confidence="high"
-            />
-          </>
-        )}
-
-        <Separator />
-
-        {/* Thinking of Buying - Tour Scheduling CTA */}
-        <Card className="border-2">
-          <div className="p-6">
-            <h2 className="text-3xl font-bold mb-6">Thinking of buying?</h2>
-            
-            {/* Date Selection */}
-            <div className="mb-6">
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {tourDates.map((date, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedDate(date.fullDate)}
-                    className={`flex-shrink-0 flex flex-col items-center justify-center p-4 rounded-lg border-2 min-w-[100px] transition-colors ${
-                      selectedDate === date.fullDate
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-muted-foreground">{date.dayOfWeek}</div>
-                    <div className={`text-3xl font-bold ${
-                      selectedDate === date.fullDate ? 'text-primary' : 'text-foreground'
-                    }`}>{date.day}</div>
-                    <div className="text-sm font-medium text-muted-foreground">{date.month}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tour Type Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
-                onClick={() => setTourType("in-person")}
-                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
-                  tourType === "in-person"
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className="font-semibold">Tour in person</span>
-              </button>
-              <button
-                onClick={() => setTourType("video")}
-                className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
-                  tourType === "video"
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className="font-semibold">Tour via video chat</span>
-              </button>
-            </div>
-
-            {/* Request Showing Button */}
-            <Button 
-              className="w-full h-14 text-lg mb-2"
-              size="lg"
-              onClick={() => setIsContactDialogOpen(true)}
-            >
-              Request showing
-            </Button>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Tour for free, no strings attached
-            </p>
-
-            {/* OR Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-background px-4 text-lg font-semibold text-muted-foreground">OR</span>
-              </div>
-            </div>
-
-            {/* Start an Offer Button */}
+          {/* Action Buttons */}
+          <div className="flex gap-2">
             <Button 
               variant="outline" 
-              className="w-full h-14 text-lg mb-2 border-2"
-              size="lg"
-              onClick={() => setIsContactDialogOpen(true)}
+              className="flex-1"
+              onClick={handleSave}
             >
-              Start an offer
+              <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
+              {isFavorite ? 'Saved' : 'Save'}
             </Button>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Make a winning offer with the help of a local agent
-            </p>
-
-            {/* Get Pre-approved Link */}
-            <div className="text-center">
-              <Button 
-                variant="link" 
-                className="text-primary text-lg font-semibold"
-                onClick={() => setIsContactDialogOpen(true)}
-              >
-                Get pre-approved
-              </Button>
-            </div>
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={handleShare}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={handleHide}
+            >
+              <XIcon className="w-4 h-4 mr-2" />
+              Hide
+            </Button>
           </div>
-        </Card>
 
-        <Separator />
+          <Separator />
 
-        {/* Open Houses Section */}
-        <Card className="border-2">
-          <div className="p-6">
-            <h2 className="text-3xl font-bold mb-6">Open houses</h2>
-            
-            {/* No Open Houses Message */}
-            <div className="flex items-start gap-3 mb-6 p-4 bg-muted/30 rounded-lg">
-              <Calendar className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-1" />
-              <p className="text-lg text-muted-foreground">No upcoming open houses</p>
-            </div>
+          {/* Property Estimate */}
+          {listing && <PropertyEstimate listing={listing} />}
 
-            {/* Schedule Tour */}
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold">Schedule a tour today</h3>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Tour with FloridaHomeFinder and one of our agents will be there to answer all your questions.
-              </p>
+          <Separator />
 
-              {/* Tour Date Selection */}
-              <div className="grid grid-cols-3 gap-2">
-                {tourDates.slice(0, 6).map((date) => (
-                  <Button
-                    key={date.fullDate}
-                    variant={selectedDate === date.fullDate ? "default" : "outline"}
-                    className="flex flex-col h-auto py-3"
-                    onClick={() => setSelectedDate(date.fullDate)}
-                  >
-                    <span className="text-xs">{date.dayOfWeek}</span>
-                    <span className="text-lg font-bold">{date.day}</span>
-                    <span className="text-xs">{date.month}</span>
-                  </Button>
-                ))}
-              </div>
-
-              {/* Tour Type Selection */}
-              <div className="flex gap-2">
-                <Button
-                  variant={tourType === "in-person" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => setTourType("in-person")}
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  In Person
-                </Button>
-                <Button
-                  variant={tourType === "video" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => setTourType("video")}
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  Video Chat
-                </Button>
-              </div>
-
-              {/* Schedule Button */}
-              <Button 
-                className="w-full h-14 text-lg"
-                size="lg"
-                onClick={() => setIsContactDialogOpen(true)}
-                disabled={!selectedDate}
-              >
-                Schedule a tour
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Comments Section */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-6">Comments</h3>
-            
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Add a comment" 
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="flex-1"
-              />
-              <Button size="icon" className="rounded-full bg-primary hover:bg-primary/90">
-                <Send className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Separator />
-
-        {/* Location Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
-          <div className="bg-muted rounded-lg h-80 flex items-center justify-center mb-4">
-            <p className="text-muted-foreground">Map would be displayed here</p>
-          </div>
-          <Input placeholder="Enter your location" className="mb-2" />
-          <Button className="w-full">Get Directions</Button>
-        </div>
-
-        <Separator />
-
-        {/* Streetview Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Streetview of {property.address}, {property.city}, {property.state} {property.zip}</h2>
-          <div className="bg-muted rounded-lg h-80 flex items-center justify-center">
-            <p className="text-muted-foreground">Street View would be displayed here</p>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Mortgage Calculator */}
-        <Card className="border-0 shadow-none bg-card">
-          <div className="p-6">
-            <h3 className="text-2xl font-bold mb-6">Mortgage Calculator</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Listing Price</label>
-                <Input 
-                  type="number" 
-                  value={listingPrice}
-                  onChange={(e) => setListingPrice(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Down Payment</label>
-                <Input 
-                  type="number" 
-                  value={downPayment}
-                  onChange={(e) => setDownPayment(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Interest Rate</label>
-                <Input 
-                  type="number" 
-                  step="0.01" 
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Amortization</label>
-                <Input type="text" value="30 Years" readOnly />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
-                <Input 
-                  type="number" 
-                  value={listing?.condominium?.fees?.maintenance || 0}
-                  onChange={(e) => {}} 
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Insurance (Monthly)</label>
-                <Input 
-                  type="number" 
-                  value={Math.round((parseFloat(listingPrice || "0") * 0.005) / 12)}
-                  onChange={(e) => {}}
-                />
-                <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
-              </div>
-              <Button className="w-full" onClick={calculateMortgage}>Calculate</Button>
-              
-              {monthlyPayment !== null && (
-                <div className="bg-primary/10 p-4 rounded-lg mt-4">
-                  <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
-                  <div className="text-3xl font-bold text-primary">
-                    {formatPrice(monthlyPayment)}
+          {/* Enhanced Listing Documents */}
+          {enhancement?.documents && enhancement.documents.length > 0 && (
+            <>
+              <Card className="border-0 shadow-none bg-card">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Property Documents</h3>
+                  <div className="space-y-2">
+                    {enhancement.documents.map((doc: any, index: number) => (
+                      <Card key={index} className="border hover:border-primary transition-colors cursor-pointer">
+                        <div className="p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-8 h-8 text-primary" />
+                            <div>
+                              <h3 className="font-semibold">{doc.title}</h3>
+                              <p className="text-xs text-muted-foreground">{doc.type || 'PDF Document'}</p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.open(doc.url, '_blank')}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Includes principal, interest, taxes, HOA, and insurance
-                  </p>
                 </div>
-              )}
-            </div>
-          </div>
-        </Card>
+              </Card>
+              <Separator />
+            </>
+          )}
 
-        <Separator />
-
-        {/* Property Description with Links */}
-        <div className="text-sm text-muted-foreground leading-relaxed">
-          <p>
-            This beautiful 5 beds 3 baths home is located at <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span> and is listed for sale at {formatPrice(property.price)}. This home was built in {property.yearBuilt}, contains {property.sqft.toLocaleString()} square feet of living space, and sits on a {property.acres} acre lot. This residential home is priced at ${property.pricePerSqFt} per square foot.
-          </p>
-          <p className="mt-4">
-            If you'd like to request a tour or more information on <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span>, please call us at{" "}
-            <a href="tel:919-249-8536" className="text-primary font-semibold hover:underline">919-249-8536</a> so that we can assist you in your real estate search. To find homes like {property.address}, {property.city}, {property.state} {property.zip}, you can search{" "}
-            <Link to={`/${property.city.toLowerCase()}`} className="text-primary font-semibold hover:underline">homes for sale in {property.city}</Link>, or visit the neighborhood of{" "}
-            <Link to={`/${property.city.toLowerCase()}/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary font-semibold hover:underline">{property.subdivision}</Link>, or by{" "}
-            <Link to={`/zip/${property.zip}`} className="text-primary font-semibold hover:underline">{property.zip}</Link>. We are here to help when you're ready to{" "}
-            <button onClick={() => setIsContactDialogOpen(true)} className="text-primary font-semibold hover:underline">contact us</button>!
-          </p>
-        </div>
-
-        <Separator />
-
-        {/* Schools Near Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Schools Near {property.address}, {property.city}, {property.state} {property.zip}</h2>
-          <Card className="border bg-card">
+          {/* Home Details Section */}
+          <Card className="border-0 shadow-none bg-card">
             <div className="p-6">
-              <p className="text-sm mb-4">Schools in <span className="font-semibold">{property.address}</span></p>
+              <h3 className="text-xl font-bold mb-6">Home Details for {property.address}</h3>
+              <p className="text-sm font-medium mb-4">{property.address}, {property.city}, {property.state} {property.zip}</p>
               
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
-                      <div className="text-xs font-semibold">RATING</div>
-                      <div className="text-lg font-bold">Above</div>
-                      <div className="text-lg font-bold">Avg</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg mb-1">Howard L Hall Elementary</h4>
-                    <p className="text-sm text-muted-foreground mb-2">526 Andrews Road, Fayetteville NC 28311</p>
-                    <p className="text-sm text-muted-foreground">Public district, K-5 | 600 students</p>
-                  </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <span className="font-semibold">{property.status}</span>
                 </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
-                      <div className="text-xs font-semibold">RATING</div>
-                      <div className="text-lg font-bold">Above</div>
-                      <div className="text-lg font-bold">Avg</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg mb-1">Reid Ross Classical Middle School</h4>
-                    <p className="text-sm text-muted-foreground mb-2">3200 Ramsey Street, Fayetteville NC 28301</p>
-                    <p className="text-sm text-muted-foreground">Public district, 6-8 | 226 students</p>
-                  </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">MLS #ID</span>
+                  <span className="font-semibold">{property.mlsId}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Price</span>
+                  <span className="font-semibold">{formatPrice(property.price)}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Bedrooms</span>
+                  <span className="font-semibold">{property.beds}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Bathrooms</span>
+                  <span className="font-semibold">{property.baths}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Square Footage</span>
+                  <span className="font-semibold">{property.sqft.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Acres</span>
+                  <span className="font-semibold">{property.acres}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-dotted pb-2">
+                  <span className="text-muted-foreground">Year</span>
+                  <span className="font-semibold">{property.yearBuilt}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2">
+                  <span className="text-muted-foreground">Days on Site</span>
+                  <span className="font-semibold">{property.daysOnSite}</span>
                 </div>
               </div>
             </div>
           </Card>
+
+          <Separator />
+
+          {/* Community Information */}
+          <Collapsible defaultOpen={true}>
+            <CollapsibleTrigger className="w-full">
+              <Card className="border-0 shadow-none bg-card">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-6 text-left flex items-center justify-between hover:text-primary transition-colors">
+                    Community Information for {property.address}
+                    <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                  </h3>
+                </div>
+              </Card>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Card className="border-0 shadow-none bg-card">
+                <div className="p-6">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center border-b border-dotted pb-2">
+                      <span className="text-muted-foreground">Address</span>
+                      <span className="font-semibold">{property.address}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dotted pb-2">
+                      <span className="text-muted-foreground">City</span>
+                      <Link to={`/listings?city=${encodeURIComponent(property.city)}`} className="font-semibold text-primary hover:underline">
+                        {property.city}
+                      </Link>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dotted pb-2">
+                      <span className="text-muted-foreground">State</span>
+                      <span className="font-semibold">{property.state}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dotted pb-2">
+                      <span className="text-muted-foreground">Zip Code</span>
+                      <Link to={`/listings?zip=${property.zip}`} className="font-semibold text-primary hover:underline">
+                        {property.zip}
+                      </Link>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dotted pb-2">
+                      <span className="text-muted-foreground">Subdivision/Community</span>
+                      <span className="font-semibold">{property.subdivision}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Interior Features */}
+          {property.interior && Object.keys(property.interior).length > 0 && (
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="w-full">
+                <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                  Interior Features of {property.address}
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                </h2>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+                  {Object.entries(property.interior).map(([key, value]) => (
+                    <div key={key} className="space-y-1">
+                      <p className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</p>
+                      <p className="font-medium">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {property.interior && Object.keys(property.interior).length > 0 && <Separator />}
+
+          {/* Exterior Features */}
+          {property.exterior && Object.keys(property.exterior).length > 0 && (
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="w-full">
+                <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                  Exterior Features of {property.address}
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                </h2>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+                  {Object.entries(property.exterior).map(([key, value]) => (
+                    <div key={key} className="space-y-1">
+                      <p className="text-sm text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</p>
+                      <p className="font-medium">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {property.exterior && Object.keys(property.exterior).length > 0 && <Separator />}
+
+          {/* HOA Information */}
+          {property.hoa && (
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="w-full">
+                <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                  HOA Information for {property.address}
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                </h2>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-2 gap-4 pb-4">
+                  {property.hoa.fee && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">HOA Fee</p>
+                      <p className="font-medium">${property.hoa.fee}/month</p>
+                    </div>
+                  )}
+                  {property.hoa.frequency && (
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Frequency</p>
+                      <p className="font-medium">{property.hoa.frequency}</p>
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {property.hoa && <Separator />}
+
+          {/* Additional Information */}
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="w-full">
+              <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                Additional Information for {property.address}
+                <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+              </h2>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+                {property.taxAssessedValue && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Tax Assessed Value</p>
+                    <p className="font-medium">{formatPrice(property.taxAssessedValue)}</p>
+                  </div>
+                )}
+                {property.annualTaxAmount && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Annual Tax Amount</p>
+                    <p className="font-medium">{formatPrice(property.annualTaxAmount)}</p>
+                  </div>
+                )}
+                {listing.propertyType && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Property Type</p>
+                    <p className="font-medium">{listing.propertyType}</p>
+                  </div>
+                )}
+                {listing.building?.size?.area && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Building Size</p>
+                    <p className="font-medium">{listing.building.size.area.toLocaleString()} sq ft</p>
+                  </div>
+                )}
+                {listing.lot?.lotSize && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Lot Size</p>
+                    <p className="font-medium">{listing.lot.lotSize.toLocaleString()} sq ft</p>
+                  </div>
+                )}
+                {listing.property?.yearBuilt && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Year Built</p>
+                    <p className="font-medium">{listing.property.yearBuilt}</p>
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Location & Map */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
+            {listing?.map?.latitude && listing?.map?.longitude && (
+              <PropertyMap 
+                latitude={listing.map.latitude}
+                longitude={listing.map.longitude}
+                properties={[listing]}
+              />
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Mortgage Calculator */}
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="w-full">
+              <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                Mortgage Calculator for {property.address}
+                <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+              </h2>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Card>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Listing Price</label>
+                      <Input 
+                        type="number" 
+                        value={listingPrice}
+                        onChange={(e) => setListingPrice(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Down Payment</label>
+                      <Input 
+                        type="number" 
+                        value={downPayment}
+                        onChange={(e) => setDownPayment(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Interest Rate</label>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Amortization</label>
+                      <Input type="text" value="30 Years" readOnly />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Association Fees (Monthly)</label>
+                      <Input 
+                        type="number" 
+                        value={listing?.association?.fee || 0}
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Insurance (Monthly)</label>
+                      <Input 
+                        type="number" 
+                        value={Math.round((parseFloat(listingPrice || "0") * 0.005) / 12)}
+                        readOnly
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Estimated at 0.5% annually</p>
+                    </div>
+                    <Button className="w-full" onClick={calculateMortgage}>Calculate</Button>
+                    
+                    {monthlyPayment !== null && (
+                      <div className="bg-primary/10 p-4 rounded-lg mt-4">
+                        <div className="text-sm text-muted-foreground mb-1">Estimated Monthly Payment</div>
+                        <div className="text-3xl font-bold text-primary">
+                          {formatPrice(monthlyPayment)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Includes principal, interest, taxes, HOA, and insurance
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Property Description with Links */}
+          <div className="text-sm text-muted-foreground leading-relaxed">
+            <p>
+              This beautiful {property.beds} beds {property.baths} baths home is located at <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span> and is listed for sale at {formatPrice(property.price)}. This home was built in {property.yearBuilt}, contains {property.sqft.toLocaleString()} square feet of living space, and sits on a {property.acres} acre lot. This residential home is priced at ${property.pricePerSqFt} per square foot.
+            </p>
+            <p className="mt-4">
+              If you would like to request a tour or more information on <span className="font-semibold text-foreground">{property.address}, {property.city}, {property.state} {property.zip}</span>, please call us at{" "}
+              <a href="tel:919-249-8536" className="text-primary font-semibold hover:underline">919-249-8536</a> so that we can assist you in your real estate search. To find homes like {property.address}, {property.city}, {property.state} {property.zip}, you can search{" "}
+              <Link to={`/${property.city.toLowerCase()}`} className="text-primary font-semibold hover:underline">homes for sale in {property.city}</Link>, or visit the neighborhood of{" "}
+              <Link to={`/${property.city.toLowerCase()}/${property.subdivision.toLowerCase().replace(/\s+/g, '-')}`} className="text-primary font-semibold hover:underline">{property.subdivision}</Link>, or by{" "}
+              <Link to={`/zip/${property.zip}`} className="text-primary font-semibold hover:underline">{property.zip}</Link>. We are here to help when you are ready to{" "}
+              <button onClick={() => setIsContactDialogOpen(true)} className="text-primary font-semibold hover:underline">contact us</button>!
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Schools Near Section */}
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="w-full">
+              <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                Schools Near {property.address}, {property.city}, {property.state} {property.zip}
+                <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+              </h2>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Card className="border bg-card">
+                <div className="p-6">
+                  <p className="text-sm mb-4">Schools in <span className="font-semibold">{property.address}</span></p>
+                  
+                  <div className="space-y-6">
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
+                          <div className="text-xs font-semibold">RATING</div>
+                          <div className="text-lg font-bold">Above</div>
+                          <div className="text-lg font-bold">Avg</div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-1">Elementary School</h4>
+                        <p className="text-sm text-muted-foreground mb-2">School information would appear here</p>
+                        <p className="text-sm text-muted-foreground">Public district, K-5</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-20 h-20 bg-primary/10 rounded-lg flex flex-col items-center justify-center border-2 border-primary">
+                          <div className="text-xs font-semibold">RATING</div>
+                          <div className="text-lg font-bold">Above</div>
+                          <div className="text-lg font-bold">Avg</div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg mb-1">Middle School</h4>
+                        <p className="text-sm text-muted-foreground mb-2">School information would appear here</p>
+                        <p className="text-sm text-muted-foreground">Public district, 6-8</p>
+                      </div>
+                  </div>
+                </div>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Separator />
+
+          {/* Property History */}
+          {listing.listingHistory && listing.listingHistory.length > 0 && (
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="w-full">
+                <h2 className="text-2xl font-bold mb-4 text-left flex items-center justify-between hover:text-primary transition-colors">
+                  Property History for {property.address}
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+                </h2>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-2 pb-4">
+                  {listing.listingHistory.map((history: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{history.event}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(history.date).toLocaleDateString()}</p>
+                      </div>
+                      {history.price && (
+                        <p className="font-bold">{formatPrice(history.price)}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {listing.listingHistory && listing.listingHistory.length > 0 && <Separator />}
+
+          {/* Similar Properties & Comparables */}
+          {listing && <SimilarProperties currentProperty={listing} className="mt-6" />}
+          
+          <Separator />
+
+          {/* Nearby Places */}
+          {listing?.map?.latitude && listing?.map?.longitude && (
+            <NearbyPlaces 
+              latitude={listing.map.latitude}
+              longitude={listing.map.longitude}
+              className="mt-6" 
+            />
+          )}
+          
+          <Separator />
+
+          {/* Community Listings */}
+          <CommunityListings 
+            city={property.city}
+            state={property.state}
+            currentMlsNumber={property.mlsId}
+            className="mt-6"
+          />
+          
+          <Separator />
+
+          {/* Related Pages */}
+          <RelatedPages 
+            city={property.city}
+            state={property.state}
+            className="mt-6"
+          />
         </div>
 
-        <Separator />
+        {/* Right Column - Contact Card (Sticky) */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-4">
+            <Card className="border-2">
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-6">Contact Agent</h3>
+                
+                {/* Tour Type Selection */}
+                <div className="space-y-3 mb-6">
+                  <button 
+                    className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                      tourType === "in-person" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}
+                    onClick={() => setTourType("in-person")}
+                  >
+                    <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className="font-semibold">Tour in person</span>
+                  </button>
+                  
+                  <button 
+                    className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                      tourType === "video" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}
+                    onClick={() => setTourType("video")}
+                  >
+                    <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className="font-semibold">Tour via video chat</span>
+                  </button>
+                </div>
 
-        {/* Similar Properties & Comparables */}
-        {listing && <SimilarProperties currentProperty={listing} className="mt-6" />}
-        
-        <Separator />
+                {/* Request Showing Button */}
+                <Button 
+                  className="w-full h-14 text-lg mb-2"
+                  size="lg"
+                  onClick={() => setIsContactDialogOpen(true)}
+                >
+                  Request showing
+                </Button>
+                <p className="text-sm text-muted-foreground text-center mb-6">
+                  Tour for free, no strings attached
+                </p>
 
-        {/* Nearby Places */}
-        {listing?.map?.latitude && listing?.map?.longitude && (
-          <NearbyPlaces 
-            latitude={listing.map.latitude}
-            longitude={listing.map.longitude}
-            className="mt-6" 
-          />
-        )}
-        
-        <Separator />
+                {/* OR Divider */}
+                <div className="relative my-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border"></div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-background px-4 text-lg font-semibold text-muted-foreground">OR</span>
+                  </div>
+                </div>
 
-        {/* Community Listings */}
-        <CommunityListings 
-          city={property.city}
-          state={property.state}
-          currentMlsNumber={property.mlsId}
-          className="mt-6"
-        />
-        
-        <Separator />
+                {/* Start an Offer Button */}
+                <Button 
+                  variant="outline" 
+                  className="w-full h-14 text-lg mb-2 border-2"
+                  size="lg"
+                  onClick={() => setIsContactDialogOpen(true)}
+                >
+                  Start an offer
+                </Button>
+                <p className="text-sm text-muted-foreground text-center mb-6">
+                  Make a winning offer with the help of a local agent
+                </p>
 
-        {/* Related Pages */}
-        <RelatedPages 
-          city={property.city}
-          state={property.state}
-          className="mt-6"
-        />
-        
-        <Separator />
+                {/* Get Pre-approved Link */}
+                <div className="text-center">
+                  <Button 
+                    variant="link" 
+                    className="text-primary text-lg font-semibold"
+                    onClick={() => setIsContactDialogOpen(true)}
+                  >
+                    Get pre-approved
+                  </Button>
+                </div>
+              </div>
+            </Card>
 
-        {/* Previous/Next Navigation */}
-        <PropertyPrevNext className="mt-6" />
+            <Separator className="my-6" />
+
+            {/* Open Houses Section */}
+            <Card className="border-2">
+              <div className="p-6">
+                <h2 className="text-3xl font-bold mb-6">Open houses</h2>
+                
+                {/* No Open Houses Message */}
+                <div className="flex items-start gap-3 mb-6 p-4 bg-muted/30 rounded-lg">
+                  <Calendar className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-1" />
+                  <p className="text-lg text-muted-foreground">No upcoming open houses</p>
+                </div>
+
+                {/* Schedule Tour */}
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold">Schedule a tour today</h3>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    Tour with us and one of our agents will be there to answer all your questions.
+                  </p>
+
+                  {/* Tour Date Selection */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {tourDates.slice(0, 6).map((date) => (
+                      <Button
+                        key={date.fullDate}
+                        variant={selectedDate === date.fullDate ? "default" : "outline"}
+                        className="flex flex-col h-auto py-3"
+                        onClick={() => setSelectedDate(date.fullDate)}
+                      >
+                        <span className="text-xs">{date.dayOfWeek}</span>
+                        <span className="text-lg font-bold">{date.day}</span>
+                        <span className="text-xs">{date.month}</span>
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Tour Type Selection */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={tourType === "in-person" ? "default" : "outline"}
+                      className="flex-1"
+                      onClick={() => setTourType("in-person")}
+                    >
+                      <Home className="w-4 h-4 mr-2" />
+                      In Person
+                    </Button>
+                    <Button
+                      variant={tourType === "video" ? "default" : "outline"}
+                      className="flex-1"
+                      onClick={() => setTourType("video")}
+                    >
+                      <Video className="w-4 h-4 mr-2" />
+                      Video Chat
+                    </Button>
+                  </div>
+
+                  {/* Schedule Button */}
+                  <Button 
+                    className="w-full h-14 text-lg"
+                    size="lg"
+                    onClick={() => setIsContactDialogOpen(true)}
+                    disabled={!selectedDate}
+                  >
+                    Schedule a tour
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
 
-      {/* Contact Dialog */}
+      {/* Contact Form Dialog */}
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1690,14 +1412,6 @@ export default function PropertyDetail() {
             >
               Ask a Question
             </Button>
-          </div>
-          <div className="flex items-center justify-center gap-2 mt-2 text-sm">
-            <Phone className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">|</span>
-            <MessageSquare className="w-4 h-4 text-primary" />
-            <a href="tel:919-249-8536" className="font-semibold text-primary hover:underline">
-              919-249-8536
-            </a>
           </div>
         </div>
       </div>
