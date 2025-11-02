@@ -161,6 +161,54 @@ export default function GlobalSiteSettings() {
               </CardContent>
             </Card>
 
+            {/* Google Ads Conversion ID */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Google Ads Conversion Tracking</CardTitle>
+                <CardDescription>
+                  Add your Google Ads Conversion ID for enhanced conversions (starts with AW-)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="google_ads_conversion_id">Conversion ID</Label>
+                  <Input
+                    id="google_ads_conversion_id"
+                    placeholder="AW-123456789"
+                    value={settings.google_ads_conversion_id || ''}
+                    onChange={(e) => updateSetting('google_ads_conversion_id', e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Used for enhanced conversions with hashed user data
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Google Ads Remarketing */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Google Ads Dynamic Remarketing</CardTitle>
+                <CardDescription>
+                  Configure dynamic remarketing for property listings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="google_ads_remarketing_id">Remarketing Tag ID</Label>
+                  <Input
+                    id="google_ads_remarketing_id"
+                    placeholder="AW-123456789"
+                    value={settings.google_ads_remarketing_id || ''}
+                    onChange={(e) => updateSetting('google_ads_remarketing_id', e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    For dynamic property remarketing campaigns
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Facebook Pixel */}
             <Card>
               <CardHeader>

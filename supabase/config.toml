@@ -23,3 +23,15 @@ verify_jwt = false
 
 [functions.generate-sitemap-listings]
 verify_jwt = false
+
+[functions.generate-facebook-catalog]
+verify_jwt = false
+
+[functions.generate-google-real-estate-feed]
+verify_jwt = false
+
+[functions.generate-page-feed]
+verify_jwt = false
+
+[functions.generate-ad-customizers]
+verify_jwt = false
