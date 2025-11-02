@@ -25,6 +25,10 @@ import { RelatedPages } from "@/components/properties/RelatedPages";
 import { PropertyPrevNext } from "@/components/properties/PropertyPrevNext";
 import { SimilarProperties } from "@/components/properties/SimilarProperties";
 import { PhotoGalleryModal } from "@/components/properties/PhotoGalleryModal";
+import { PropertyHistory } from "@/components/properties/PropertyHistory";
+import { MarketStatistics } from "@/components/properties/MarketStatistics";
+import { NeighborhoodFollow } from "@/components/properties/NeighborhoodFollow";
+import { EnhancedTimePicker } from "@/components/properties/EnhancedTimePicker";
 import PropertyMap from "@/components/map/PropertyMap";
 import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
 import { parsePropertyUrl, extractMlsFromOldUrl } from "@/lib/propertyUrl";
@@ -91,6 +95,7 @@ export default function PropertyDetail() {
   const [user, setUser] = useState<any>(null);
   const [enhancement, setEnhancement] = useState<any>(null);
   const [selectedTiming, setSelectedTiming] = useState<string>("select");
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     firstName: '',
@@ -611,6 +616,28 @@ export default function PropertyDetail() {
               undefined
             }
             lastUpdated={listing.avm?.date || listing.estimate?.date}
+          />
+
+          <Separator />
+
+          {/* Property History - Placeholder for future integration */}
+          {/* Note: Property history data would need to be sourced from Repliers API or another data source */}
+
+          {/* Market Statistics */}
+          <MarketStatistics 
+            neighborhood={property.subdivision || "this area"}
+            city={property.city}
+            className="mt-6"
+          />
+
+          <Separator />
+
+          {/* Neighborhood Follow */}
+          <NeighborhoodFollow 
+            neighborhood={property.subdivision || property.city}
+            city={property.city}
+            state={property.state}
+            className="mt-6"
           />
 
           <Separator />
@@ -1296,7 +1323,7 @@ export default function PropertyDetail() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">When would you like to view this property?</label>
+              <label className="text-sm font-medium mb-3 block">When would you like to view this property?</label>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <Button
                   type="button"
@@ -1335,6 +1362,16 @@ export default function PropertyDetail() {
                   Select Day
                 </Button>
               </div>
+              
+              {/* Enhanced Time Picker */}
+              {selectedDate && (
+                <EnhancedTimePicker
+                  value={selectedTime}
+                  onChange={setSelectedTime}
+                  label="Preferred Time"
+                  className="mt-4"
+                />
+              )}
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Comments</label>

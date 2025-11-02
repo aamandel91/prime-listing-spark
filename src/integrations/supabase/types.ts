@@ -392,6 +392,33 @@ export type Database = {
         }
         Relationships: []
       }
+      neighborhood_subscriptions: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          neighborhood_name: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          neighborhood_name: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          neighborhood_name?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       open_house_leads: {
         Row: {
           buyer_timeline: string
