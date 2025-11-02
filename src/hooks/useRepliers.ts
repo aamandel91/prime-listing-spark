@@ -1,160 +1,57 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface RepliersProperty {
-  mlsNumber: string;
-  listPrice: number;
-  originalPrice?: number;
-  listDate?: string;
-  standardStatus?: string;
-  class?: string;
-  address: {
-    streetNumber: string;
-    streetName: string;
-    streetSuffix: string;
-    city: string;
-    state: string;
-    zip: string;
-    neighborhood?: string;
-    area?: string;
-  };
-  details: {
-    numBedrooms: number;
-    numBathrooms: number;
-    sqft: string;
-    yearBuilt: string;
-    description: string;
-    propertyType: string;
-    style: string;
-    airConditioning?: string;
-    heating?: string;
-    flooringType?: string;
-    extras?: string;
-    exteriorConstruction1?: string;
-    roofMaterial?: string;
-    foundationType?: string;
-    patio?: string;
-    sewer?: string;
-    numGarageSpaces?: number;
-    numParkingSpaces?: number;
-  };
-  images: string[];
-  map: {
-    latitude: number;
-    longitude: number;
-  };
-  lastStatus: string;
-  daysOnMarket: number;
-  lot?: {
-    acres: number;
-    squareFeet?: number;
-    features?: string;
-    legalDescription?: string;
-  };
-  openHouse?: Array<any>;
-  agents?: Array<{
-    name: string;
-    phones?: string[];
-    email?: string;
-    brokerage?: {
-      name: string;
-    };
-  }>;
-  office?: {
-    brokerageName?: string;
-  };
-  condominium?: {
-    fees?: {
-      maintenance?: number;
-    };
-    condoCorp?: string;
-    parkingType?: string;
-  };
-  nearby?: {
-    amenities?: string[];
-  };
-  taxes?: {
-    annualAmount?: number;
-    assessmentYear?: string;
-  };
-  rooms?: Array<{
-    description: string;
-    features?: string;
-    level?: string;
-  }>;
-  avm?: {
-    value: number;
-    high: number;
-    low: number;
-  };
-  estimate?: {
-    date: string;
-    high: number;
-    low: number;
-    confidence: number;
-  };
-}
-
-export interface RepliersSearchParams {
-  city?: string;
-  state?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  propertyType?: string;
-  propertyTypeOrStyle?: string | string[];
-  status?: string;
-  standardStatus?: string;
-  minLotSizeSqft?: number;
-  minGarageSpaces?: number;
-  minParkingSpaces?: number;
-  limit?: number;
-  offset?: number;
-  minSqft?: number;
-  maxSqft?: number;
-  minYearBuilt?: number;
-  maxYearBuilt?: number;
-}
+import type { 
+  RepliersProperty, 
+  RepliersSearchParams, 
+  RepliersAPIResponse,
+  RepliersProxyRequest,
+  isRepliersAPIResponse 
+} from '@/types/repliers';
 
 export const useRepliers = () => {
-  const searchListings = async (params: RepliersSearchParams = {}) => {
+  const searchListings = async (params: RepliersSearchParams = {}): Promise<RepliersAPIResponse<RepliersProperty>> => {
     try {
-      const { data, error } = await supabase.functions.invoke('repliers-proxy', {
-        body: {
-          endpoint: '/listings',
-          params: Object.fromEntries(
-            Object.entries(params).filter(([key, value]) => {
-              // Exclude undefined, null, and empty strings
-              if (value === undefined || value === null || value === '') return false;
-              // Exclude 0 for price fields (Repliers API requires minPrice > 0)
-              if ((key === 'minPrice' || key === 'maxPrice') && value === 0) return false;
-              return true;
-            })
-          ),
-        },
-      });
+      const requestBody: RepliersProxyRequest = {
+        endpoint: '/listings',
+        params: Object.fromEntries(
+          Object.entries(params).filter(([key, value]) => {
+            // Exclude undefined, null, and empty strings
+            if (value === undefined || value === null || value === '') return false;
+            // Exclude 0 for price fields (Repliers API requires minPrice > 0)
+            if ((key === 'minPrice' || key === 'maxPrice') && value === 0) return false;
+            return true;
+          })
+        ),
+      };
+
+      const { data, error } = await supabase.functions.invoke<RepliersAPIResponse<RepliersProperty>>(
+        'repliers-proxy',
+        { body: requestBody }
+      );
 
       if (error) {
         console.error('Error fetching listings:', error);
         throw error;
       }
 
-      return data;
+      return data as RepliersAPIResponse<RepliersProperty>;
     } catch (error) {
       console.error('Error in searchListings:', error);
       throw error;
     }
   };
 
-  const getListingById = async (id: string) => {
+  const getListingById = async (id: string): Promise<RepliersProperty | null> => {
     try {
-      const { data, error } = await supabase.functions.invoke('repliers-proxy', {
-        body: {
-          endpoint: `/listings`,
-          params: { mlsNumber: id },
-        },
-      });
+      const requestBody: RepliersProxyRequest = {
+        endpoint: `/listings`,
+        params: { mlsNumber: id },
+      };
+
+      const { data, error } = await supabase.functions.invoke<RepliersAPIResponse<RepliersProperty>>(
+        'repliers-proxy',
+        { body: requestBody }
+      );
 
       if (error) {
         console.error('Error fetching listing:', error);
@@ -162,7 +59,7 @@ export const useRepliers = () => {
       }
 
       // Extract first listing from response
-      const listing = data?.listings?.[0] || data?.[0];
+      const listing = data?.listings?.[0] || data?.[0] || null;
       return listing;
     } catch (error) {
       console.error('Error in getListingById:', error);
