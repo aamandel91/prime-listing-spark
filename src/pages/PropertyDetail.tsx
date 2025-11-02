@@ -1116,29 +1116,6 @@ export default function PropertyDetail() {
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-6">Contact Agent</h3>
                 
-                {/* Tour Type Selection */}
-                <div className="space-y-3 mb-6">
-                  <button 
-                    className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
-                      tourType === "in-person" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}
-                    onClick={() => setTourType("in-person")}
-                  >
-                    <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className="font-semibold">Tour in person</span>
-                  </button>
-                  
-                  <button 
-                    className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
-                      tourType === "video" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}
-                    onClick={() => setTourType("video")}
-                  >
-                    <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className="font-semibold">Tour via video chat</span>
-                  </button>
-                </div>
-
                 {/* Request Showing Button */}
                 <Button 
                   className="w-full h-14 text-lg mb-2"
@@ -1189,7 +1166,7 @@ export default function PropertyDetail() {
 
             <Separator className="my-6" />
 
-            {/* Open Houses Section */}
+            {/* Open Houses & Schedule Tour Section */}
             <Card className="border-2">
               <div className="p-6">
                 <h2 className="text-3xl font-bold mb-6">Open houses</h2>
@@ -1207,40 +1184,46 @@ export default function PropertyDetail() {
                     Tour with us and one of our agents will be there to answer all your questions.
                   </p>
 
-                  {/* Tour Date Selection */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {tourDates.slice(0, 6).map((date) => (
-                      <Button
-                        key={date.fullDate}
-                        variant={selectedDate === date.fullDate ? "default" : "outline"}
-                        className="flex flex-col h-auto py-3"
-                        onClick={() => setSelectedDate(date.fullDate)}
-                      >
-                        <span className="text-xs">{date.dayOfWeek}</span>
-                        <span className="text-lg font-bold">{date.day}</span>
-                        <span className="text-xs">{date.month}</span>
-                      </Button>
-                    ))}
-                  </div>
-
-                  {/* Tour Type Selection */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant={tourType === "in-person" ? "default" : "outline"}
-                      className="flex-1"
+                  {/* Tour Type Selection - Large Buttons */}
+                  <div className="space-y-3">
+                    <button 
+                      className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                        tourType === "in-person" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                      }`}
                       onClick={() => setTourType("in-person")}
                     >
-                      <Home className="w-4 h-4 mr-2" />
-                      In Person
-                    </Button>
-                    <Button
-                      variant={tourType === "video" ? "default" : "outline"}
-                      className="flex-1"
+                      <Home className={`w-6 h-6 ${tourType === "in-person" ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className="font-semibold">Tour in person</span>
+                    </button>
+                    
+                    <button 
+                      className={`w-full p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                        tourType === "video" ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                      }`}
                       onClick={() => setTourType("video")}
                     >
-                      <Video className="w-4 h-4 mr-2" />
-                      Video Chat
-                    </Button>
+                      <Video className={`w-6 h-6 ${tourType === "video" ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className="font-semibold">Tour via video chat</span>
+                    </button>
+                  </div>
+
+                  {/* Tour Date Selection */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">Select a date</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {tourDates.slice(0, 6).map((date) => (
+                        <Button
+                          key={date.fullDate}
+                          variant={selectedDate === date.fullDate ? "default" : "outline"}
+                          className="flex flex-col h-auto py-3"
+                          onClick={() => setSelectedDate(date.fullDate)}
+                        >
+                          <span className="text-xs">{date.dayOfWeek}</span>
+                          <span className="text-lg font-bold">{date.day}</span>
+                          <span className="text-xs">{date.month}</span>
+                        </Button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Schedule Button */}
