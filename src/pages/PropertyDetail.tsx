@@ -1502,7 +1502,13 @@ export default function PropertyDetail() {
         <Separator />
 
         {/* Nearby Places */}
-        {listing && <NearbyPlaces propertyAddress={listing.address} className="mt-6" />}
+        {listing?.map?.latitude && listing?.map?.longitude && (
+          <NearbyPlaces 
+            latitude={listing.map.latitude}
+            longitude={listing.map.longitude}
+            className="mt-6" 
+          />
+        )}
         
         <Separator />
 
@@ -1542,77 +1548,6 @@ export default function PropertyDetail() {
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 flex items-end justify-center pb-4">
                 <DialogTitle className="text-white text-center text-lg">
                   Interested in {property.address}, {property.city} {property.state}, {property.zip}?
-                </DialogTitle>
-              </div>
-            </div>
-          </DialogHeader>
-              <Card className="overflow-hidden hover-scale group cursor-pointer">
-                <img 
-                  src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" 
-                  alt="Blog post"
-                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="p-4">
-                  <div className="flex gap-2 text-xs text-muted-foreground mb-2">
-                    <span>Aug 21, 2025</span>
-                    <span>10 min read</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">15 Best Things To Do in Fayetteville, NC</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Are you looking for fun things to do in Fayetteville, NC? Here are the top 15 things to do in Fayetteville! Are you thinking about making...
-                  </p>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to="/blog/2">
-              <Card className="overflow-hidden hover-scale group cursor-pointer">
-                <img 
-                  src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" 
-                  alt="Blog post"
-                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="p-4">
-                  <div className="flex gap-2 text-xs text-muted-foreground mb-2">
-                    <span>Jun 26, 2025</span>
-                    <span>7 min read</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Is Fayetteville, NC, a Safe Place to Live? (Crime Statistics)</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Considering a move to Fayetteville? Learn about crime rates, safe neighborhoods, and what makes this North Carolina city a great place to call home.
-                  </p>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* What's Your Home Worth Section */}
-        <Card className="border-0 shadow-none bg-card/50 backdrop-blur">
-          <div className="p-8 text-center">
-            <h2 className="text-3xl font-bold mb-2">What's your home worth?</h2>
-            <p className="text-muted-foreground mb-6">Have a top local Realtor give you a FREE Comparative Market Analysis</p>
-            <Input placeholder="Your Email" className="mb-3 max-w-md mx-auto" />
-            <Button className="w-full max-w-md">Check Now</Button>
-          </div>
-        </Card>
-      </div>
-
-      {/* Contact Form Dialog */}
-      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="relative h-32 -mt-6 -mx-6 mb-4">
-              <img 
-                src={property.images[0]} 
-                alt={property.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 flex items-end justify-center pb-4">
-                <DialogTitle className="text-white text-center text-lg">
-                  Interested in {property.address}, {property.city} NC, {property.zip}?
                 </DialogTitle>
               </div>
             </div>
