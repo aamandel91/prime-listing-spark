@@ -131,6 +131,42 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_properties: {
+        Row: {
+          created_at: string | null
+          current_price: number | null
+          id: string
+          initial_price: number | null
+          price_drop_alert: boolean | null
+          property_data: Json
+          property_mls: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_price?: number | null
+          id?: string
+          initial_price?: number | null
+          price_drop_alert?: boolean | null
+          property_data: Json
+          property_mls: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_price?: number | null
+          id?: string
+          initial_price?: number | null
+          price_drop_alert?: boolean | null
+          property_data?: Json
+          property_mls?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       featured_cities: {
         Row: {
           city_name: string
@@ -419,6 +455,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          channel: string
+          content: string
+          id: string
+          metadata: Json | null
+          notification_type: string
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          content: string
+          id?: string
+          metadata?: Json | null
+          notification_type: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          content?: string
+          id?: string
+          metadata?: Json | null
+          notification_type?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       open_house_leads: {
         Row: {
           buyer_timeline: string
@@ -572,6 +644,48 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_searches: {
+        Row: {
+          created_at: string | null
+          email_notifications: boolean | null
+          id: string
+          is_active: boolean | null
+          last_notified_at: string | null
+          name: string
+          notification_frequency: string | null
+          search_criteria: Json
+          sms_notifications: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          name: string
+          notification_frequency?: string | null
+          search_criteria: Json
+          sms_notifications?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          name?: string
+          notification_frequency?: string | null
+          search_criteria?: Json
+          sms_notifications?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       seo_settings: {
         Row: {
           created_at: string
@@ -659,6 +773,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean | null
+          processed_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          processed?: boolean | null
+          processed_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean | null
+          processed_at?: string | null
         }
         Relationships: []
       }

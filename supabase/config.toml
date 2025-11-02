@@ -9,6 +9,12 @@ verify_jwt = false
 [functions.repliers-market-stats]
 verify_jwt = false
 
+[functions.repliers-webhook]
+verify_jwt = false
+
+[functions.send-notification]
+verify_jwt = false
+
 [functions.optimize-image]
 verify_jwt = true
 

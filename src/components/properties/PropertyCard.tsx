@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { BedDouble, Bath, Square, MapPin, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BedDouble, Bath, Square, MapPin } from "lucide-react";
 import { generatePropertyUrl } from "@/lib/propertyUrl";
+import { FavoriteButton } from "./FavoriteButton";
 
 interface PropertyCardProps {
   id: string;
@@ -143,17 +143,21 @@ const PropertyCard = ({
         )}
 
         {/* Favorite Button */}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-3 right-3 bg-background/90 hover:bg-background hover:text-primary transition-colors shadow-md"
-          onClick={(e) => {
-            e.preventDefault();
-            // Will require login in the future
+        <FavoriteButton
+          propertyMls={mlsNumber || id}
+          propertyData={{
+            address,
+            city,
+            state,
+            zipCode,
+            beds,
+            baths,
+            sqft,
+            title
           }}
-        >
-          <Heart className="w-5 h-5" />
-        </Button>
+          price={price}
+          className="absolute top-3 right-3 bg-background/90 hover:bg-background shadow-md"
+        />
       </div>
 
       <div className="p-4 flex flex-col flex-1">

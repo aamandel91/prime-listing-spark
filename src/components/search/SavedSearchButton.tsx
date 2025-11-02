@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { useSavedSearches } from "@/hooks/useSavedSearches";
 
 interface SavedSearchButtonProps {
   searchCriteria: Record<string, any>;
@@ -30,34 +30,18 @@ export const SavedSearchButton = ({
   const [searchName, setSearchName] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
+  const { saveSearch } = useSavedSearches();
 
   const handleSave = async () => {
-    if (!searchName.trim()) {
-      toast({
-        title: "Name Required",
-        description: "Please enter a name for this search.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    if (!searchName.trim()) return;
+    
     setSaving(true);
+    await saveSearch(searchName, searchCriteria, emailNotifications);
+    setSaving(false);
     
-    // TODO: Implement actual save to backend
-    // await supabase.from('saved_searches').insert({...})
-    
-    setTimeout(() => {
-      setSaving(false);
-      setOpen(false);
-      toast({
-        title: "Search Saved!",
-        description: emailNotifications
-          ? "You'll receive email notifications when new properties match your criteria."
-          : "Your search has been saved. View it anytime from your account.",
-      });
-      setSearchName("");
-    }, 1000);
+    setOpen(false);
+    setSearchName("");
+    setEmailNotifications(true);
   };
 
   if (variant === "icon") {
