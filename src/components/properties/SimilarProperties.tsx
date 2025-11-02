@@ -35,13 +35,13 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
           city: currentProperty.address.city,
           state: currentProperty.address.state,
           propertyType: currentProperty.details.propertyType,
-          beds: currentProperty.details.numBedrooms,
+          minBeds: currentProperty.details.numBedrooms, // Same or more bedrooms
           baths: currentProperty.details.numBathrooms,
           limit: 6,
         };
 
-        // Calculate price range (±15%)
-        const priceVariance = currentProperty.listPrice * 0.15;
+        // Calculate price range (±10%)
+        const priceVariance = currentProperty.listPrice * 0.10;
         const minPrice = Math.floor(currentProperty.listPrice - priceVariance);
         const maxPrice = Math.ceil(currentProperty.listPrice + priceVariance);
 
@@ -126,7 +126,20 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                 <CarouselContent>
                   {similarActive.map((property) => (
                     <CarouselItem key={property.mlsNumber} className="md:basis-1/2 lg:basis-1/3">
-                      <PropertyCard property={property} />
+                      <PropertyCard 
+                        id={property.mlsNumber}
+                        title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                        price={property.listPrice}
+                        image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
+                        beds={property.details.numBedrooms}
+                        baths={property.details.numBathrooms}
+                        sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
+                        address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                        city={property.address.city}
+                        state={property.address.state}
+                        zipCode={property.address.zip}
+                        mlsNumber={property.mlsNumber}
+                      />
                     </CarouselItem>
                   ))}
                 </CarouselContent>
@@ -146,7 +159,20 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
                 <CarouselContent>
                   {soldComparables.map((property) => (
                     <CarouselItem key={property.mlsNumber} className="md:basis-1/2 lg:basis-1/3">
-                      <PropertyCard property={property} />
+                      <PropertyCard 
+                        id={property.mlsNumber}
+                        title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                        price={property.listPrice}
+                        image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
+                        beds={property.details.numBedrooms}
+                        baths={property.details.numBathrooms}
+                        sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
+                        address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                        city={property.address.city}
+                        state={property.address.state}
+                        zipCode={property.address.zip}
+                        mlsNumber={property.mlsNumber}
+                      />
                     </CarouselItem>
                   ))}
                 </CarouselContent>
