@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
+import { EnhancedSearchBar } from "@/components/search/EnhancedSearchBar";
 
 const Hero = () => {
   const [activeTab, setActiveTab] = useState("buying");
@@ -64,7 +64,7 @@ const Hero = () => {
 
               {/* Search Form */}
               <div className="max-w-5xl mx-auto animate-fade-up">
-                <UnifiedSearchBar variant="hero" />
+                <EnhancedSearchBar variant="hero" />
                 <Button variant="link" className="text-white hover:text-white/80 mt-4">
                   Search Properties Near Me
                 </Button>
