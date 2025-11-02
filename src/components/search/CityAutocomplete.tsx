@@ -152,6 +152,7 @@ export const CityAutocomplete = ({
     onChange(item.value);
     setIsOpen(false);
     setSelectedIndex(-1);
+    inputRef.current?.blur(); // Blur input to prevent dropdown from reopening
     if (onSelect) {
       onSelect({ name: item.value, state: item.state });
     }
