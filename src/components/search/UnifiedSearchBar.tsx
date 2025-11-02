@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Minus } from "lucide-react";
 import { CityAutocomplete } from "./CityAutocomplete";
+import { useAddressParser } from "@/hooks/useAddressParser";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ interface UnifiedSearchBarProps {
 const UnifiedSearchBar = ({ variant = "inline", className = "" }: UnifiedSearchBarProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { parseAddress, extractCity, extractState, extractZipCode } = useAddressParser();
   
   const [location, setLocation] = useState(searchParams.get("city") || "");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "FL");
@@ -62,8 +64,30 @@ const UnifiedSearchBar = ({ variant = "inline", className = "" }: UnifiedSearchB
     const params = new URLSearchParams();
     
     if (location) {
-      params.set("city", location);
-      params.set("state", selectedState);
+      // Try to parse address for better structure
+      const parsed = parseAddress(location);
+      
+      if (parsed) {
+        // Use parsed components if available
+        if (parsed.placeName) {
+          params.set("city", parsed.placeName);
+        }
+        if (parsed.stateAbbreviation) {
+          params.set("state", parsed.stateAbbreviation);
+        } else {
+          params.set("state", selectedState);
+        }
+        if (parsed.zipCode) {
+          params.set("zipCode", parsed.zipCode);
+        }
+        if (parsed.addressLine1) {
+          params.set("address", parsed.addressLine1);
+        }
+      } else {
+        // Fallback to original input
+        params.set("city", location);
+        params.set("state", selectedState);
+      }
     }
     
     if (status !== "all") {

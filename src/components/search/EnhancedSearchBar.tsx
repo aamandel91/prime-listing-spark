@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, X, Save, Map as MapIcon, List } from "lucide-react";
 import { CityAutocomplete } from "./CityAutocomplete";
+import { useAddressParser } from "@/hooks/useAddressParser";
 import { PropertyTypeSelector } from "./PropertyTypeSelector";
 import PriceFilter from "./PriceFilter";
 import BedsAndBathsFilter from "./BedsAndBathsFilter";
@@ -32,6 +33,7 @@ export const EnhancedSearchBar = ({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { parseAddress } = useAddressParser();
   
   const [location, setLocation] = useState(searchParams.get("city") || "");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "FL");
@@ -117,8 +119,28 @@ export const EnhancedSearchBar = ({
     const params = new URLSearchParams();
     
     if (location) {
-      params.set("city", location);
-      params.set("state", selectedState);
+      // Parse address for better structure
+      const parsed = parseAddress(location);
+      
+      if (parsed) {
+        if (parsed.placeName) {
+          params.set("city", parsed.placeName);
+        }
+        if (parsed.stateAbbreviation) {
+          params.set("state", parsed.stateAbbreviation);
+        } else {
+          params.set("state", selectedState);
+        }
+        if (parsed.zipCode) {
+          params.set("zipCode", parsed.zipCode);
+        }
+        if (parsed.addressLine1) {
+          params.set("address", parsed.addressLine1);
+        }
+      } else {
+        params.set("city", location);
+        params.set("state", selectedState);
+      }
     }
     
     if (status !== "all") {
