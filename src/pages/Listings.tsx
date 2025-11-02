@@ -47,7 +47,7 @@ const Listings = () => {
   const [maxYear, setMaxYear] = useState(searchParams.get("maxYearBuilt") || "");
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedState, setSelectedState] = useState(searchParams.get("state") || "TX");
+  const [selectedState, setSelectedState] = useState(searchParams.get("state") || "FL");
   
   // Map status from URL to API format (Active/Pending -> A/U)
   const mapStatusToApi = (status: string | null): string => {
@@ -122,7 +122,7 @@ const Listings = () => {
     
     // Ensure state parameter exists
     if (!searchParams.get("state")) {
-      newParams.set("state", "TX");
+      newParams.set("state", "FL");
       changed = true;
     }
     
@@ -159,6 +159,20 @@ const Listings = () => {
   useEffect(() => {
     setPage(1);
   }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, minGarage, minParking, propertyTypes, minSqft, maxSqft, minYear, maxYear, listingStatus]);
+
+  // Fallback: if selected state has no data with this API key, auto-switch to FL
+  useEffect(() => {
+    if (!loading && (!apiListings || apiListings.length === 0)) {
+      const unsupported = ["TX", "CA"];
+      if (selectedState && unsupported.includes(selectedState)) {
+        const fallback = "FL";
+        setSelectedState(fallback);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("state", fallback);
+        setSearchParams(newParams, { replace: true });
+      }
+    }
+  }, [loading, apiListings, selectedState, searchParams, setSearchParams]);
 
   // Transform API data to match our component format
   const allProperties = useMemo(() => {
@@ -239,7 +253,7 @@ const Listings = () => {
       beds: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
       baths: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
       city: selectedCity || location,
-      state: selectedState || "TX",
+      state: selectedState || "FL",
       subdivision: searchParams.get("subdivision") || undefined,
       county: searchParams.get("county") || undefined,
     });
