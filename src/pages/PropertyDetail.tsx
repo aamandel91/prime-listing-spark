@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { useRepliersListing } from "@/hooks/useRepliers";
 import { useTourRequest } from "@/hooks/useTourRequest";
+import { PropertyEstimate } from "@/components/properties/PropertyEstimate";
 import {
   ChevronLeft,
   ChevronRight,
@@ -1076,33 +1077,16 @@ export default function PropertyDetail() {
           </>
         )}
 
-        {/* Home Value Estimate - if available */}
+        {/* Home Value Estimate - Enhanced with PropertyEstimate */}
         {property.avm && (
           <>
             <Separator />
-            <Card className="border-0 shadow-none bg-card">
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-6">Home Value Estimate</h3>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Estimated Value</span>
-                    <span className="text-2xl font-bold">{formatPrice(property.avm.value)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">High Estimate</span>
-                    <span className="font-semibold">{formatPrice(property.avm.high)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Low Estimate</span>
-                    <span className="font-semibold">{formatPrice(property.avm.low)}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-4">
-                    * This is an automated valuation model estimate and should not be used as the sole basis for determining property value.
-                  </p>
-                </div>
-              </div>
-            </Card>
+            <PropertyEstimate
+              listPrice={property.price}
+              estimatedValue={property.avm.value}
+              pricePerSqft={property.pricePerSqFt}
+              confidence="high"
+            />
           </>
         )}
 

@@ -18,6 +18,7 @@ const Navbar = () => {
   ];
 
   const rightLinks = [
+    { to: "/agents", label: "Agents" },
     { to: "/blog", label: "Blog" },
     { to: "/login", label: "Login/Register" },
   ];

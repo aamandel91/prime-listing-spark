@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import Index from "./pages/Index";
+import AgentDirectory from "./pages/AgentDirectory";
 import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
 import CityTemplate from "./pages/CityTemplate";
@@ -49,6 +50,7 @@ const RecoveryRouter = () => {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/agents" element={<AgentDirectory />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
