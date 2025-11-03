@@ -36,20 +36,8 @@ export default defineConfig(({ mode }) => ({
           'admin-editor': ['react-quill'],
           'admin-maps': ['@react-google-maps/api'],
           
-          // Module renderers - split by feature
-          'cms-modules': [
-            './src/components/cms/modules/ContentModuleRenderer.tsx',
-            './src/components/cms/modules/LinksRenderer.tsx',
-            './src/components/cms/modules/StatisticsRenderer.tsx',
-          ],
-          'cms-listings': [
-            './src/components/cms/modules/SavedSearchListingsRenderer.tsx',
-            './src/components/cms/modules/SavedSearchTableRenderer.tsx',
-          ],
-          'cms-media': [
-            './src/components/cms/modules/VideosGridRenderer.tsx',
-            './src/components/cms/modules/SingleVideoRenderer.tsx',
-          ],
+          // CMS modules are automatically code-split via React.lazy()
+          // No manual chunking needed to avoid conflicts with dynamic imports
         },
       },
     },
