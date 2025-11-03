@@ -35,10 +35,17 @@ import LocationImport from "./pages/admin/LocationImport";
 import ListingDataExtractor from "./pages/admin/ListingDataExtractor";
 import ZipCodePage from "./pages/ZipCodePage";
 import NeighborhoodPage from "./pages/NeighborhoodPage";
+import { useTrackingCodes } from "./hooks/useTrackingCodes";
 
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
+
+// Component to load tracking codes
+const TrackingCodesLoader = () => {
+  useTrackingCodes();
+  return null;
+};
 
 const RecoveryRouter = () => {
   const location = useLocation();
@@ -110,6 +117,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <TrackingCodesLoader />
         <Toaster />
         <Sonner />
         <BrowserRouter>
