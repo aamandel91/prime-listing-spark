@@ -786,6 +786,65 @@ export type Database = {
         }
         Relationships: []
       }
+      navigation_items: {
+        Row: {
+          created_at: string
+          css_classes: string | null
+          dropdown_items: Json | null
+          icon: string | null
+          id: string
+          is_visible: boolean
+          label: string
+          order_index: number
+          parent_id: string | null
+          position: string
+          target: string | null
+          type: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          css_classes?: string | null
+          dropdown_items?: Json | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label: string
+          order_index?: number
+          parent_id?: string | null
+          position: string
+          target?: string | null
+          type: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          css_classes?: string | null
+          dropdown_items?: Json | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label?: string
+          order_index?: number
+          parent_id?: string | null
+          position?: string
+          target?: string | null
+          type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "navigation_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "navigation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       neighborhood_subscriptions: {
         Row: {
           city: string

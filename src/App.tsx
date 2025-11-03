@@ -26,6 +26,7 @@ import BlogMigration from "./pages/admin/BlogMigration";
 import CityContentGenerator from "./pages/admin/CityContentGenerator";
 import CompetitorAnalysis from "./pages/admin/CompetitorAnalysis";
 import SidebarManagement from "./pages/admin/SidebarManagement";
+import NavigationManagement from "./pages/admin/NavigationManagement";
 import ContentStrategyGenerator from "./pages/admin/ContentStrategyGenerator";
 import PropertyTypePages from "./pages/admin/PropertyTypePages";
 import ListingEnhancements from "./pages/admin/ListingEnhancements";

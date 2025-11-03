@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, LogOut, User, MapPin, Map, Building2, DollarSign, Search } from "lucide-react";
+import { Menu, X, Home, LogOut, User } from "lucide-react";
 import SearchDropdown from "./SearchDropdown";
 import CountiesDropdown from "./CountiesDropdown";
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
 import { AdminMenu } from "./AdminMenu";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useContentPages } from "@/hooks/useContentPages";
+import { useNavigationItems } from "@/hooks/useNavigationItems";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -24,7 +24,7 @@ const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { data: settings } = useSiteSettings();
-  const { data: contentPages = [] } = useContentPages(true);
+  const { data: navItems = [] } = useNavigationItems();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -63,45 +63,52 @@ const Navbar = () => {
     }
   };
 
-  const leftLinks = [
-    { to: "/sell", label: "Sell" },
-  ];
+  const leftItems = navItems.filter(item => item.position === 'left' && item.is_visible);
+  const rightItems = navItems.filter(item => item.position === 'right' && item.is_visible);
 
-  const rightLinks = [
-    { to: "/agents", label: "Agents", openInNewWindow: false },
-    { to: "/blog", label: "Blog", openInNewWindow: false },
-    ...contentPages.map(page => ({
-      to: `/pages/${page.slug}`,
-      label: page.title,
-      openInNewWindow: page.open_in === "new_window"
-    })),
-  ];
+  const renderNavItem = (item: any) => {
+    if (item.type === 'dropdown') {
+      // Special handling for existing dropdown components
+      if (item.label === 'Search') return <SearchDropdown key={item.id} />;
+      if (item.label === 'Counties') return <CountiesDropdown key={item.id} />;
+      if (item.label === 'Property Type') return <PropertyTypeDropdown key={item.id} />;
+      
+      return null;
+    }
+
+    const linkProps = {
+      to: item.url || '/',
+      ...(item.target === '_blank' && {
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      })
+    };
+
+    if (item.type === 'button') {
+      return (
+        <Link key={item.id} {...linkProps}>
+          <Button variant="default" className={item.css_classes}>
+            {item.label}
+          </Button>
+        </Link>
+      );
+    }
+
+    return (
+      <Link key={item.id} {...linkProps}>
+        <Button variant="ghost" className={`text-foreground hover:text-primary ${item.css_classes || ''}`}>
+          {item.label}
+        </Button>
+      </Link>
+    );
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Left Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            <SearchDropdown />
-            <Link to="/cities">
-              <Button variant="ghost" className="text-foreground hover:text-primary">
-                Cities
-              </Button>
-            </Link>
-            <CountiesDropdown />
-            <PropertyTypeDropdown />
-            {leftLinks.map((link) => (
-              <Link key={link.to} to={link.to}>
-                <Button variant="ghost" className="text-foreground hover:text-primary">
-                  {link.label}
-                </Button>
-              </Link>
-            ))}
-          </div>
-
-          {/* Centered Logo */}
-          <Link to="/" className="flex items-center space-x-2 group absolute left-1/2 transform -translate-x-1/2">
+          {/* Logo on Left */}
+          <Link to="/" className="flex items-center space-x-2 group">
             {settings?.logoUrl ? (
               <img 
                 src={settings.logoUrl} 
@@ -118,23 +125,14 @@ const Navbar = () => {
             )}
           </Link>
 
+          {/* Center Navigation - Left Items */}
+          <div className="hidden lg:flex items-center space-x-1 flex-1 justify-center">
+            {leftItems.map(renderNavItem)}
+          </div>
+
           {/* Right Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
-            {rightLinks.map((link) => (
-              link.openInNewWindow ? (
-                <a key={link.to} href={link.to} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" className="text-foreground hover:text-primary">
-                    {link.label}
-                  </Button>
-                </a>
-              ) : (
-                <Link key={link.to} to={link.to}>
-                  <Button variant="ghost" className="text-foreground hover:text-primary">
-                    {link.label}
-                  </Button>
-                </Link>
-              )
-            ))}
+            {rightItems.map(renderNavItem)}
             
             {!loading && (
               user ? (
@@ -147,7 +145,7 @@ const Navbar = () => {
                         Account
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="bg-popover z-50">
                       <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleSignOut}>
@@ -157,13 +155,7 @@ const Navbar = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
-              ) : (
-                <Link to="/auth">
-                  <Button variant="default">
-                    Sign In
-                  </Button>
-                </Link>
-              )
+              ) : null
             )}
           </div>
 
@@ -180,55 +172,14 @@ const Navbar = () => {
         {isOpen && (
           <div className="lg:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col space-y-2">
-              <Link
-                to="/advanced-search"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <Search className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground">Search</span>
-              </Link>
-              <Link
-                to="/cities"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <MapPin className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground">Cities</span>
-              </Link>
-              <Link
-                to="/counties"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <Map className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground">Counties</span>
-              </Link>
-              <Link
-                to="/property-types"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <Building2 className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground">Property Types</span>
-              </Link>
-              <Link
-                to="/sell"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <DollarSign className="w-5 h-5 text-muted-foreground" />
-                <span className="text-foreground">Sell</span>
-              </Link>
-              <div className="border-t border-border my-2" />
-              {rightLinks.map((link) => (
+              {[...leftItems, ...rightItems].map((item) => (
                 <Link
-                  key={link.to}
-                  to={link.to}
+                  key={item.id}
+                  to={item.url || '/'}
                   onClick={() => setIsOpen(false)}
                   className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-secondary transition-colors"
                 >
-                  <span className="text-foreground">{link.label}</span>
+                  <span className="text-foreground">{item.label}</span>
                 </Link>
               ))}
               
