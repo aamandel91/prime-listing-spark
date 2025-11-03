@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useContentPages } from "@/hooks/useContentPages";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useSiteSettings();
+  const { data: contentPages } = useContentPages();
 
   const siteName = settings?.siteName || "Florida Home Finder";
   const agentName = settings?.agentFirstName && settings?.agentLastName 
@@ -69,6 +71,16 @@ const Footer = () => {
               <li><Link to="/neighborhoods" className="text-primary-foreground/80 hover:text-accent transition-colors">Neighborhoods</Link></li>
               <li><Link to="/blog" className="text-primary-foreground/80 hover:text-accent transition-colors">Blog & News</Link></li>
               <li><Link to="/about" className="text-primary-foreground/80 hover:text-accent transition-colors">About Us</Link></li>
+              {contentPages?.filter(page => page.include_in_nav).slice(0, 3).map(page => (
+                <li key={page.id}>
+                  <Link 
+                    to={`/pages/${page.slug}`} 
+                    className="text-primary-foreground/80 hover:text-accent transition-colors"
+                  >
+                    {page.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
