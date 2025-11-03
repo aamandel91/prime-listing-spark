@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLeadDeduplication } from './useLeadDeduplication';
 import { useAuthCheck } from './useAuthCheck';
+import { useAgentSubdomain } from './useAgentSubdomain';
 
 export interface TourRequest {
   property_mls: string;
@@ -18,6 +19,7 @@ export const useTourRequest = () => {
   const { toast } = useToast();
   const { createOrUpdateLeadStatus } = useLeadDeduplication();
   const { isAuthenticated } = useAuthCheck();
+  const { agentId } = useAgentSubdomain();
 
   const submitTourRequest = async (request: TourRequest) => {
     // Check authentication first
@@ -39,13 +41,14 @@ export const useTourRequest = () => {
 
       if (error) throw error;
 
-      // Create or update lead status for deduplication tracking
+      // Create or update lead status for deduplication tracking with agent assignment
       await createOrUpdateLeadStatus(
         request.visitor_email,
         request.visitor_name,
         request.visitor_phone,
         "tour_request",
-        request.property_mls
+        request.property_mls,
+        agentId || undefined
       );
 
       toast({

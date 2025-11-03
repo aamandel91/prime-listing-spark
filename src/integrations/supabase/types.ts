@@ -30,6 +30,7 @@ export type Database = {
           social_links: Json | null
           sort_order: number | null
           specialties: string[] | null
+          subdomain: string | null
           updated_at: string
           user_id: string | null
           years_experience: number | null
@@ -49,6 +50,7 @@ export type Database = {
           social_links?: Json | null
           sort_order?: number | null
           specialties?: string[] | null
+          subdomain?: string | null
           updated_at?: string
           user_id?: string | null
           years_experience?: number | null
@@ -68,6 +70,7 @@ export type Database = {
           social_links?: Json | null
           sort_order?: number | null
           specialties?: string[] | null
+          subdomain?: string | null
           updated_at?: string
           user_id?: string | null
           years_experience?: number | null
@@ -656,7 +659,15 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_lead_statuses_agent"
+            columns: ["assigned_agent"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listing_enhancements: {
         Row: {

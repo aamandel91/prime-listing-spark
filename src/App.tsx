@@ -3,7 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { ScrollToTop } from "./components/ScrollToTop";
+import { useAgentSubdomain } from "./hooks/useAgentSubdomain";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import Index from "./pages/Index";
 import AgentDirectory from "./pages/AgentDirectory";
@@ -55,6 +57,7 @@ const TrackingCodesLoader = () => {
 const RecoveryRouter = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAgentSubdomain } = useAgentSubdomain();
 
   useEffect(() => {
     if (location.hash.includes('type=recovery') && location.pathname !== '/auth') {
@@ -64,6 +67,11 @@ const RecoveryRouter = () => {
 
   return (
     <>
+      {isAgentSubdomain && (
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+      )}
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Index />} />
@@ -127,16 +135,18 @@ const RecoveryRouter = () => {
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <TrackingCodesLoader />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <RecoveryRouter />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <TrackingCodesLoader />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <RecoveryRouter />
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 

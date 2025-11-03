@@ -61,7 +61,8 @@ export const useLeadDeduplication = () => {
     name: string,
     phone?: string,
     source?: string,
-    propertyMls?: string
+    propertyMls?: string,
+    agentId?: string
   ) => {
     try {
       const duplicate = await findDuplicateLead(email, phone);
@@ -76,6 +77,7 @@ export const useLeadDeduplication = () => {
             lead_phone: phone || null,
             source: source || null,
             source_property_mls: propertyMls || null,
+            assigned_agent: agentId || null,
             last_contact_date: new Date().toISOString(),
           }, {
             onConflict: "lead_email"
@@ -102,6 +104,7 @@ export const useLeadDeduplication = () => {
             lead_phone: phone || null,
             source: source || null,
             source_property_mls: propertyMls || null,
+            assigned_agent: agentId || null,
             first_contact_date: new Date().toISOString(),
             status: "new",
           });

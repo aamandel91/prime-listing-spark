@@ -27,6 +27,7 @@ interface Agent {
   specialties: string[] | null;
   years_experience: number | null;
   profile_image_url: string | null;
+  subdomain: string | null;
   featured: boolean;
   active: boolean;
   sort_order: number;
@@ -48,6 +49,7 @@ export default function AgentManagement() {
     specialties: "",
     years_experience: "",
     profile_image_url: "",
+    subdomain: "",
     featured: false,
     active: true,
     sort_order: 0,
@@ -118,6 +120,7 @@ export default function AgentManagement() {
         specialties: formData.specialties ? formData.specialties.split(",").map(s => s.trim()) : null,
         years_experience: formData.years_experience ? parseInt(formData.years_experience) : null,
         profile_image_url: formData.profile_image_url || null,
+        subdomain: formData.subdomain || null,
         featured: formData.featured,
         active: formData.active,
         sort_order: formData.sort_order,
@@ -164,6 +167,7 @@ export default function AgentManagement() {
       specialties: agent.specialties?.join(", ") || "",
       years_experience: agent.years_experience?.toString() || "",
       profile_image_url: agent.profile_image_url || "",
+      subdomain: agent.subdomain || "",
       featured: agent.featured,
       active: agent.active,
       sort_order: agent.sort_order,
@@ -204,6 +208,7 @@ export default function AgentManagement() {
       specialties: "",
       years_experience: "",
       profile_image_url: "",
+      subdomain: "",
       featured: false,
       active: true,
       sort_order: 0,
@@ -282,6 +287,18 @@ export default function AgentManagement() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="subdomain">Subdomain</Label>
+                    <Input
+                      id="subdomain"
+                      value={formData.subdomain}
+                      onChange={(e) => setFormData({ ...formData, subdomain: e.target.value })}
+                      placeholder="agent-name"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Agent's unique subdomain (e.g., john.yoursite.com)
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="years_experience">Years Experience</Label>
