@@ -38,6 +38,7 @@ const menuSections = [
     items: [
       { title: "Analytics Dashboard", url: "/admin/analytics", icon: BarChart3 },
       { title: "Competitor Analysis", url: "/admin/competitor-analysis", icon: TrendingUp },
+      { title: "AI Content Generator", url: "/admin/content-strategy", icon: FileText },
     ],
   },
   {

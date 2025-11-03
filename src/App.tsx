@@ -25,6 +25,7 @@ import Auth from "./pages/Auth";
 import BlogMigration from "./pages/admin/BlogMigration";
 import CityContentGenerator from "./pages/admin/CityContentGenerator";
 import CompetitorAnalysis from "./pages/admin/CompetitorAnalysis";
+import ContentStrategyGenerator from "./pages/admin/ContentStrategyGenerator";
 import PropertyTypePages from "./pages/admin/PropertyTypePages";
 import ListingEnhancements from "./pages/admin/ListingEnhancements";
 import Analytics from "./pages/admin/Analytics";
@@ -107,6 +108,7 @@ const RecoveryRouter = () => {
           <Route path="role-management" element={<RoleManagement />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="competitor-analysis" element={<CompetitorAnalysis />} />
+          <Route path="content-strategy" element={<ContentStrategyGenerator />} />
           <Route path="city-content" element={<CityContentGenerator />} />
         </Route>
         

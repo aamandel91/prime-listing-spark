@@ -27,6 +27,12 @@ verify_jwt = false
 [functions.analyze-competitor-seo]
 verify_jwt = false
 
+[functions.analyze-content-strategy]
+verify_jwt = true
+
+[functions.generate-seo-content]
+verify_jwt = true
+
 [functions.generate-sitemap-content]
 verify_jwt = false
 
