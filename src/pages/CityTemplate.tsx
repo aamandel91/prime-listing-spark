@@ -344,14 +344,25 @@ const CityTemplate = () => {
                 Property Types Available
               </h2>
               <div className="space-y-4">
-                {cityData.propertyTypes.map((type) => (
+                {[
+                  { name: "Single Family Homes", slug: "single-family-homes", icon: "🏡" },
+                  { name: "Condos", slug: "condos", icon: "🏢" },
+                  { name: "Townhomes", slug: "townhomes", icon: "🏘️" },
+                  { name: "Land", slug: "land", icon: "🌳" },
+                  { name: "Multi-Family", slug: "multi-family", icon: "🏬" }
+                ].map((type) => (
                   <Link
-                    key={type.type}
-                    to={`/${citySlug?.toLowerCase() || 'fayetteville'}/${type.type.toLowerCase().replace(/\s+/g, '-')}`}
+                    key={type.slug}
+                    to={`/cities/${citySlug}/${type.slug}`}
                     className="flex justify-between items-center p-4 bg-secondary rounded-lg hover:bg-secondary/70 transition-colors"
                   >
-                    <span className="font-medium text-foreground">{type.type}</span>
-                    <span className="text-accent font-bold">{type.count} listings</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{type.icon}</span>
+                      <span className="font-medium text-foreground">{type.name}</span>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      Explore →
+                    </Button>
                   </Link>
                 ))}
               </div>
