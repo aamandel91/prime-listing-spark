@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { AdminLayout } from "./components/admin/AdminLayout";
 import Index from "./pages/Index";
 import AgentDirectory from "./pages/AgentDirectory";
 import Listings from "./pages/Listings";
@@ -26,7 +27,6 @@ import PropertyTypePages from "./pages/admin/PropertyTypePages";
 import ListingEnhancements from "./pages/admin/ListingEnhancements";
 import Analytics from "./pages/admin/Analytics";
 import RoleManagement from "./pages/admin/RoleManagement";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Leads from "./pages/admin/Leads";
 import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
@@ -70,21 +70,23 @@ const RecoveryRouter = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/sell" element={<Sell />} />
         
-        {/* Protected Admin Routes */}
-        <Route path="/admin/blog-migration" element={<ProtectedRoute requireRole="admin"><BlogMigration /></ProtectedRoute>} />
-        <Route path="/admin/city-content" element={<ProtectedRoute requireRole="admin"><CityContentGenerator /></ProtectedRoute>} />
-        <Route path="/admin/competitor-analysis" element={<ProtectedRoute requireRole="admin"><CompetitorAnalysis /></ProtectedRoute>} />
-        <Route path="/admin/property-type-pages" element={<ProtectedRoute requireRole="admin"><PropertyTypePages /></ProtectedRoute>} />
-        <Route path="/admin/listing-enhancements" element={<ProtectedRoute requireRole="admin"><ListingEnhancements /></ProtectedRoute>} />
-        <Route path="/admin/leads" element={<ProtectedRoute requireRole="admin"><Leads /></ProtectedRoute>} />
-        <Route path="/admin/analytics" element={<ProtectedRoute requireRole="admin"><Analytics /></ProtectedRoute>} />
-        <Route path="/admin/roles" element={<ProtectedRoute requireRole="admin"><RoleManagement /></ProtectedRoute>} />
-        <Route path="/admin/seo-settings" element={<ProtectedRoute requireRole="admin"><SEOSettings /></ProtectedRoute>} />
-        <Route path="/admin/global-site-settings" element={<ProtectedRoute requireRole="admin"><GlobalSiteSettings /></ProtectedRoute>} />
-        <Route path="/admin/site-layout-settings" element={<ProtectedRoute requireRole="admin"><SiteLayoutSettings /></ProtectedRoute>} />
-        <Route path="/admin/featured-cities" element={<ProtectedRoute requireRole="admin"><FeaturedCities /></ProtectedRoute>} />
-        <Route path="/admin/location-import" element={<ProtectedRoute requireRole="admin"><LocationImport /></ProtectedRoute>} />
-        <Route path="/admin/listing-data-extractor" element={<ProtectedRoute requireRole="admin"><ListingDataExtractor /></ProtectedRoute>} />
+        {/* Admin CMS Routes - All under AdminLayout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="global-site-settings" element={<GlobalSiteSettings />} />
+          <Route path="site-layout-settings" element={<SiteLayoutSettings />} />
+          <Route path="seo-settings" element={<SEOSettings />} />
+          <Route path="featured-cities" element={<FeaturedCities />} />
+          <Route path="property-type-pages" element={<PropertyTypePages />} />
+          <Route path="blog-migration" element={<BlogMigration />} />
+          <Route path="location-import" element={<LocationImport />} />
+          <Route path="listing-data-extractor" element={<ListingDataExtractor />} />
+          <Route path="listing-enhancements" element={<ListingEnhancements />} />
+          <Route path="leads" element={<Leads />} />
+          <Route path="role-management" element={<RoleManagement />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="competitor-analysis" element={<CompetitorAnalysis />} />
+          <Route path="city-content" element={<CityContentGenerator />} />
+        </Route>
         
         {/* Public Routes - More specific routes first */}
         <Route path="/cities" element={<Cities />} />
