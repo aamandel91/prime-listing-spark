@@ -19,9 +19,9 @@ Deno.serve(async (req) => {
     const baseUrl = req.headers.get('origin') || 'https://yourdomain.com';
 
     // Fetch active listings from Repliers API
-    const response = await fetch('https://api.repliers.io/listings?limit=5000&status=Active', {
+    const response = await fetch('https://api.repliers.io/listings?limit=5000&standardStatus=A', {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'REPLIERS-API-KEY': apiKey,
         'Content-Type': 'application/json',
       },
     });
