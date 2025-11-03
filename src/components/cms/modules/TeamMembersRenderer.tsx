@@ -9,7 +9,7 @@ interface TeamMembersRendererProps {
   module: TeamMembersModule;
 }
 
-export function TeamMembersRenderer({ module }: TeamMembersRendererProps) {
+export default function TeamMembersRenderer({ module }: TeamMembersRendererProps) {
   const [agents, setAgents] = useState<any[]>([]);
 
   useEffect(() => {

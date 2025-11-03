@@ -6,7 +6,7 @@ interface LinksRendererProps {
   module: LinksModule;
 }
 
-export function LinksRenderer({ module }: LinksRendererProps) {
+export default function LinksRenderer({ module }: LinksRendererProps) {
   const isExternalLink = (url: string) => {
     return url.startsWith("http://") || url.startsWith("https://");
   };

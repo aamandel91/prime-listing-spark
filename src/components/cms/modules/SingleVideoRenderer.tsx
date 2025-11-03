@@ -6,7 +6,7 @@ interface SingleVideoRendererProps {
   module: SingleVideoModule;
 }
 
-export function SingleVideoRenderer({ module }: SingleVideoRendererProps) {
+export default function SingleVideoRenderer({ module }: SingleVideoRendererProps) {
   const [videoUrl, setVideoUrl] = useState<string>("");
 
   useEffect(() => {

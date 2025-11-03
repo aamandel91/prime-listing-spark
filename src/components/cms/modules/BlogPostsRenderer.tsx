@@ -9,7 +9,7 @@ interface BlogPostsRendererProps {
   module: BlogPostsModule;
 }
 
-export function BlogPostsRenderer({ module }: BlogPostsRendererProps) {
+export default function BlogPostsRenderer({ module }: BlogPostsRendererProps) {
   const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {

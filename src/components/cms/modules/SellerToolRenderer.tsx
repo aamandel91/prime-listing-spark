@@ -19,7 +19,7 @@ const sellerLeadSchema = z.object({
   address: z.string().min(1).max(500),
 });
 
-export function SellerToolRenderer({ module }: SellerToolRendererProps) {
+export default function SellerToolRenderer({ module }: SellerToolRendererProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",

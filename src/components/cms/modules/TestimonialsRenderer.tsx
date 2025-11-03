@@ -8,7 +8,7 @@ interface TestimonialsRendererProps {
   module: TestimonialsModule;
 }
 
-export function TestimonialsRenderer({ module }: TestimonialsRendererProps) {
+export default function TestimonialsRenderer({ module }: TestimonialsRendererProps) {
   const [testimonials, setTestimonials] = useState<any[]>([]);
 
   useEffect(() => {

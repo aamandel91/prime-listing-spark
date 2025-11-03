@@ -7,7 +7,7 @@ interface VideosGridRendererProps {
   module: VideosGridModule;
 }
 
-export function VideosGridRenderer({ module }: VideosGridRendererProps) {
+export default function VideosGridRenderer({ module }: VideosGridRendererProps) {
   const [videos, setVideos] = useState<any[]>([]);
 
   useEffect(() => {

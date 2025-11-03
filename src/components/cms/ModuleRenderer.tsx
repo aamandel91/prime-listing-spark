@@ -2,22 +2,22 @@ import { lazy, Suspense } from "react";
 import { ContentPageModule } from "@/types/contentModules";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Lazy load all module renderers to split them into separate chunks
-// This ensures only the modules actually used on a page are downloaded
-const ContentModuleRenderer = lazy(() => import("./modules/ContentModuleRenderer").then(m => ({ default: m.ContentModuleRenderer })));
-const SavedSearchListingsRenderer = lazy(() => import("./modules/SavedSearchListingsRenderer").then(m => ({ default: m.SavedSearchListingsRenderer })));
-const SavedSearchTableRenderer = lazy(() => import("./modules/SavedSearchTableRenderer").then(m => ({ default: m.SavedSearchTableRenderer })));
-const StatisticsRenderer = lazy(() => import("./modules/StatisticsRenderer").then(m => ({ default: m.StatisticsRenderer })));
-const LinksRenderer = lazy(() => import("./modules/LinksRenderer").then(m => ({ default: m.LinksRenderer })));
-const ContactFormRenderer = lazy(() => import("./modules/ContactFormRenderer").then(m => ({ default: m.ContactFormRenderer })));
-const TestimonialsRenderer = lazy(() => import("./modules/TestimonialsRenderer").then(m => ({ default: m.TestimonialsRenderer })));
-const BlogPostsRenderer = lazy(() => import("./modules/BlogPostsRenderer").then(m => ({ default: m.BlogPostsRenderer })));
-const VideosGridRenderer = lazy(() => import("./modules/VideosGridRenderer").then(m => ({ default: m.VideosGridRenderer })));
-const SingleVideoRenderer = lazy(() => import("./modules/SingleVideoRenderer").then(m => ({ default: m.SingleVideoRenderer })));
-const ContactDetailsRenderer = lazy(() => import("./modules/ContactDetailsRenderer").then(m => ({ default: m.ContactDetailsRenderer })));
-const TeamMembersRenderer = lazy(() => import("./modules/TeamMembersRenderer").then(m => ({ default: m.TeamMembersRenderer })));
-const MortgageCalculatorRenderer = lazy(() => import("./modules/MortgageCalculatorRenderer").then(m => ({ default: m.MortgageCalculatorRenderer })));
-const SellerToolRenderer = lazy(() => import("./modules/SellerToolRenderer").then(m => ({ default: m.SellerToolRenderer })));
+// Lazy load all module renderers using dynamic imports
+// Each module will be code-split into its own chunk automatically
+const LazyContentModule = lazy(() => import("./modules/ContentModuleRenderer"));
+const LazySavedSearchListings = lazy(() => import("./modules/SavedSearchListingsRenderer"));
+const LazySavedSearchTable = lazy(() => import("./modules/SavedSearchTableRenderer"));
+const LazyStatistics = lazy(() => import("./modules/StatisticsRenderer"));
+const LazyLinks = lazy(() => import("./modules/LinksRenderer"));
+const LazyContactForm = lazy(() => import("./modules/ContactFormRenderer"));
+const LazyTestimonials = lazy(() => import("./modules/TestimonialsRenderer"));
+const LazyBlogPosts = lazy(() => import("./modules/BlogPostsRenderer"));
+const LazyVideosGrid = lazy(() => import("./modules/VideosGridRenderer"));
+const LazySingleVideo = lazy(() => import("./modules/SingleVideoRenderer"));
+const LazyContactDetails = lazy(() => import("./modules/ContactDetailsRenderer"));
+const LazyTeamMembers = lazy(() => import("./modules/TeamMembersRenderer"));
+const LazyMortgageCalculator = lazy(() => import("./modules/MortgageCalculatorRenderer"));
+const LazySellerTool = lazy(() => import("./modules/SellerToolRenderer"));
 
 interface ModuleRendererProps {
   module: ContentPageModule;
@@ -42,33 +42,33 @@ export function ModuleRenderer({ module }: ModuleRendererProps) {
   const renderModule = () => {
     switch (module.type) {
       case "content":
-        return <ContentModuleRenderer module={module} />;
+        return <LazyContentModule module={module} />;
       case "saved_search_listings":
-        return <SavedSearchListingsRenderer module={module} />;
+        return <LazySavedSearchListings module={module} />;
       case "saved_search_table":
-        return <SavedSearchTableRenderer module={module} />;
+        return <LazySavedSearchTable module={module} />;
       case "statistics":
-        return <StatisticsRenderer module={module} />;
+        return <LazyStatistics module={module} />;
       case "links":
-        return <LinksRenderer module={module} />;
+        return <LazyLinks module={module} />;
       case "contact_form":
-        return <ContactFormRenderer module={module} />;
+        return <LazyContactForm module={module} />;
       case "testimonials":
-        return <TestimonialsRenderer module={module} />;
+        return <LazyTestimonials module={module} />;
       case "blog_posts":
-        return <BlogPostsRenderer module={module} />;
+        return <LazyBlogPosts module={module} />;
       case "videos_grid":
-        return <VideosGridRenderer module={module} />;
+        return <LazyVideosGrid module={module} />;
       case "single_video":
-        return <SingleVideoRenderer module={module} />;
+        return <LazySingleVideo module={module} />;
       case "contact_details":
-        return <ContactDetailsRenderer module={module} />;
+        return <LazyContactDetails module={module} />;
       case "team_members":
-        return <TeamMembersRenderer module={module} />;
+        return <LazyTeamMembers module={module} />;
       case "mortgage_calculator":
-        return <MortgageCalculatorRenderer module={module} />;
+        return <LazyMortgageCalculator module={module} />;
       case "seller_tool":
-        return <SellerToolRenderer module={module} />;
+        return <LazySellerTool module={module} />;
       default:
         return null;
     }

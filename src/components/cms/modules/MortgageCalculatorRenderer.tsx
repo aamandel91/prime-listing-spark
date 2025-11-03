@@ -9,7 +9,7 @@ interface MortgageCalculatorRendererProps {
   module: MortgageCalculatorModule;
 }
 
-export function MortgageCalculatorRenderer({ module }: MortgageCalculatorRendererProps) {
+export default function MortgageCalculatorRenderer({ module }: MortgageCalculatorRendererProps) {
   const [homePrice, setHomePrice] = useState(300000);
   const [downPayment, setDownPayment] = useState(60000);
   const [interestRate, setInterestRate] = useState(6.5);

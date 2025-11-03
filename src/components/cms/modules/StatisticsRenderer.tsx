@@ -5,7 +5,7 @@ interface StatisticsRendererProps {
   module: StatisticsModule;
 }
 
-export function StatisticsRenderer({ module }: StatisticsRendererProps) {
+export default function StatisticsRenderer({ module }: StatisticsRendererProps) {
   return (
     <div className="module-statistics">
       {module.title && <h2 className="text-3xl font-bold mb-6">{module.title}</h2>}

@@ -9,7 +9,7 @@ interface SavedSearchListingsRendererProps {
   module: SavedSearchListingsModule;
 }
 
-export function SavedSearchListingsRenderer({ module }: SavedSearchListingsRendererProps) {
+export default function SavedSearchListingsRenderer({ module }: SavedSearchListingsRendererProps) {
   const [searchCriteria, setSearchCriteria] = useState<any>(null);
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

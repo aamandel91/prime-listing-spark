@@ -10,7 +10,7 @@ interface SavedSearchTableRendererProps {
   module: SavedSearchTableModule;
 }
 
-export function SavedSearchTableRenderer({ module }: SavedSearchTableRendererProps) {
+export default function SavedSearchTableRenderer({ module }: SavedSearchTableRendererProps) {
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const repliers = useRepliers();

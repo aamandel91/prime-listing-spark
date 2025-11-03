@@ -19,7 +19,7 @@ const contactSchema = z.object({
   message: z.string().min(1, "Message is required").max(1000),
 });
 
-export function ContactFormRenderer({ module }: ContactFormRendererProps) {
+export default function ContactFormRenderer({ module }: ContactFormRendererProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
