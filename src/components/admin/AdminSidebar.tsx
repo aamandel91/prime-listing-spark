@@ -55,6 +55,7 @@ const menuSections = [
       { title: "Featured Cities", url: "/admin/featured-cities", icon: MapPin },
       { title: "Property Type Pages", url: "/admin/property-type-pages", icon: Home },
       { title: "Content Pages", url: "/admin/content-pages", icon: FileText },
+      { title: "Sidebar Management", url: "/admin/sidebar-management", icon: Layout },
       { title: "Blog Posts", url: "/admin/blog-migration", icon: BookOpen },
       { title: "Testimonials", url: "/admin/testimonials", icon: Star },
       { title: "Videos", url: "/admin/videos", icon: FileText },

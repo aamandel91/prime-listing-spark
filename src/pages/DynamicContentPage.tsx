@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ModuleRenderer } from "@/components/cms/ModuleRenderer";
 import { ContentPageModule } from "@/types/contentModules";
+import { SidebarRenderer } from "@/components/sidebar/SidebarRenderer";
 import { Loader2 } from "lucide-react";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 
@@ -71,10 +72,19 @@ export default function DynamicContentPage() {
       )}
 
       <main className={page.full_width ? "w-full" : "container mx-auto px-4 py-8"}>
-        <div className="space-y-12">
-          {modules.map((module) => (
-            <ModuleRenderer key={module.id} module={module} />
-          ))}
+        <div className={page.display_sidebar ? "flex gap-8" : ""}>
+          <div className="flex-1 space-y-12">
+            {modules.map((module) => (
+              <ModuleRenderer key={module.id} module={module} />
+            ))}
+          </div>
+          
+          {page.display_sidebar && page.sidebar_config && (
+            <SidebarRenderer 
+              sections={page.sidebar_config as any} 
+              context={{ city: page.title, state: 'FL' }}
+            />
+          )}
         </div>
       </main>
 

@@ -249,6 +249,7 @@ export type Database = {
           parent_id: string | null
           published: boolean | null
           robots_indexing: string | null
+          sidebar_config: Json | null
           slug: string
           sort_order: number | null
           specific_sidebar: string | null
@@ -279,6 +280,7 @@ export type Database = {
           parent_id?: string | null
           published?: boolean | null
           robots_indexing?: string | null
+          sidebar_config?: Json | null
           slug: string
           sort_order?: number | null
           specific_sidebar?: string | null
@@ -309,6 +311,7 @@ export type Database = {
           parent_id?: string | null
           published?: boolean | null
           robots_indexing?: string | null
+          sidebar_config?: Json | null
           slug?: string
           sort_order?: number | null
           specific_sidebar?: string | null
@@ -1193,6 +1196,36 @@ export type Database = {
           id?: string
           setting_key?: string
           setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sidebar_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          sections: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          sections?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          sections?: Json
           updated_at?: string
         }
         Relationships: []
