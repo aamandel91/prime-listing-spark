@@ -113,6 +113,7 @@ const RecoveryRouter = () => {
           <Route path="content-strategy" element={<ContentStrategyGenerator />} />
           <Route path="city-content" element={<CityContentGenerator />} />
           <Route path="sidebar-management" element={<SidebarManagement />} />
+          <Route path="navigation-management" element={<NavigationManagement />} />
         </Route>
         
         {/* Public Routes - More specific routes first */}
