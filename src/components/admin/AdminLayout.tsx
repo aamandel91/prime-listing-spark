@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 export function AdminLayout() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAgent, setIsAgent] = useState(false);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,31 +30,33 @@ export function AdminLayout() {
 
       setUser(session.user);
 
-      // Check admin role
+      // Check admin or agent role
       const { data: roles, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .eq("user_id", session.user.id);
 
       if (error) {
-        console.error("Error checking admin status:", error);
+        console.error("Error checking roles:", error);
         navigate("/");
         return;
       }
 
-      if (!roles) {
+      const userRoles = roles?.map(r => r.role) || [];
+      
+      if (userRoles.includes("admin")) {
+        setIsAdmin(true);
+      } else if (userRoles.includes("agent")) {
+        setIsAgent(true);
+      } else {
         toast({
           variant: "destructive",
           title: "Access Denied",
-          description: "You need admin privileges to access this area",
+          description: "You need admin or agent privileges to access this area",
         });
         navigate("/");
         return;
       }
-
-      setIsAdmin(true);
     } catch (error) {
       console.error("Error in admin check:", error);
       navigate("/");
@@ -83,14 +86,14 @@ export function AdminLayout() {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isAgent) {
     return null;
   }
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AdminSidebar />
+        <AdminSidebar isAdmin={isAdmin} isAgent={isAgent} />
         
         <div className="flex-1 flex flex-col">
           {/* Header */}

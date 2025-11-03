@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireRole?: "admin" | "editor";
+  requireRole?: "admin" | "editor" | "agent";
 }
 
 export default function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
@@ -51,6 +51,8 @@ export default function ProtectedRoute({ children, requireRole }: ProtectedRoute
         if (userRoles.includes("admin")) {
           setHasRole(true);
         } else if (requireRole === "editor" && userRoles.includes("editor")) {
+          setHasRole(true);
+        } else if (requireRole === "agent" && userRoles.includes("agent")) {
           setHasRole(true);
         }
 

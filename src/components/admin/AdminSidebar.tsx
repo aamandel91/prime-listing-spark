@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Mail,
   BookOpen,
+  UserPlus,
 } from "lucide-react";
 import {
   Sidebar,
@@ -76,7 +77,12 @@ const menuSections = [
   },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isAdmin: boolean;
+  isAgent: boolean;
+}
+
+export function AdminSidebar({ isAdmin, isAgent }: AdminSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -86,6 +92,24 @@ export function AdminSidebar() {
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
+
+  // Filter menu sections based on role
+  const filteredMenuSections = menuSections.filter(section => {
+    // Agents only see the "Users & Leads" section with Agents item
+    if (isAgent && !isAdmin) {
+      return section.label === "Users & Leads";
+    }
+    return true;
+  }).map(section => {
+    // For agents, only show the Agents item in Users & Leads
+    if (isAgent && !isAdmin && section.label === "Users & Leads") {
+      return {
+        ...section,
+        items: section.items.filter(item => item.title === "Agents")
+      };
+    }
+    return section;
+  });
 
   return (
     <Sidebar
@@ -102,11 +126,11 @@ export function AdminSidebar() {
           )}
         </div>
 
-        {menuSections.map((section) => (
+        {filteredMenuSections.map((section) => (
           <SidebarGroup key={section.label} className="px-2 py-2">
             {!collapsed && (
               <SidebarGroupLabel className="text-xs uppercase text-muted-foreground font-semibold px-3 py-2 mb-1">
-                {section.label}
+                {isAgent && !isAdmin && section.label === "Users & Leads" ? "My Profile" : section.label}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
@@ -127,7 +151,11 @@ export function AdminSidebar() {
                       title={collapsed ? item.title : undefined}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="text-sm">
+                          {isAgent && !isAdmin && item.title === "Agents" ? "My Profile" : item.title}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuItem>
                 ))}

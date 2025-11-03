@@ -35,6 +35,8 @@ interface Agent {
 export default function AgentManagement() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [formData, setFormData] = useState({
@@ -53,15 +55,41 @@ export default function AgentManagement() {
   const { toast } = useToast();
 
   useEffect(() => {
+    checkUserRole();
     fetchAgents();
   }, []);
 
+  const checkUserRole = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setCurrentUserId(session.user.id);
+      
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+      
+      const userRoles = roles?.map(r => r.role) || [];
+      if (userRoles.includes("admin")) {
+        setUserRole("admin");
+      } else if (userRoles.includes("agent")) {
+        setUserRole("agent");
+      }
+    }
+  };
+
   const fetchAgents = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("agents")
-        .select("*")
-        .order("sort_order", { ascending: true });
+        .select("*");
+      
+      // If user is an agent, only show their own profile
+      if (userRole === "agent" && currentUserId) {
+        query = query.eq("user_id", currentUserId);
+      }
+      
+      const { data, error } = await query.order("sort_order", { ascending: true });
 
       if (error) throw error;
       setAgents(data || []);
@@ -199,9 +227,12 @@ export default function AgentManagement() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Agent Management</h1>
-            <p className="text-muted-foreground mt-2">Manage your real estate agents</p>
+            <h1 className="text-3xl font-bold">{userRole === "agent" ? "My Profile" : "Agent Management"}</h1>
+            <p className="text-muted-foreground mt-2">
+              {userRole === "agent" ? "Manage your agent profile" : "Manage your real estate agents"}
+            </p>
           </div>
+          {userRole === "admin" && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => resetForm()}>
@@ -328,6 +359,7 @@ export default function AgentManagement() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         <div className="grid gap-4">
@@ -375,9 +407,11 @@ export default function AgentManagement() {
                     <Button variant="outline" size="sm" onClick={() => handleEdit(agent)}>
                       <Edit className="h-4 w-4" />
                     </Button>
+                    {userRole === "admin" && (
                     <Button variant="destructive" size="sm" onClick={() => handleDelete(agent.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
