@@ -21,11 +21,22 @@ import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
 import { ModuleBuilder } from "@/components/admin/ModuleBuilder";
 import { ContentPageModule } from "@/types/contentModules";
 
+const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')      // Replace spaces with hyphens
+    .replace(/-+/g, '-')       // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, '');  // Remove leading/trailing hyphens
+};
+
 export default function ContentPages() {
   const [pages, setPages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<any>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -38,6 +49,22 @@ export default function ContentPages() {
     modules: [] as any[],
   });
   const { toast } = useToast();
+
+  const handleTitleChange = (newTitle: string) => {
+    setFormData({ ...formData, title: newTitle });
+    
+    // Auto-generate slug only if user hasn't manually edited it
+    if (!editingPage && !slugManuallyEdited) {
+      setFormData(prev => ({ ...prev, title: newTitle, slug: generateSlug(newTitle) }));
+    } else if (!editingPage) {
+      setFormData(prev => ({ ...prev, title: newTitle }));
+    }
+  };
+
+  const handleSlugChange = (newSlug: string) => {
+    setSlugManuallyEdited(true);
+    setFormData({ ...formData, slug: generateSlug(newSlug) });
+  };
 
   useEffect(() => {
     fetchPages();
@@ -133,6 +160,7 @@ export default function ContentPages() {
 
   const resetForm = () => {
     setEditingPage(null);
+    setSlugManuallyEdited(false);
     setFormData({
       title: "",
       slug: "",
@@ -226,7 +254,7 @@ export default function ContentPages() {
                           <Input
                             id="slug"
                             value={formData.slug}
-                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                            onChange={(e) => handleSlugChange(e.target.value)}
                             placeholder="about-us"
                           />
                         </div>
@@ -294,7 +322,7 @@ export default function ContentPages() {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => handleTitleChange(e.target.value)}
                         required
                       />
                     </div>
@@ -303,9 +331,12 @@ export default function ContentPages() {
                       <Input
                         id="slug"
                         value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        onChange={(e) => handleSlugChange(e.target.value)}
                         placeholder="about-us"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Auto-generated from title, but you can edit it
+                      </p>
                     </div>
                   </div>
                   <div>
