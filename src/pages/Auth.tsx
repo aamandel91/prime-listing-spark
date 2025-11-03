@@ -66,12 +66,24 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Check role and route accordingly
+      const userId = data.user?.id;
+      let destination = "/";
+      if (userId) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+        const roleList = roles?.map(r => r.role) || [];
+        if (roleList.includes("admin")) destination = "/admin/global-site-settings";
+      }
 
       toast({
         title: "Welcome back!",
@@ -79,7 +91,7 @@ const Auth = () => {
         duration: 3000,
       });
       
-      navigate("/");
+      navigate(destination);
     } catch (error: any) {
       toast({
         variant: "destructive",
