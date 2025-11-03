@@ -19,35 +19,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function Analytics() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  const getDateRangeFilter = () => {
-    const now = new Date();
+  const getDateRangeFilter = (offset: number = 0) => {
     const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
-    const startDate = new Date(now.setDate(now.getDate() - days));
+    const now = new Date();
+    const startDate = new Date(now.getTime() - (days + offset) * 24 * 60 * 60 * 1000);
     return startDate.toISOString();
   };
 
-  // Fetch property views
+  const getCurrentPeriodStart = () => getDateRangeFilter(0);
+  const getPreviousPeriodStart = () => {
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    return getDateRangeFilter(days);
+  };
+  const getPreviousPeriodEnd = () => getCurrentPeriodStart();
+
+  // Fetch current period property views
   const { data: propertyViews } = useQuery({
     queryKey: ["property-views-analytics", timeRange],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("property_views")
         .select("*")
-        .gte("created_at", getDateRangeFilter());
+        .gte("created_at", getCurrentPeriodStart());
       
       if (error) throw error;
       return data || [];
     },
   });
 
-  // Fetch leads
+  // Fetch previous period property views for trend
+  const { data: previousPropertyViews } = useQuery({
+    queryKey: ["property-views-analytics-previous", timeRange],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("property_views")
+        .select("*")
+        .gte("created_at", getPreviousPeriodStart())
+        .lt("created_at", getPreviousPeriodEnd());
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch current period leads
   const { data: openHouseLeads } = useQuery({
     queryKey: ["open-house-leads-analytics", timeRange],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("open_house_leads")
         .select("*")
-        .gte("created_at", getDateRangeFilter());
+        .gte("created_at", getCurrentPeriodStart());
       
       if (error) throw error;
       return data || [];
@@ -60,7 +82,36 @@ export default function Analytics() {
       const { data, error } = await supabase
         .from("tour_requests")
         .select("*")
-        .gte("created_at", getDateRangeFilter());
+        .gte("created_at", getCurrentPeriodStart());
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch previous period leads for trend
+  const { data: previousOpenHouseLeads } = useQuery({
+    queryKey: ["open-house-leads-analytics-previous", timeRange],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("open_house_leads")
+        .select("*")
+        .gte("created_at", getPreviousPeriodStart())
+        .lt("created_at", getPreviousPeriodEnd());
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: previousTourRequests } = useQuery({
+    queryKey: ["tour-requests-analytics-previous", timeRange],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tour_requests")
+        .select("*")
+        .gte("created_at", getPreviousPeriodStart())
+        .lt("created_at", getPreviousPeriodEnd());
       
       if (error) throw error;
       return data || [];
@@ -74,22 +125,43 @@ export default function Analytics() {
       const { data, error } = await supabase
         .from("lead_statuses")
         .select("*")
-        .gte("created_at", getDateRangeFilter());
+        .gte("created_at", getCurrentPeriodStart());
       
       if (error) throw error;
       return data || [];
     },
   });
 
-  const totalLeads = (openHouseLeads?.length || 0) + (tourRequests?.length || 0);
+  // Deduplicate leads by email
+  const uniqueCurrentLeads = new Set([
+    ...(openHouseLeads?.map(l => l.email) || []),
+    ...(tourRequests?.map(l => l.visitor_email) || [])
+  ]);
+  
+  const uniquePreviousLeads = new Set([
+    ...(previousOpenHouseLeads?.map(l => l.email) || []),
+    ...(previousTourRequests?.map(l => l.visitor_email) || [])
+  ]);
+
+  const totalLeads = uniqueCurrentLeads.size;
+  const previousTotalLeads = uniquePreviousLeads.size;
   const totalViews = propertyViews?.length || 0;
-  const conversionRate = totalViews > 0 ? ((totalLeads / totalViews) * 100).toFixed(2) : "0";
+  const previousTotalViews = previousPropertyViews?.length || 0;
+  
+  const conversionRate = totalViews > 0 ? ((totalLeads / totalViews) * 100) : 0;
+  const previousConversionRate = previousTotalViews > 0 ? ((previousTotalLeads / previousTotalViews) * 100) : 0;
+  
   const convertedLeads = leadStatuses?.filter(l => l.status === "converted").length || 0;
 
-  // Calculate trends (mock for now - would need historical data)
-  const viewsTrend = 12.5;
-  const leadsTrend = 8.3;
-  const conversionTrend = -2.1;
+  // Calculate real trends
+  const calculateTrend = (current: number, previous: number) => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return Number((((current - previous) / previous) * 100).toFixed(1));
+  };
+
+  const viewsTrend = calculateTrend(totalViews, previousTotalViews);
+  const leadsTrend = calculateTrend(totalLeads, previousTotalLeads);
+  const conversionTrend = calculateTrend(conversionRate, previousConversionRate);
 
   // Top properties by views
   const propertyViewCounts = propertyViews?.reduce((acc: any, view) => {
@@ -102,12 +174,32 @@ export default function Analytics() {
     .slice(0, 10)
     .map(([mls, count]) => ({ mls, count }));
 
-  // Lead sources
-  const leadSources = leadStatuses?.reduce((acc: any, lead) => {
-    const source = lead.source || "Direct";
+  // Aggregate lead sources from all tables
+  const leadSources = [...(openHouseLeads || []), ...(tourRequests || [])].reduce((acc: any, lead) => {
+    // Extract source from page_referrer or default to "Direct"
+    let source = "Direct";
+    const referrer = (lead as any).page_referrer || (lead as any).referrer;
+    
+    if (referrer) {
+      if (referrer.includes('google')) source = "Google";
+      else if (referrer.includes('facebook') || referrer.includes('fb')) source = "Facebook";
+      else if (referrer.includes('instagram')) source = "Instagram";
+      else if (referrer.includes('zillow')) source = "Zillow";
+      else if (referrer.includes('realtor.com')) source = "Realtor.com";
+      else if (referrer !== window.location.origin) source = "Referral";
+    }
+    
     acc[source] = (acc[source] || 0) + 1;
     return acc;
   }, {});
+
+  // Add lead_statuses sources if they have explicit source field
+  leadStatuses?.forEach(lead => {
+    if (lead.source) {
+      const source = lead.source;
+      leadSources[source] = (leadSources[source] || 0) + 1;
+    }
+  });
 
   // Status distribution
   const statusDistribution = leadStatuses?.reduce((acc: any, lead) => {
@@ -201,7 +293,7 @@ export default function Analytics() {
           />
           <StatCard
             title="Conversion Rate"
-            value={`${conversionRate}%`}
+            value={`${conversionRate.toFixed(2)}%`}
             icon={TrendingUp}
             trend={conversionTrend}
             description="Views to leads"
