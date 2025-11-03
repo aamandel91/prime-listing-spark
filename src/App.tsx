@@ -31,7 +31,7 @@ import Leads from "./pages/admin/Leads";
 import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
 import CityPropertyType from "./pages/CityPropertyType";
-import CityBulkImport from "./pages/admin/CityBulkImport";
+import LocationImport from "./pages/admin/LocationImport";
 
 import { useEffect } from "react";
 
@@ -73,7 +73,7 @@ const RecoveryRouter = () => {
         <Route path="/admin/global-site-settings" element={<ProtectedRoute requireRole="admin"><GlobalSiteSettings /></ProtectedRoute>} />
         <Route path="/admin/site-layout-settings" element={<ProtectedRoute requireRole="admin"><SiteLayoutSettings /></ProtectedRoute>} />
         <Route path="/admin/featured-cities" element={<ProtectedRoute requireRole="admin"><FeaturedCities /></ProtectedRoute>} />
-        <Route path="/admin/city-bulk-import" element={<ProtectedRoute requireRole="admin"><CityBulkImport /></ProtectedRoute>} />
+        <Route path="/admin/location-import" element={<ProtectedRoute requireRole="admin"><LocationImport /></ProtectedRoute>} />
         
         {/* Public Routes - More specific routes first */}
         <Route path="/cities" element={<Cities />} />
