@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, Clock } from "lucide-react";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 interface PropertyHistoryItem {
   listDate: string;
@@ -60,59 +61,64 @@ export const PropertyHistory = ({ history, className = "" }: PropertyHistoryProp
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <CardTitle>Property History</CardTitle>
-        </div>
-        <CardDescription>
-          Historical listing and sales data for this property
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[120px]">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    List Date
-                  </div>
-                </TableHead>
-                <TableHead className="min-w-[120px]">List Price</TableHead>
-                <TableHead className="min-w-[100px]">Status</TableHead>
-                <TableHead className="min-w-[120px]">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Sold Date
-                  </div>
-                </TableHead>
-                <TableHead className="min-w-[120px]">Sold Price</TableHead>
-                <TableHead className="min-w-[100px]">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Days on Market
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {history.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{formatDate(item.listDate)}</TableCell>
-                  <TableCell className="font-medium">{formatPrice(item.listPrice)}</TableCell>
-                  <TableCell>{getStatusBadge(item.status)}</TableCell>
-                  <TableCell>{formatDate(item.soldDate)}</TableCell>
-                  <TableCell className="font-medium">{formatPrice(item.soldPrice)}</TableCell>
-                  <TableCell>{item.daysOnMarket || "N/A"}</TableCell>
+    <AuthGate 
+      title="Sign in to view property history"
+      description="Access complete listing history, past sales data, and price changes"
+    >
+      <Card className={className}>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <CardTitle>Property History</CardTitle>
+          </div>
+          <CardDescription>
+            Historical listing and sales data for this property
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      List Date
+                    </div>
+                  </TableHead>
+                  <TableHead className="min-w-[120px]">List Price</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Sold Date
+                    </div>
+                  </TableHead>
+                  <TableHead className="min-w-[120px]">Sold Price</TableHead>
+                  <TableHead className="min-w-[100px]">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Days on Market
+                    </div>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+              </TableHeader>
+              <TableBody>
+                {history.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{formatDate(item.listDate)}</TableCell>
+                    <TableCell className="font-medium">{formatPrice(item.listPrice)}</TableCell>
+                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                    <TableCell>{formatDate(item.soldDate)}</TableCell>
+                    <TableCell className="font-medium">{formatPrice(item.soldPrice)}</TableCell>
+                    <TableCell>{item.daysOnMarket || "N/A"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </AuthGate>
   );
 };

@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, Home, Calendar, AlertCircle } from "lucide-re
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRepliersMarketStats } from "@/hooks/useRepliersMarketStats";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 interface MarketStat {
   label: string;
@@ -120,50 +121,55 @@ export const MarketStatistics = ({
   }
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Home className="w-5 h-5 text-primary" />
-          <CardTitle>Market Statistics</CardTitle>
-        </div>
-        <CardDescription>
-          Real estate market data for {neighborhood ? `${neighborhood}, ` : ''}{city}{state ? `, ${state}` : ''}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {marketStats.map((stat, index) => (
-            <div key={index} className="p-4 border rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-                {renderChangeIndicator(stat.change)}
+    <AuthGate 
+      title="Sign in to view market statistics"
+      description="Access detailed market data, trends, and analytics for this area"
+    >
+      <Card className={className}>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Home className="w-5 h-5 text-primary" />
+            <CardTitle>Market Statistics</CardTitle>
+          </div>
+          <CardDescription>
+            Real estate market data for {neighborhood ? `${neighborhood}, ` : ''}{city}{state ? `, ${state}` : ''}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {marketStats.map((stat, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                  {renderChangeIndicator(stat.change)}
+                </div>
+                <p className="text-2xl font-bold mb-1">{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.period}</p>
               </div>
-              <p className="text-2xl font-bold mb-1">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.period}</p>
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-primary mt-1" />
-            <div>
-              <p className="font-medium text-sm mb-1">Market Insights</p>
-              <p className="text-sm text-muted-foreground">
-                {stats.activeListings > 0 ? (
-                  <>
-                    The market currently has {stats.activeListings} active listing{stats.activeListings !== 1 ? 's' : ''}.
-                    {stats.avgDaysOnMarket30d > 0 && ` Properties are selling in an average of ${stats.avgDaysOnMarket30d} days.`}
-                    {stats.medianPrice30d > 0 && ` The median sale price is ${formatCurrency(stats.medianPrice30d)}.`}
-                  </>
-                ) : (
-                  'No recent market activity data available for this area.'
-                )}
-              </p>
+            ))}
+          </div>
+          
+          <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-primary mt-1" />
+              <div>
+                <p className="font-medium text-sm mb-1">Market Insights</p>
+                <p className="text-sm text-muted-foreground">
+                  {stats.activeListings > 0 ? (
+                    <>
+                      The market currently has {stats.activeListings} active listing{stats.activeListings !== 1 ? 's' : ''}.
+                      {stats.avgDaysOnMarket30d > 0 && ` Properties are selling in an average of ${stats.avgDaysOnMarket30d} days.`}
+                      {stats.medianPrice30d > 0 && ` The median sale price is ${formatCurrency(stats.medianPrice30d)}.`}
+                    </>
+                  ) : (
+                    'No recent market activity data available for this area.'
+                  )}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </AuthGate>
   );
 };

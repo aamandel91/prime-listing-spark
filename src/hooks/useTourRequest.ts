@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLeadDeduplication } from './useLeadDeduplication';
+import { useAuthCheck } from './useAuthCheck';
 
 export interface TourRequest {
   property_mls: string;
@@ -16,8 +17,19 @@ export interface TourRequest {
 export const useTourRequest = () => {
   const { toast } = useToast();
   const { createOrUpdateLeadStatus } = useLeadDeduplication();
+  const { isAuthenticated } = useAuthCheck();
 
   const submitTourRequest = async (request: TourRequest) => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to schedule a tour.",
+        variant: "destructive",
+      });
+      return { data: null, error: new Error('Authentication required') };
+    }
+
     try {
       const { data, error } = await supabase
         .from('tour_requests')
@@ -53,5 +65,5 @@ export const useTourRequest = () => {
     }
   };
 
-  return { submitTourRequest };
+  return { submitTourRequest, isAuthenticated };
 };
