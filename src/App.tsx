@@ -37,6 +37,10 @@ import ContentPages from "./pages/admin/ContentPages";
 import AgentDetail from "./pages/AgentDetail";
 import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Accessibility from "./pages/Accessibility";
+import DmcaNotice from "./pages/DmcaNotice";
 import CityPropertyType from "./pages/CityPropertyType";
 import LocationImport from "./pages/admin/LocationImport";
 import ListingDataExtractor from "./pages/admin/ListingDataExtractor";
@@ -125,6 +129,12 @@ const RecoveryRouter = () => {
         
         {/* New SEO-friendly property URL format - must come after city routes */}
         <Route path="/:propertySlug/" element={<PropertyDetail />} />
+        
+        {/* Legal Pages */}
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/accessibility" element={<Accessibility />} />
+        <Route path="/dmca-notice" element={<DmcaNotice />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

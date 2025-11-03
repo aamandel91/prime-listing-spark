@@ -131,8 +131,10 @@ const Footer = () => {
         <div className="border-t border-primary-light mt-8 pt-8 text-center">
           <p className="text-primary-foreground/60 text-sm">
             © {currentYear} {settings?.siteOwner || siteName}. All rights reserved. | 
-            <Link to="/privacy" className="hover:text-accent transition-colors ml-1">Privacy Policy</Link> | 
-            <Link to="/terms" className="hover:text-accent transition-colors ml-1">Terms of Service</Link>
+            <Link to="/privacy-policy" className="hover:text-accent transition-colors ml-1">Privacy Policy</Link> | 
+            <Link to="/terms-of-service" className="hover:text-accent transition-colors ml-1">Terms of Service</Link> | 
+            <Link to="/accessibility" className="hover:text-accent transition-colors ml-1">Accessibility</Link> | 
+            <Link to="/dmca-notice" className="hover:text-accent transition-colors ml-1">DMCA</Link>
           </p>
         </div>
       </div>
