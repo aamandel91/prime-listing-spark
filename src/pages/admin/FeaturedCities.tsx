@@ -12,6 +12,7 @@ import { Loader2, Plus, Edit, Trash2, Save, X } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FeaturedCity {
   id: string;
@@ -40,7 +41,10 @@ interface FeaturedCounty {
 export default function FeaturedCities() {
   const [cities, setCities] = useState<FeaturedCity[]>([]);
   const [counties, setCounties] = useState<FeaturedCounty[]>([]);
+  const [apiCities, setApiCities] = useState<Array<{name: string, state: string}>>([]);
+  const [apiCounties, setApiCounties] = useState<Array<{name: string, state: string}>>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingApi, setLoadingApi] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [locationType, setLocationType] = useState<"city" | "county">("city");
@@ -59,7 +63,74 @@ export default function FeaturedCities() {
   useEffect(() => {
     fetchCities();
     fetchCounties();
+    fetchApiLocations();
   }, []);
+
+  const fetchApiLocations = async () => {
+    try {
+      setLoadingApi(true);
+
+      // Fetch cities from Repliers API
+      const { data: citiesData, error: citiesError } = await supabase.functions.invoke(
+        "repliers-proxy",
+        {
+          body: {
+            endpoint: "/locations",
+            params: {
+              type: "city",
+              state: "FL",
+            },
+          },
+        }
+      );
+
+      if (citiesError) throw citiesError;
+
+      // Fetch counties/areas from Repliers API
+      const { data: countiesData, error: countiesError } = await supabase.functions.invoke(
+        "repliers-proxy",
+        {
+          body: {
+            endpoint: "/locations",
+            params: {
+              type: "area",
+              state: "FL",
+            },
+          },
+        }
+      );
+
+      if (countiesError) throw countiesError;
+
+      // Extract and sort cities
+      const cityList = (citiesData?.locations || [])
+        .map((loc: any) => ({
+          name: loc.name,
+          state: loc.state || "FL",
+        }))
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+      // Extract and sort counties
+      const countyList = (countiesData?.locations || [])
+        .map((loc: any) => ({
+          name: loc.name,
+          state: loc.state || "FL",
+        }))
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+      setApiCities(cityList);
+      setApiCounties(countyList);
+    } catch (error) {
+      console.error("Error fetching API locations:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch locations from API",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingApi(false);
+    }
+  };
 
   const fetchCities = async () => {
     try {
@@ -301,13 +372,30 @@ export default function FeaturedCities() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="city_name">City Name</Label>
-                      <Input
-                        id="city_name"
+                      <Select
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                      />
+                        onValueChange={(value) => {
+                          const slug = value.toLowerCase().replace(/\s+/g, '-');
+                          setFormData({ ...formData, name: value, slug });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a city..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingApi ? (
+                            <SelectItem value="_loading" disabled>
+                              Loading cities...
+                            </SelectItem>
+                          ) : (
+                            apiCities.map((city) => (
+                              <SelectItem key={city.name} value={city.name}>
+                                {city.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                 <div>
                   <Label htmlFor="state">State</Label>
@@ -568,13 +656,30 @@ export default function FeaturedCities() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="county_name">County Name</Label>
-                      <Input
-                        id="county_name"
+                      <Select
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                      />
+                        onValueChange={(value) => {
+                          const slug = value.toLowerCase().replace(/\s+/g, '-');
+                          setFormData({ ...formData, name: value, slug });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a county..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingApi ? (
+                            <SelectItem value="_loading" disabled>
+                              Loading counties...
+                            </SelectItem>
+                          ) : (
+                            apiCounties.map((county) => (
+                              <SelectItem key={county.name} value={county.name}>
+                                {county.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label htmlFor="state">State</Label>
