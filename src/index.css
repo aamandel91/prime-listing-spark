@@ -152,4 +152,49 @@ All colors MUST be HSL.
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* Quill Editor Custom Styles */
+  .quill-editor .ql-container {
+    min-height: 300px;
+    font-family: inherit;
+  }
+
+  .quill-editor .ql-editor {
+    min-height: 300px;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .quill-editor .ql-editor.ql-blank::before {
+    font-style: normal;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .quill-editor .ql-toolbar {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid hsl(var(--border)) !important;
+    background: hsl(var(--muted));
+  }
+
+  .quill-editor .ql-container {
+    border: none !important;
+  }
+
+  .dark .quill-editor .ql-toolbar {
+    background: hsl(var(--muted));
+  }
+
+  .dark .quill-editor .ql-stroke {
+    stroke: hsl(var(--foreground));
+  }
+
+  .dark .quill-editor .ql-fill {
+    fill: hsl(var(--foreground));
+  }
+
+  .dark .quill-editor .ql-picker-label {
+    color: hsl(var(--foreground));
+  }
 }
