@@ -50,26 +50,49 @@ export default function Counties() {
         }
       });
 
-      // Fetch featured counties from database for custom content
+      // Fetch featured counties from database
       const { data: featuredCounties } = await supabase
         .from("featured_counties")
-        .select("*");
+        .select("*")
+        .eq("featured", true);
 
-      // Merge API counties with featured counties data
-      const countiesArray: CountyData[] = Array.from(countyMap.values()).map(({ county, state, count }) => {
-        const slug = county.toLowerCase().replace(/\s+/g, "-");
+      // Create a map for easier lookup
+      const countiesArray: CountyData[] = [];
+      const processedKeys = new Set<string>();
+
+      // First, add all API counties
+      Array.from(countyMap.values()).forEach(({ county, state, count }) => {
+        const key = `${county.toLowerCase()}-${state.toLowerCase()}`;
+        processedKeys.add(key);
+        
         const featured = featuredCounties?.find(
-          (fc) => fc.county_name.toLowerCase() === county.toLowerCase() && fc.state === state
+          (fc) => fc.county_name.toLowerCase() === county.toLowerCase() && 
+                  (fc.state.toLowerCase() === state.toLowerCase() || fc.state.toLowerCase() === state.toLowerCase())
         );
 
-        return {
+        countiesArray.push({
           county_name: county,
           state: state,
-          slug: featured?.slug || slug,
+          slug: featured?.slug || county.toLowerCase().replace(/\s+/g, "-"),
           description: featured?.description || `Explore ${count} properties available in ${county} County, ${state}.`,
           hero_image_url: featured?.hero_image_url || null,
           property_count: count
-        };
+        });
+      });
+
+      // Then, add featured counties that aren't in the API results
+      featuredCounties?.forEach((fc) => {
+        const key = `${fc.county_name.toLowerCase()}-${fc.state.toLowerCase()}`;
+        if (!processedKeys.has(key)) {
+          countiesArray.push({
+            county_name: fc.county_name,
+            state: fc.state,
+            slug: fc.slug,
+            description: fc.description || `Explore properties available in ${fc.county_name} County, ${fc.state}.`,
+            hero_image_url: fc.hero_image_url || null,
+            property_count: 0
+          });
+        }
       });
 
       // Sort by property count (most listings first) then alphabetically

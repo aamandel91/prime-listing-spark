@@ -50,26 +50,49 @@ export default function Cities() {
         }
       });
 
-      // Fetch featured cities from database for custom content
+      // Fetch featured cities from database
       const { data: featuredCities } = await supabase
         .from("featured_cities")
-        .select("*");
+        .select("*")
+        .eq("featured", true);
 
-      // Merge API cities with featured cities data
-      const citiesArray: CityData[] = Array.from(cityMap.values()).map(({ city, state, count }) => {
-        const slug = city.toLowerCase().replace(/\s+/g, "-");
+      // Create a map for easier lookup
+      const citiesArray: CityData[] = [];
+      const processedKeys = new Set<string>();
+
+      // First, add all API cities
+      Array.from(cityMap.values()).forEach(({ city, state, count }) => {
+        const key = `${city.toLowerCase()}-${state.toLowerCase()}`;
+        processedKeys.add(key);
+        
         const featured = featuredCities?.find(
-          (fc) => fc.city_name.toLowerCase() === city.toLowerCase() && fc.state === state
+          (fc) => fc.city_name.toLowerCase() === city.toLowerCase() && 
+                  (fc.state.toLowerCase() === state.toLowerCase() || fc.state.toLowerCase() === state.toLowerCase())
         );
 
-        return {
+        citiesArray.push({
           city_name: city,
           state: state,
-          slug: featured?.slug || slug,
+          slug: featured?.slug || city.toLowerCase().replace(/\s+/g, "-"),
           description: featured?.description || `Explore ${count} properties available in ${city}, ${state}.`,
           hero_image_url: featured?.hero_image_url || null,
           property_count: count
-        };
+        });
+      });
+
+      // Then, add featured cities that aren't in the API results
+      featuredCities?.forEach((fc) => {
+        const key = `${fc.city_name.toLowerCase()}-${fc.state.toLowerCase()}`;
+        if (!processedKeys.has(key)) {
+          citiesArray.push({
+            city_name: fc.city_name,
+            state: fc.state,
+            slug: fc.slug,
+            description: fc.description || `Explore properties available in ${fc.city_name}, ${fc.state}.`,
+            hero_image_url: fc.hero_image_url || null,
+            property_count: 0
+          });
+        }
       });
 
       // Sort by property count (most listings first) then alphabetically
