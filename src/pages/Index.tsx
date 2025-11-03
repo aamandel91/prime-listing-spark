@@ -6,6 +6,8 @@ import CTASection from "@/components/home/CTASection";
 import PropertyTypes from "@/components/home/PropertyTypes";
 import PopularSearches from "@/components/home/PopularSearches";
 import ExploreListings from "@/components/home/ExploreListings";
+import FeaturedProperties from "@/components/home/FeaturedProperties";
+import Stats from "@/components/home/Stats";
 import RecentBlogs from "@/components/home/RecentBlogs";
 import FloridaResourceSection from "@/components/home/FloridaResourceSection";
 
@@ -71,6 +73,8 @@ const Index = () => {
       
       <main className="flex-1">
         <Hero />
+        <Stats />
+        <FeaturedProperties />
         <CTASection />
         <PropertyTypes />
         <PopularSearches />
