@@ -29,6 +29,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const menuSections = [
   {
@@ -84,38 +85,46 @@ export function AdminSidebar() {
 
   return (
     <Sidebar
-      className={collapsed ? "w-16" : "w-64"}
+      className={cn(
+        "border-r bg-background",
+        collapsed ? "w-16" : "w-64"
+      )}
       collapsible="icon"
     >
-      <SidebarContent>
-        <div className="p-4 border-b">
+      <SidebarContent className="bg-background">
+        <div className="p-4 border-b bg-card">
           {!collapsed && (
-            <h2 className="text-lg font-bold text-primary">Admin CMS</h2>
+            <h2 className="text-lg font-bold text-card-foreground">Admin CMS</h2>
           )}
         </div>
 
         {menuSections.map((section) => (
-          <SidebarGroup key={section.label}>
+          <SidebarGroup key={section.label} className="px-2 py-2">
             {!collapsed && (
-              <SidebarGroupLabel className="text-xs uppercase text-muted-foreground">
+              <SidebarGroupLabel className="text-xs uppercase text-muted-foreground font-semibold px-3 py-2 mb-1">
                 {section.label}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="space-y-1">
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end
-                        className={getNavCls}
-                        title={collapsed ? item.title : undefined}
-                      >
-                        <item.icon className={collapsed ? "h-5 w-5" : "mr-3 h-4 w-4"} />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
+                    <NavLink
+                      to={item.url}
+                      end
+                      className={({ isActive }) => 
+                        cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md transition-all w-full",
+                          isActive 
+                            ? "bg-primary text-primary-foreground font-medium shadow-sm" 
+                            : "text-foreground hover:bg-muted hover:text-foreground"
+                        )
+                      }
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </NavLink>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
