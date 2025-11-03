@@ -9,11 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Save, X, Search } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
 
 interface FeaturedCity {
   id: string;
@@ -638,6 +640,31 @@ export default function FeaturedCities() {
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Search Criteria for {city.city_name}</DialogTitle>
+                          </DialogHeader>
+                          <SearchCriteriaEditor
+                            entityType="featured_city"
+                            entityId={city.id}
+                            onSave={() => {
+                              toast({
+                                title: "Success",
+                                description: "Search criteria updated"
+                              });
+                            }}
+                          />
+                        </DialogContent>
+                      </Dialog>
                       <Button
                         variant="outline"
                         size="sm"
@@ -853,6 +880,31 @@ export default function FeaturedCities() {
                           </p>
                         </div>
                         <div className="flex gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Search Criteria for {county.county_name}</DialogTitle>
+                              </DialogHeader>
+                              <SearchCriteriaEditor
+                                entityType="featured_county"
+                                entityId={county.id}
+                                onSave={() => {
+                                  toast({
+                                    title: "Success",
+                                    description: "Search criteria updated"
+                                  });
+                                }}
+                              />
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             variant="outline"
                             size="sm"

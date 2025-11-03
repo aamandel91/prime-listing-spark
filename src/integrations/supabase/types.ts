@@ -852,6 +852,8 @@ export type Database = {
           city: string | null
           county: string | null
           created_at: string | null
+          entity_id: string | null
+          entity_type: string
           id: string
           latitude: number | null
           longitude: number | null
@@ -872,7 +874,7 @@ export type Database = {
           name: string
           neighborhood: string | null
           office_id: string | null
-          page_id: string
+          page_id: string | null
           polygon: Json | null
           pool: boolean | null
           property_class: string | null
@@ -893,6 +895,8 @@ export type Database = {
           city?: string | null
           county?: string | null
           created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
           id?: string
           latitude?: number | null
           longitude?: number | null
@@ -913,7 +917,7 @@ export type Database = {
           name: string
           neighborhood?: string | null
           office_id?: string | null
-          page_id: string
+          page_id?: string | null
           polygon?: Json | null
           pool?: boolean | null
           property_class?: string | null
@@ -934,6 +938,8 @@ export type Database = {
           city?: string | null
           county?: string | null
           created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
           id?: string
           latitude?: number | null
           longitude?: number | null
@@ -954,7 +960,7 @@ export type Database = {
           name?: string
           neighborhood?: string | null
           office_id?: string | null
-          page_id?: string
+          page_id?: string | null
           polygon?: Json | null
           pool?: boolean | null
           property_class?: string | null
@@ -967,15 +973,7 @@ export type Database = {
           waterfront?: boolean | null
           zip?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "page_search_criteria_page_id_fkey"
-            columns: ["page_id"]
-            isOneToOne: true
-            referencedRelation: "content_pages"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       pages: {
         Row: {

@@ -12,7 +12,9 @@ import { Loader2, Save, Map as MapIcon } from 'lucide-react';
 import { GoogleMap, DrawingManager, Polygon, useJsApiLoader } from '@react-google-maps/api';
 
 interface SearchCriteriaEditorProps {
-  pageId: string;
+  pageId?: string;
+  entityType?: 'content_page' | 'featured_city' | 'featured_county' | 'featured_neighborhood';
+  entityId?: string;
   onSave?: () => void;
 }
 
@@ -86,7 +88,7 @@ const statusOptions = [
   { value: 'Withdrawn', label: 'Withdrawn' },
 ];
 
-export function SearchCriteriaEditor({ pageId, onSave }: SearchCriteriaEditorProps) {
+export function SearchCriteriaEditor({ pageId, entityType = 'content_page', entityId, onSave }: SearchCriteriaEditorProps) {
   const [criteria, setCriteria] = useState<SearchCriteria>({
     name: 'Search Criteria',
     status: 'A'
@@ -104,16 +106,29 @@ export function SearchCriteriaEditor({ pageId, onSave }: SearchCriteriaEditorPro
   });
 
   useEffect(() => {
-    fetchCriteria();
-  }, [pageId]);
+    if (pageId || entityId) {
+      fetchCriteria();
+    }
+  }, [pageId, entityId]);
 
   const fetchCriteria = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('page_search_criteria')
-        .select('*')
-        .eq('page_id', pageId)
-        .single();
+        .select('*');
+
+      if (pageId) {
+        query = query.eq('page_id', pageId);
+      } else if (entityId) {
+        query = query
+          .eq('entity_type', entityType)
+          .eq('entity_id', entityId);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await query.single();
 
       if (error && error.code !== 'PGRST116') throw error;
 
@@ -167,7 +182,9 @@ export function SearchCriteriaEditor({ pageId, onSave }: SearchCriteriaEditorPro
 
       const payload = {
         ...criteria,
-        page_id: pageId,
+        page_id: pageId || null,
+        entity_type: entityType,
+        entity_id: entityId || null,
         polygon: polygonGeoJSON,
         updated_at: new Date().toISOString()
       };

@@ -34,6 +34,13 @@ import { cn } from "@/lib/utils";
 
 const menuSections = [
   {
+    label: "Analytics & Tools",
+    items: [
+      { title: "Analytics Dashboard", url: "/admin/analytics", icon: BarChart3 },
+      { title: "Competitor Analysis", url: "/admin/competitor-analysis", icon: TrendingUp },
+    ],
+  },
+  {
     label: "Site Management",
     items: [
       { title: "Global Settings", url: "/admin/global-site-settings", icon: Settings },
@@ -66,13 +73,6 @@ const menuSections = [
       { title: "Agents", url: "/admin/agents", icon: Users },
       { title: "Leads Management", url: "/admin/leads", icon: Mail },
       { title: "User Roles", url: "/admin/role-management", icon: Shield },
-    ],
-  },
-  {
-    label: "Analytics & Tools",
-    items: [
-      { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-      { title: "Competitor Analysis", url: "/admin/competitor-analysis", icon: TrendingUp },
     ],
   },
 ];

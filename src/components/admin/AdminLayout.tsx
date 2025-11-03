@@ -46,8 +46,16 @@ export function AdminLayout() {
       
       if (userRoles.includes("admin")) {
         setIsAdmin(true);
+        // Redirect to analytics if on /admin root
+        if (window.location.pathname === "/admin" || window.location.pathname === "/admin/") {
+          navigate("/admin/analytics", { replace: true });
+        }
       } else if (userRoles.includes("agent")) {
         setIsAgent(true);
+        // Agents go to their profile
+        if (window.location.pathname === "/admin" || window.location.pathname === "/admin/") {
+          navigate("/admin/agents", { replace: true });
+        }
       } else {
         toast({
           variant: "destructive",
