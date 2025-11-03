@@ -228,48 +228,90 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          default_image: string | null
+          display_sidebar: boolean | null
           featured_image: string | null
+          full_width: boolean | null
+          hide_breadcrumbs: boolean | null
+          hide_footer: boolean | null
+          hide_header: boolean | null
           id: string
+          include_in_nav: boolean | null
           is_template: boolean | null
           meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
           modules: Json | null
+          open_in: string | null
+          page_overview: string | null
+          page_priority: number | null
           page_type: string | null
           parent_id: string | null
           published: boolean | null
+          robots_indexing: string | null
           slug: string
           sort_order: number | null
+          specific_sidebar: string | null
           title: string
           updated_at: string
         }
         Insert: {
           content: string
           created_at?: string
+          default_image?: string | null
+          display_sidebar?: boolean | null
           featured_image?: string | null
+          full_width?: boolean | null
+          hide_breadcrumbs?: boolean | null
+          hide_footer?: boolean | null
+          hide_header?: boolean | null
           id?: string
+          include_in_nav?: boolean | null
           is_template?: boolean | null
           meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           modules?: Json | null
+          open_in?: string | null
+          page_overview?: string | null
+          page_priority?: number | null
           page_type?: string | null
           parent_id?: string | null
           published?: boolean | null
+          robots_indexing?: string | null
           slug: string
           sort_order?: number | null
+          specific_sidebar?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           content?: string
           created_at?: string
+          default_image?: string | null
+          display_sidebar?: boolean | null
           featured_image?: string | null
+          full_width?: boolean | null
+          hide_breadcrumbs?: boolean | null
+          hide_footer?: boolean | null
+          hide_header?: boolean | null
           id?: string
+          include_in_nav?: boolean | null
           is_template?: boolean | null
           meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           modules?: Json | null
+          open_in?: string | null
+          page_overview?: string | null
+          page_priority?: number | null
           page_type?: string | null
           parent_id?: string | null
           published?: boolean | null
+          robots_indexing?: string | null
           slug?: string
           sort_order?: number | null
+          specific_sidebar?: string | null
           title?: string
           updated_at?: string
         }

@@ -20,6 +20,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
 import { ModuleBuilder } from "@/components/admin/ModuleBuilder";
 import { ContentPageModule } from "@/types/contentModules";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const generateSlug = (text: string): string => {
   return text
@@ -48,6 +51,20 @@ export default function ContentPages() {
     sort_order: 0,
     modules: [] as any[],
     is_template: false,
+    include_in_nav: true,
+    hide_header: false,
+    hide_breadcrumbs: false,
+    hide_footer: false,
+    display_sidebar: true,
+    full_width: false,
+    specific_sidebar: "",
+    open_in: "same_window",
+    page_priority: 0.7,
+    robots_indexing: "index, follow",
+    meta_title: "",
+    meta_keywords: "",
+    default_image: "",
+    page_overview: "",
   });
   const { toast } = useToast();
 
@@ -139,6 +156,20 @@ export default function ContentPages() {
       sort_order: page.sort_order,
       modules: page.modules || [],
       is_template: page.is_template || false,
+      include_in_nav: page.include_in_nav ?? true,
+      hide_header: page.hide_header || false,
+      hide_breadcrumbs: page.hide_breadcrumbs || false,
+      hide_footer: page.hide_footer || false,
+      display_sidebar: page.display_sidebar ?? true,
+      full_width: page.full_width || false,
+      specific_sidebar: page.specific_sidebar || "",
+      open_in: page.open_in || "same_window",
+      page_priority: page.page_priority || 0.7,
+      robots_indexing: page.robots_indexing || "index, follow",
+      meta_title: page.meta_title || "",
+      meta_keywords: page.meta_keywords || "",
+      default_image: page.default_image || "",
+      page_overview: page.page_overview || "",
     });
     setIsDialogOpen(true);
   };
@@ -206,6 +237,20 @@ export default function ContentPages() {
       sort_order: 0,
       modules: [],
       is_template: false,
+      include_in_nav: true,
+      hide_header: false,
+      hide_breadcrumbs: false,
+      hide_footer: false,
+      display_sidebar: true,
+      full_width: false,
+      specific_sidebar: "",
+      open_in: "same_window",
+      page_priority: 0.7,
+      robots_indexing: "index, follow",
+      meta_title: "",
+      meta_keywords: "",
+      default_image: "",
+      page_overview: "",
     });
   };
 
@@ -294,25 +339,244 @@ export default function ContentPages() {
                           />
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor="meta_description">Meta Description</Label>
-                        <Textarea
-                          id="meta_description"
-                          value={formData.meta_description}
-                          onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                          rows={2}
-                          placeholder="SEO description..."
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="featured_image">Featured Image URL</Label>
-                        <Input
-                          id="featured_image"
-                          value={formData.featured_image}
-                          onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                          placeholder="https://..."
-                        />
-                      </div>
+
+                      <Accordion type="multiple" className="w-full">
+                        <AccordionItem value="page-settings">
+                          <AccordionTrigger>Page Settings</AccordionTrigger>
+                          <AccordionContent className="space-y-4 pt-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="include_in_nav">Include in Dynamic Navigation Menus?</Label>
+                                <Switch
+                                  id="include_in_nav"
+                                  checked={formData.include_in_nav}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, include_in_nav: checked })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="hide_header">Hide Header Navigation?</Label>
+                                <Switch
+                                  id="hide_header"
+                                  checked={formData.hide_header}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, hide_header: checked })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="hide_breadcrumbs">Hide Breadcrumbs?</Label>
+                                <Switch
+                                  id="hide_breadcrumbs"
+                                  checked={formData.hide_breadcrumbs}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, hide_breadcrumbs: checked })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="hide_footer">Hide Footer Navigation?</Label>
+                                <Switch
+                                  id="hide_footer"
+                                  checked={formData.hide_footer}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, hide_footer: checked })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="display_sidebar">Display Sidebar on This Page?</Label>
+                                <Switch
+                                  id="display_sidebar"
+                                  checked={formData.display_sidebar}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, display_sidebar: checked })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="full_width">Full / Fluid Width Page?</Label>
+                                <Switch
+                                  id="full_width"
+                                  checked={formData.full_width}
+                                  onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, full_width: checked })
+                                  }
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="specific_sidebar">Page-Specific Sidebar</Label>
+                                <Input
+                                  id="specific_sidebar"
+                                  value={formData.specific_sidebar}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, specific_sidebar: e.target.value })
+                                  }
+                                  placeholder="None (Use Section)"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="open_in">Open In</Label>
+                                <Select
+                                  value={formData.open_in}
+                                  onValueChange={(value) =>
+                                    setFormData({ ...formData, open_in: value })
+                                  }
+                                >
+                                  <SelectTrigger id="open_in">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="same_window">Same Window</SelectItem>
+                                    <SelectItem value="new_window">New Window</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="page_priority">Page Priority</Label>
+                                <Input
+                                  id="page_priority"
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="1"
+                                  value={formData.page_priority}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, page_priority: parseFloat(e.target.value) })
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="robots_indexing">Robots / Page Indexing</Label>
+                                <Select
+                                  value={formData.robots_indexing}
+                                  onValueChange={(value) =>
+                                    setFormData({ ...formData, robots_indexing: value })
+                                  }
+                                >
+                                  <SelectTrigger id="robots_indexing">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="index, follow">index, follow</SelectItem>
+                                    <SelectItem value="noindex, follow">noindex, follow</SelectItem>
+                                    <SelectItem value="index, nofollow">index, nofollow</SelectItem>
+                                    <SelectItem value="noindex, nofollow">noindex, nofollow</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="meta-tags">
+                          <AccordionTrigger>Meta Tags</AccordionTrigger>
+                          <AccordionContent className="space-y-4 pt-4">
+                            <div>
+                              <Label htmlFor="meta_title">Meta Title</Label>
+                              <Input
+                                id="meta_title"
+                                value={formData.meta_title}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, meta_title: e.target.value })
+                                }
+                                placeholder="Page title"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="meta_keywords">Meta Keywords</Label>
+                              <Textarea
+                                id="meta_keywords"
+                                value={formData.meta_keywords}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, meta_keywords: e.target.value })
+                                }
+                                rows={3}
+                                placeholder="keyword1, keyword2, keyword3"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="meta_description">Meta Description</Label>
+                              <Textarea
+                                id="meta_description"
+                                value={formData.meta_description}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, meta_description: e.target.value })
+                                }
+                                rows={3}
+                                placeholder="SEO description..."
+                              />
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="page-defaults">
+                          <AccordionTrigger>Page Defaults</AccordionTrigger>
+                          <AccordionContent className="space-y-4 pt-4">
+                            <div>
+                              <Label>Default Page Photo</Label>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                Must be .jpg format. Optimal resolution 525px X 350px. Larger images will be scaled / optimized.
+                              </p>
+                              {formData.default_image && (
+                                <div className="mb-2">
+                                  <img 
+                                    src={formData.default_image} 
+                                    alt="Default page" 
+                                    className="w-32 h-32 object-cover rounded"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setFormData({ ...formData, default_image: "" })}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              )}
+                              <ImageUpload
+                                onImageUploaded={(url) =>
+                                  setFormData({ ...formData, default_image: url })
+                                }
+                                folder="page-defaults"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="page_overview">Page Overview</Label>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                1-3 sentence summary of the page contents & purpose.
+                              </p>
+                              <Textarea
+                                id="page_overview"
+                                value={formData.page_overview}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, page_overview: e.target.value })
+                                }
+                                rows={3}
+                                placeholder="Brief overview of this page..."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="featured_image">Featured Image URL</Label>
+                              <Input
+                                id="featured_image"
+                                value={formData.featured_image}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, featured_image: e.target.value })
+                                }
+                                placeholder="https://..."
+                              />
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+
                       <div className="flex gap-6">
                         <div className="flex items-center space-x-2">
                           <Switch
@@ -384,45 +648,264 @@ export default function ContentPages() {
                       </p>
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="meta_description">Meta Description</Label>
-                    <Textarea
-                      id="meta_description"
-                      value={formData.meta_description}
-                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                      rows={2}
-                      placeholder="SEO description..."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="featured_image">Featured Image URL</Label>
-                    <Input
-                      id="featured_image"
-                      value={formData.featured_image}
-                      onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                      placeholder="https://..."
-                    />
-                  </div>
+
+                  <Accordion type="multiple" className="w-full">
+                    <AccordionItem value="page-settings">
+                      <AccordionTrigger>Page Settings</AccordionTrigger>
+                      <AccordionContent className="space-y-4 pt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="include_in_nav_new">Include in Dynamic Navigation Menus?</Label>
+                            <Switch
+                              id="include_in_nav_new"
+                              checked={formData.include_in_nav}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, include_in_nav: checked })
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="hide_header_new">Hide Header Navigation?</Label>
+                            <Switch
+                              id="hide_header_new"
+                              checked={formData.hide_header}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, hide_header: checked })
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="hide_breadcrumbs_new">Hide Breadcrumbs?</Label>
+                            <Switch
+                              id="hide_breadcrumbs_new"
+                              checked={formData.hide_breadcrumbs}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, hide_breadcrumbs: checked })
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="hide_footer_new">Hide Footer Navigation?</Label>
+                            <Switch
+                              id="hide_footer_new"
+                              checked={formData.hide_footer}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, hide_footer: checked })
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="display_sidebar_new">Display Sidebar on This Page?</Label>
+                            <Switch
+                              id="display_sidebar_new"
+                              checked={formData.display_sidebar}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, display_sidebar: checked })
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="full_width_new">Full / Fluid Width Page?</Label>
+                            <Switch
+                              id="full_width_new"
+                              checked={formData.full_width}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, full_width: checked })
+                              }
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="specific_sidebar_new">Page-Specific Sidebar</Label>
+                            <Input
+                              id="specific_sidebar_new"
+                              value={formData.specific_sidebar}
+                              onChange={(e) =>
+                                setFormData({ ...formData, specific_sidebar: e.target.value })
+                              }
+                              placeholder="None (Use Section)"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="open_in_new">Open In</Label>
+                            <Select
+                              value={formData.open_in}
+                              onValueChange={(value) =>
+                                setFormData({ ...formData, open_in: value })
+                              }
+                            >
+                              <SelectTrigger id="open_in_new">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="same_window">Same Window</SelectItem>
+                                <SelectItem value="new_window">New Window</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="page_priority_new">Page Priority</Label>
+                            <Input
+                              id="page_priority_new"
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="1"
+                              value={formData.page_priority}
+                              onChange={(e) =>
+                                setFormData({ ...formData, page_priority: parseFloat(e.target.value) })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="robots_indexing_new">Robots / Page Indexing</Label>
+                            <Select
+                              value={formData.robots_indexing}
+                              onValueChange={(value) =>
+                                setFormData({ ...formData, robots_indexing: value })
+                              }
+                            >
+                              <SelectTrigger id="robots_indexing_new">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="index, follow">index, follow</SelectItem>
+                                <SelectItem value="noindex, follow">noindex, follow</SelectItem>
+                                <SelectItem value="index, nofollow">index, nofollow</SelectItem>
+                                <SelectItem value="noindex, nofollow">noindex, nofollow</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="meta-tags">
+                      <AccordionTrigger>Meta Tags</AccordionTrigger>
+                      <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                          <Label htmlFor="meta_title_new">Meta Title</Label>
+                          <Input
+                            id="meta_title_new"
+                            value={formData.meta_title}
+                            onChange={(e) =>
+                              setFormData({ ...formData, meta_title: e.target.value })
+                            }
+                            placeholder="Page title"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="meta_keywords_new">Meta Keywords</Label>
+                          <Textarea
+                            id="meta_keywords_new"
+                            value={formData.meta_keywords}
+                            onChange={(e) =>
+                              setFormData({ ...formData, meta_keywords: e.target.value })
+                            }
+                            rows={3}
+                            placeholder="keyword1, keyword2, keyword3"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="meta_description_new">Meta Description</Label>
+                          <Textarea
+                            id="meta_description_new"
+                            value={formData.meta_description}
+                            onChange={(e) =>
+                              setFormData({ ...formData, meta_description: e.target.value })
+                            }
+                            rows={3}
+                            placeholder="SEO description..."
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="page-defaults">
+                      <AccordionTrigger>Page Defaults</AccordionTrigger>
+                      <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                          <Label>Default Page Photo</Label>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Must be .jpg format. Optimal resolution 525px X 350px. Larger images will be scaled / optimized.
+                          </p>
+                          {formData.default_image && (
+                            <div className="mb-2">
+                              <img 
+                                src={formData.default_image} 
+                                alt="Default page" 
+                                className="w-32 h-32 object-cover rounded"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setFormData({ ...formData, default_image: "" })}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Remove
+                              </Button>
+                            </div>
+                          )}
+                          <ImageUpload
+                            onImageUploaded={(url) =>
+                              setFormData({ ...formData, default_image: url })
+                            }
+                            folder="page-defaults"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="page_overview_new">Page Overview</Label>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            1-3 sentence summary of the page contents & purpose.
+                          </p>
+                          <Textarea
+                            id="page_overview_new"
+                            value={formData.page_overview}
+                            onChange={(e) =>
+                              setFormData({ ...formData, page_overview: e.target.value })
+                            }
+                            rows={3}
+                            placeholder="Brief overview of this page..."
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="featured_image_new">Featured Image URL</Label>
+                          <Input
+                            id="featured_image_new"
+                            value={formData.featured_image}
+                            onChange={(e) =>
+                              setFormData({ ...formData, featured_image: e.target.value })
+                            }
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
                   <div className="flex gap-6">
                     <div className="flex items-center space-x-2">
                       <Switch
-                        id="published"
+                        id="published_new"
                         checked={formData.published}
                         onCheckedChange={(checked) =>
                           setFormData({ ...formData, published: checked })
                         }
                       />
-                      <Label htmlFor="published">Published</Label>
+                      <Label htmlFor="published_new">Published</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
-                        id="is_template"
+                        id="is_template_new"
                         checked={formData.is_template}
                         onCheckedChange={(checked) =>
                           setFormData({ ...formData, is_template: checked })
                         }
                       />
-                      <Label htmlFor="is_template">Template</Label>
+                      <Label htmlFor="is_template_new">Template</Label>
                     </div>
                   </div>
                   
