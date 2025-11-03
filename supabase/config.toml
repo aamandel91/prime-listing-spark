@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.generate-ad-customizers]
 verify_jwt = false
+
+[functions.ai-content-assist]
+verify_jwt = true

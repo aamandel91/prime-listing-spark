@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 export default function ContentPages() {
   const [pages, setPages] = useState<any[]>([]);
@@ -219,13 +220,10 @@ export default function ContentPages() {
                       </div>
                       <div>
                         <Label htmlFor="content">Content *</Label>
-                        <Textarea
-                          id="content"
-                          value={formData.content}
-                          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                          rows={12}
-                          required
-                          placeholder="Page content (supports HTML)..."
+                        <RichTextEditor
+                          content={formData.content}
+                          onChange={(content) => setFormData({ ...formData, content })}
+                          placeholder="Start writing your content..."
                         />
                       </div>
                       <div>
@@ -307,13 +305,10 @@ export default function ContentPages() {
                   </div>
                   <div>
                     <Label htmlFor="content">Content *</Label>
-                    <Textarea
-                      id="content"
-                      value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                      rows={12}
-                      required
-                      placeholder="Page content (supports HTML)..."
+                    <RichTextEditor
+                      content={formData.content}
+                      onChange={(content) => setFormData({ ...formData, content })}
+                      placeholder="Start writing your content..."
                     />
                   </div>
                   <div>
