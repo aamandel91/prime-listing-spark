@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { Helmet } from 'react-helmet-async';
 import { ScrollToTop } from "./components/ScrollToTop";
 import { useAgentSubdomain } from "./hooks/useAgentSubdomain";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -161,18 +161,16 @@ const RecoveryRouter = () => {
 
 const App = () => {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <TrackingCodesLoader />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <RecoveryRouter />
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <TrackingCodesLoader />
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <RecoveryRouter />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
