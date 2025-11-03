@@ -5,6 +5,7 @@ import { Menu, X, Home, MapPin, Map, Building2, DollarSign } from "lucide-react"
 import SearchDropdown from "./SearchDropdown";
 import CountiesDropdown from "./CountiesDropdown";
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
+import { AdminMenu } from "./AdminMenu";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Navbar = () => {
@@ -66,6 +67,7 @@ const Navbar = () => {
 
           {/* Right Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
+            <AdminMenu />
             {rightLinks.map((link) => (
               <Link key={link.to} to={link.to}>
                 <Button variant="ghost" className="text-foreground hover:text-primary">

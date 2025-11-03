@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { makeFirstUserAdmin } from "@/utils/makeFirstUserAdmin";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -116,7 +117,7 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -126,11 +127,24 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Account created!",
-        description: "You've successfully signed up",
-        duration: 3000,
-      });
+      // Automatically make first user an admin
+      if (data.user) {
+        const wasGrantedAdmin = await makeFirstUserAdmin(data.user.id);
+        
+        toast({
+          title: "Account created!",
+          description: wasGrantedAdmin 
+            ? "You've been granted admin access as the first user!" 
+            : "You've successfully signed up",
+          duration: 4000,
+        });
+      } else {
+        toast({
+          title: "Account created!",
+          description: "You've successfully signed up",
+          duration: 3000,
+        });
+      }
       
       navigate("/");
     } catch (error: any) {
