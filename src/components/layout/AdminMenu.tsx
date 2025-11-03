@@ -23,6 +23,9 @@ import {
   Shield,
   Globe,
   ChevronDown,
+  Sparkles,
+  Link2,
+  PenTool,
 } from "lucide-react";
 
 export const AdminMenu = () => {
@@ -115,6 +118,27 @@ export const AdminMenu = () => {
         <DropdownMenuItem onClick={() => navigate('/admin/property-type-pages')}>
           <Home className="mr-2 h-4 w-4" />
           Property Type Pages
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/admin/neighborhood-pages')}>
+          <MapPin className="mr-2 h-4 w-4" />
+          Neighborhood Pages
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+          AI Content Generation
+        </DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => navigate('/admin/content-strategy')}>
+          <Sparkles className="mr-2 h-4 w-4" />
+          Content Strategy
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/admin/blog-content-generator')}>
+          <PenTool className="mr-2 h-4 w-4" />
+          Blog Generator
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/admin/internal-linking')}>
+          <Link2 className="mr-2 h-4 w-4" />
+          Internal Linking
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

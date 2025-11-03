@@ -29,6 +29,9 @@ import SidebarManagement from "./pages/admin/SidebarManagement";
 import NavigationManagement from "./pages/admin/NavigationManagement";
 import ContentStrategyGenerator from "./pages/admin/ContentStrategyGenerator";
 import PropertyTypePages from "./pages/admin/PropertyTypePages";
+import NeighborhoodPages from "./pages/admin/NeighborhoodPages";
+import BlogContentGenerator from "./pages/admin/BlogContentGenerator";
+import InternalLinkingManager from "./pages/admin/InternalLinkingManager";
 import ListingEnhancements from "./pages/admin/ListingEnhancements";
 import Analytics from "./pages/admin/Analytics";
 import RoleManagement from "./pages/admin/RoleManagement";
@@ -98,6 +101,9 @@ const RecoveryRouter = () => {
           <Route path="seo-settings" element={<SEOSettings />} />
           <Route path="featured-cities" element={<FeaturedCities />} />
           <Route path="property-type-pages" element={<PropertyTypePages />} />
+          <Route path="neighborhood-pages" element={<NeighborhoodPages />} />
+          <Route path="blog-content-generator" element={<BlogContentGenerator />} />
+          <Route path="internal-linking" element={<InternalLinkingManager />} />
           <Route path="content-pages" element={<ContentPages />} />
           <Route path="blog-migration" element={<BlogMigration />} />
           <Route path="testimonials" element={<TestimonialsManagement />} />
