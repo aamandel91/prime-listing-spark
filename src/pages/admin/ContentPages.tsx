@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, Save, FileText, Search } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Save, FileText, Search, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +47,7 @@ export default function ContentPages() {
     published: false,
     sort_order: 0,
     modules: [] as any[],
+    is_template: false,
   });
   const { toast } = useToast();
 
@@ -137,6 +138,7 @@ export default function ContentPages() {
       published: page.published,
       sort_order: page.sort_order,
       modules: page.modules || [],
+      is_template: page.is_template || false,
     });
     setIsDialogOpen(true);
   };
@@ -158,6 +160,38 @@ export default function ContentPages() {
     }
   };
 
+  const handleDuplicate = async (page: any) => {
+    try {
+      const duplicateData = {
+        title: `${page.title} (Copy)`,
+        slug: `${page.slug}-copy-${Date.now()}`,
+        content: page.content,
+        meta_description: page.meta_description,
+        featured_image: page.featured_image,
+        page_type: page.page_type,
+        published: false,
+        sort_order: page.sort_order,
+        modules: page.modules || [],
+        is_template: false,
+      };
+
+      const { error } = await supabase.from("content_pages").insert([duplicateData]);
+      if (error) throw error;
+
+      toast({ 
+        title: "Success", 
+        description: "Page duplicated successfully" 
+      });
+      fetchPages();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to duplicate page",
+        variant: "destructive",
+      });
+    }
+  };
+
   const resetForm = () => {
     setEditingPage(null);
     setSlugManuallyEdited(false);
@@ -171,6 +205,7 @@ export default function ContentPages() {
       published: false,
       sort_order: 0,
       modules: [],
+      is_template: false,
     });
   };
 
@@ -289,6 +324,16 @@ export default function ContentPages() {
                           />
                           <Label htmlFor="published">Published</Label>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="is_template"
+                            checked={formData.is_template}
+                            onCheckedChange={(checked) =>
+                              setFormData({ ...formData, is_template: checked })
+                            }
+                          />
+                          <Label htmlFor="is_template">Template</Label>
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button type="submit">
@@ -369,6 +414,16 @@ export default function ContentPages() {
                       />
                       <Label htmlFor="published">Published</Label>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="is_template"
+                        checked={formData.is_template}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, is_template: checked })
+                        }
+                      />
+                      <Label htmlFor="is_template">Template</Label>
+                    </div>
                   </div>
                   
                   <ModuleBuilder
@@ -413,9 +468,22 @@ export default function ContentPages() {
                       ) : (
                         <span className="text-xs bg-muted px-2 py-1 rounded">Draft</span>
                       )}
+                      {page.is_template && (
+                        <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded">
+                          Template
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDuplicate(page)}
+                      title="Duplicate page"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => handleEdit(page)}>
                       <Edit className="h-4 w-4" />
                     </Button>

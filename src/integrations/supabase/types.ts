@@ -230,6 +230,7 @@ export type Database = {
           created_at: string
           featured_image: string | null
           id: string
+          is_template: boolean | null
           meta_description: string | null
           modules: Json | null
           page_type: string | null
@@ -245,6 +246,7 @@ export type Database = {
           created_at?: string
           featured_image?: string | null
           id?: string
+          is_template?: boolean | null
           meta_description?: string | null
           modules?: Json | null
           page_type?: string | null
@@ -260,6 +262,7 @@ export type Database = {
           created_at?: string
           featured_image?: string | null
           id?: string
+          is_template?: boolean | null
           meta_description?: string | null
           modules?: Json | null
           page_type?: string | null
