@@ -56,7 +56,7 @@ export default function PropertyTypePages() {
   const [loading, setLoading] = useState(true);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [selectedPropertyType, setSelectedPropertyType] = useState<string>("");
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
   const [template, setTemplate] = useState({
     title: "",
     description: "",
@@ -73,19 +73,38 @@ export default function PropertyTypePages() {
 
   const fetchCities = async () => {
     try {
-      const { data, error } = await supabase
-        .from("featured_cities")
-        .select("id, city_name, slug, state")
-        .eq("featured", true)
-        .order("city_name");
+      // Fetch cities from Repliers API
+      const { data, error } = await supabase.functions.invoke(
+        "repliers-proxy",
+        {
+          body: {
+            endpoint: "/locations",
+            params: {
+              type: "city",
+              state: "FL",
+            },
+          },
+        }
+      );
 
       if (error) throw error;
-      setCities(data || []);
+
+      // Map API response to City format
+      const cityList = (data?.locations || [])
+        .map((loc: any) => ({
+          id: loc.id || loc.name,
+          city_name: loc.name,
+          slug: loc.name.toLowerCase().replace(/\s+/g, '-'),
+          state: loc.state || "FL",
+        }))
+        .sort((a: any, b: any) => a.city_name.localeCompare(b.city_name));
+
+      setCities(cityList);
     } catch (error) {
       console.error("Error fetching cities:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch cities",
+        description: "Failed to fetch cities from API",
         variant: "destructive",
       });
     } finally {
@@ -109,11 +128,27 @@ export default function PropertyTypePages() {
     );
   };
 
+  const handlePropertyTypeToggle = (typeValue: string) => {
+    setSelectedPropertyTypes(prev =>
+      prev.includes(typeValue)
+        ? prev.filter(val => val !== typeValue)
+        : [...prev, typeValue]
+    );
+  };
+
+  const handleSelectAllPropertyTypes = () => {
+    if (selectedPropertyTypes.length === PROPERTY_TYPES.length) {
+      setSelectedPropertyTypes([]);
+    } else {
+      setSelectedPropertyTypes(PROPERTY_TYPES.map(t => t.value));
+    }
+  };
+
   const generateSeoContent = async () => {
-    if (!selectedPropertyType || selectedCities.length === 0) {
+    if (selectedPropertyTypes.length === 0 || selectedCities.length === 0) {
       toast({
         title: "Error",
-        description: "Please select a property type and at least one city",
+        description: "Please select at least one property type and city",
         variant: "destructive",
       });
       return;
@@ -124,14 +159,14 @@ export default function PropertyTypePages() {
       const selectedCity = cities.find(c => c.id === selectedCities[0]);
       if (!selectedCity) return;
 
-      const propertyTypeInfo = PROPERTY_TYPES.find(pt => pt.value === selectedPropertyType);
+      const propertyTypeInfo = PROPERTY_TYPES.find(pt => pt.value === selectedPropertyTypes[0]);
       
       // Use Firecrawl to scrape competitor data
       const { data, error } = await supabase.functions.invoke('analyze-competitor-seo', {
         body: {
           city: selectedCity.city_name,
           state: selectedCity.state,
-          propertyType: propertyTypeInfo?.label || selectedPropertyType,
+          propertyType: propertyTypeInfo?.label || selectedPropertyTypes[0],
         }
       });
 
@@ -160,10 +195,10 @@ export default function PropertyTypePages() {
   };
 
   const generatePages = async () => {
-    if (!selectedPropertyType || selectedCities.length === 0) {
+    if (selectedPropertyTypes.length === 0 || selectedCities.length === 0) {
       toast({
         title: "Error",
-        description: "Please select a property type and at least one city",
+        description: "Please select at least one property type and city",
         variant: "destructive",
       });
       return;
@@ -180,44 +215,59 @@ export default function PropertyTypePages() {
 
     setGenerating(true);
     try {
-      const propertyTypeInfo = PROPERTY_TYPES.find(pt => pt.value === selectedPropertyType);
+      let totalPages = 0;
       
-      for (const cityId of selectedCities) {
-        const city = cities.find(c => c.id === cityId);
-        if (!city) continue;
+      for (const propertyType of selectedPropertyTypes) {
+        const propertyTypeInfo = PROPERTY_TYPES.find(pt => pt.value === propertyType);
+        
+        for (const cityId of selectedCities) {
+          const city = cities.find(c => c.id === cityId);
+          if (!city) continue;
 
-        const pageData = {
-          city_slug: city.slug,
-          property_type: selectedPropertyType,
-          title: template.title.replace(/{city}/g, city.city_name).replace(/{state}/g, city.state),
-          description: template.description.replace(/{city}/g, city.city_name).replace(/{state}/g, city.state),
-          content: template.content.replace(/{city}/g, city.city_name).replace(/{state}/g, city.state),
-          url_path: `/${city.slug}/${selectedPropertyType}`,
-        };
+          const pageData = {
+            city_slug: city.slug,
+            property_type: propertyType,
+            title: template.title
+              .replace(/{city}/g, city.city_name)
+              .replace(/{state}/g, city.state)
+              .replace(/{propertyType}/g, propertyTypeInfo?.label || propertyType),
+            description: template.description
+              .replace(/{city}/g, city.city_name)
+              .replace(/{state}/g, city.state)
+              .replace(/{propertyType}/g, propertyTypeInfo?.label || propertyType),
+            content: template.content
+              .replace(/{city}/g, city.city_name)
+              .replace(/{state}/g, city.state)
+              .replace(/{propertyType}/g, propertyTypeInfo?.label || propertyType),
+            url_path: `/${city.slug}/${propertyType}`,
+          };
 
-        // Store in pages table
-        const { error } = await supabase
-          .from("pages")
-          .upsert({
-            page_key: `city_property_type_${city.slug}_${selectedPropertyType}`,
-            title: pageData.title,
-            content: {
-              ...pageData,
-              property_type_filter: propertyTypeInfo?.searchType,
-            }
-          }, {
-            onConflict: 'page_key'
-          });
+          // Store in pages table
+          const { error } = await supabase
+            .from("pages")
+            .upsert({
+              page_key: `city_property_type_${city.slug}_${propertyType}`,
+              title: pageData.title,
+              content: {
+                ...pageData,
+                property_type_filter: propertyTypeInfo?.searchType,
+              }
+            }, {
+              onConflict: 'page_key'
+            });
 
-        if (error) throw error;
+          if (error) throw error;
+          totalPages++;
+        }
       }
 
       toast({
         title: "Success",
-        description: `Created ${selectedCities.length} property type pages`,
+        description: `Created ${totalPages} property type pages`,
       });
 
       setSelectedCities([]);
+      setSelectedPropertyTypes([]);
       setTemplate({ title: "", description: "", content: "" });
     } catch (error) {
       console.error("Error generating pages:", error);
@@ -254,24 +304,33 @@ export default function PropertyTypePages() {
           {/* Property Type Selection */}
           <Card>
             <CardHeader>
-              <CardTitle>Select Property Type</CardTitle>
-              <CardDescription>
-                Choose which property type pages to create
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Select Property Types</CardTitle>
+                  <CardDescription>
+                    Choose which property type pages to create (multiple allowed)
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={handleSelectAllPropertyTypes}>
+                  {selectedPropertyTypes.length === PROPERTY_TYPES.length ? "Deselect All" : "Select All"}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a property type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROPERTY_TYPES.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {PROPERTY_TYPES.map(type => (
+                  <div key={type.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={type.value}
+                      checked={selectedPropertyTypes.includes(type.value)}
+                      onCheckedChange={() => handlePropertyTypeToggle(type.value)}
+                    />
+                    <Label htmlFor={type.value} className="cursor-pointer">
                       {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
@@ -321,7 +380,7 @@ export default function PropertyTypePages() {
                 <Button
                   variant="outline"
                   onClick={generateSeoContent}
-                  disabled={generatingSeo || !selectedPropertyType || selectedCities.length === 0}
+                  disabled={generatingSeo || selectedPropertyTypes.length === 0 || selectedCities.length === 0}
                 >
                   {generatingSeo ? (
                     <>
@@ -344,7 +403,7 @@ export default function PropertyTypePages() {
                   id="title"
                   value={template.title}
                   onChange={(e) => setTemplate(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. {city} {state} Single Family Homes for Sale"
+                  placeholder="e.g. {city} {state} {propertyType} for Sale"
                 />
               </div>
               <div>
@@ -375,7 +434,7 @@ export default function PropertyTypePages() {
             <CardContent className="pt-6">
               <Button
                 onClick={generatePages}
-                disabled={generating || !selectedPropertyType || selectedCities.length === 0}
+                disabled={generating || selectedPropertyTypes.length === 0 || selectedCities.length === 0}
                 className="w-full"
                 size="lg"
               >
@@ -387,12 +446,12 @@ export default function PropertyTypePages() {
                 ) : (
                   <>
                     <Plus className="mr-2 h-4 w-4" />
-                    Generate {selectedCities.length} Page{selectedCities.length !== 1 ? 's' : ''}
+                    Generate {selectedPropertyTypes.length * selectedCities.length} Page{selectedPropertyTypes.length * selectedCities.length !== 1 ? 's' : ''}
                   </>
                 )}
               </Button>
               <p className="text-sm text-muted-foreground text-center mt-4">
-                Pages will be created at: /{"{city-slug}"}/{selectedPropertyType || "{type}"}
+                Pages will be created at: /{"{city-slug}"}/{"{property-type}"}
               </p>
             </CardContent>
           </Card>
