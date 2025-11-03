@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Edit, Trash2, Save, X } from "lucide-react";
@@ -43,6 +44,8 @@ export default function FeaturedCities() {
   const [counties, setCounties] = useState<FeaturedCounty[]>([]);
   const [apiCities, setApiCities] = useState<Array<{name: string, state: string}>>([]);
   const [apiCounties, setApiCounties] = useState<Array<{name: string, state: string}>>([]);
+  const [selectedApiCities, setSelectedApiCities] = useState<string[]>([]);
+  const [selectedApiCounties, setSelectedApiCounties] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingApi, setLoadingApi] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -174,62 +177,112 @@ export default function FeaturedCities() {
 
   const handleSave = async () => {
     try {
-      if (locationType === "city") {
-        const dataToSave = {
-          city_name: formData.name,
-          state: formData.state,
-          slug: formData.slug,
-          featured: formData.featured,
-          description: formData.description,
-          hero_image_url: formData.hero_image_url,
-          sort_order: formData.sort_order,
-        };
+      // Check if we're doing bulk add
+      const isBulkAdd = !editingId && (
+        (locationType === "city" && selectedApiCities.length > 0) ||
+        (locationType === "county" && selectedApiCounties.length > 0)
+      );
 
-        if (editingId) {
-          const { error } = await supabase
-            .from("featured_cities")
-            .update(dataToSave)
-            .eq("id", editingId);
+      if (isBulkAdd) {
+        // Bulk add selected cities or counties
+        if (locationType === "city") {
+          const citiesToAdd = selectedApiCities.map(name => ({
+            city_name: name,
+            state: "FL",
+            slug: name.toLowerCase().replace(/\s+/g, '-'),
+            featured: true,
+            description: "",
+            hero_image_url: "",
+            sort_order: 0,
+          }));
 
+          const { error } = await supabase.from("featured_cities").insert(citiesToAdd);
           if (error) throw error;
-          toast({ title: "Success", description: "City updated successfully" });
+          
+          toast({ 
+            title: "Success", 
+            description: `Added ${citiesToAdd.length} cities` 
+          });
+          setSelectedApiCities([]);
         } else {
-          const { error } = await supabase
-            .from("featured_cities")
-            .insert([dataToSave]);
+          const countiesToAdd = selectedApiCounties.map(name => ({
+            county_name: name,
+            state: "FL",
+            slug: name.toLowerCase().replace(/\s+/g, '-'),
+            featured: true,
+            description: "",
+            hero_image_url: "",
+            sort_order: 0,
+          }));
 
+          const { error } = await supabase.from("featured_counties").insert(countiesToAdd);
           if (error) throw error;
-          toast({ title: "Success", description: "City added successfully" });
+          
+          toast({ 
+            title: "Success", 
+            description: `Added ${countiesToAdd.length} counties` 
+          });
+          setSelectedApiCounties([]);
         }
-        fetchCities();
       } else {
-        const dataToSave = {
-          county_name: formData.name,
-          state: formData.state,
-          slug: formData.slug,
-          featured: formData.featured,
-          description: formData.description,
-          hero_image_url: formData.hero_image_url,
-          sort_order: formData.sort_order,
-        };
+        // Single add/edit
+        if (locationType === "city") {
+          const dataToSave = {
+            city_name: formData.name,
+            state: formData.state,
+            slug: formData.slug,
+            featured: formData.featured,
+            description: formData.description,
+            hero_image_url: formData.hero_image_url,
+            sort_order: formData.sort_order,
+          };
 
-        if (editingId) {
-          const { error } = await supabase
-            .from("featured_counties")
-            .update(dataToSave)
-            .eq("id", editingId);
+          if (editingId) {
+            const { error } = await supabase
+              .from("featured_cities")
+              .update(dataToSave)
+              .eq("id", editingId);
 
-          if (error) throw error;
-          toast({ title: "Success", description: "County updated successfully" });
+            if (error) throw error;
+            toast({ title: "Success", description: "City updated successfully" });
+          } else {
+            const { error } = await supabase
+              .from("featured_cities")
+              .insert([dataToSave]);
+
+            if (error) throw error;
+            toast({ title: "Success", description: "City added successfully" });
+          }
+          fetchCities();
         } else {
-          const { error } = await supabase
-            .from("featured_counties")
-            .insert([dataToSave]);
+          const dataToSave = {
+            county_name: formData.name,
+            state: formData.state,
+            slug: formData.slug,
+            featured: formData.featured,
+            description: formData.description,
+            hero_image_url: formData.hero_image_url,
+            sort_order: formData.sort_order,
+          };
 
-          if (error) throw error;
-          toast({ title: "Success", description: "County added successfully" });
+          if (editingId) {
+            const { error } = await supabase
+              .from("featured_counties")
+              .update(dataToSave)
+              .eq("id", editingId);
+
+            if (error) throw error;
+            toast({ title: "Success", description: "County updated successfully" });
+          } else {
+            const { error } = await supabase
+              .from("featured_counties")
+              .insert([dataToSave]);
+
+            if (error) throw error;
+            toast({ title: "Success", description: "County added successfully" });
+          }
+          fetchCounties();
         }
-        fetchCounties();
       }
 
       setEditingId(null);
@@ -243,6 +296,12 @@ export default function FeaturedCities() {
         hero_image_url: "",
         sort_order: 0,
       });
+      
+      if (locationType === "city") {
+        fetchCities();
+      } else {
+        fetchCounties();
+      }
     } catch (error) {
       console.error(`Error saving ${locationType}:`, error);
       toast({
@@ -329,6 +388,40 @@ export default function FeaturedCities() {
   const startAddNew = (type: "city" | "county") => {
     setLocationType(type);
     setIsAddingNew(true);
+    setSelectedApiCities([]);
+    setSelectedApiCounties([]);
+  };
+
+  const handleToggleApiCity = (cityName: string) => {
+    setSelectedApiCities(prev =>
+      prev.includes(cityName)
+        ? prev.filter(name => name !== cityName)
+        : [...prev, cityName]
+    );
+  };
+
+  const handleToggleApiCounty = (countyName: string) => {
+    setSelectedApiCounties(prev =>
+      prev.includes(countyName)
+        ? prev.filter(name => name !== countyName)
+        : [...prev, countyName]
+    );
+  };
+
+  const handleSelectAllApiCities = () => {
+    if (selectedApiCities.length === apiCities.length) {
+      setSelectedApiCities([]);
+    } else {
+      setSelectedApiCities(apiCities.map(c => c.name));
+    }
+  };
+
+  const handleSelectAllApiCounties = () => {
+    if (selectedApiCounties.length === apiCounties.length) {
+      setSelectedApiCounties([]);
+    } else {
+      setSelectedApiCounties(apiCounties.map(c => c.name));
+    }
   };
 
   if (loading) {
@@ -366,113 +459,44 @@ export default function FeaturedCities() {
             {isAddingNew && locationType === "city" && (
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Add New City</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Add Cities</CardTitle>
+                    <Button variant="outline" size="sm" onClick={handleSelectAllApiCities}>
+                      {selectedApiCities.length === apiCities.length ? "Deselect All" : "Select All"}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city_name">City Name</Label>
-                      <Select
-                        value={formData.name}
-                        onValueChange={(value) => {
-                          const slug = value.toLowerCase().replace(/\s+/g, '-');
-                          setFormData({ ...formData, name: value, slug });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a city..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {loadingApi ? (
-                            <SelectItem value="_loading" disabled>
-                              Loading cities...
-                            </SelectItem>
-                          ) : (
-                            apiCities.map((city) => (
-                              <SelectItem key={city.name} value={city.name}>
-                                {city.name}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                  {loadingApi ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
                     </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) =>
-                      setFormData({ ...formData, state: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="slug">Slug</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sort_order">Sort Order</Label>
-                  <Input
-                    id="sort_order"
-                    type="number"
-                    value={formData.sort_order}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sort_order: parseInt(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="hero_image_url">Hero Image URL</Label>
-                <Input
-                  id="hero_image_url"
-                  value={formData.hero_image_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hero_image_url: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={4}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="featured"
-                  checked={formData.featured}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, featured: checked })
-                  }
-                />
-                <Label htmlFor="featured">Featured</Label>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSave}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save
-                </Button>
-                <Button variant="outline" onClick={cancelEdit}>
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </Button>
-              </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                      {apiCities.map((city) => (
+                        <div key={city.name} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`city-${city.name}`}
+                            checked={selectedApiCities.includes(city.name)}
+                            onCheckedChange={() => handleToggleApiCity(city.name)}
+                          />
+                          <Label htmlFor={`city-${city.name}`} className="cursor-pointer">
+                            {city.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2 pt-4">
+                    <Button onClick={handleSave} disabled={selectedApiCities.length === 0}>
+                      <Save className="mr-2 h-4 w-4" />
+                      Add {selectedApiCities.length} {selectedApiCities.length === 1 ? 'City' : 'Cities'}
+                    </Button>
+                    <Button variant="outline" onClick={cancelEdit}>
+                      <X className="mr-2 h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -650,107 +674,38 @@ export default function FeaturedCities() {
             {isAddingNew && locationType === "county" && (
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Add New County</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Add Counties</CardTitle>
+                    <Button variant="outline" size="sm" onClick={handleSelectAllApiCounties}>
+                      {selectedApiCounties.length === apiCounties.length ? "Deselect All" : "Select All"}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="county_name">County Name</Label>
-                      <Select
-                        value={formData.name}
-                        onValueChange={(value) => {
-                          const slug = value.toLowerCase().replace(/\s+/g, '-');
-                          setFormData({ ...formData, name: value, slug });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a county..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {loadingApi ? (
-                            <SelectItem value="_loading" disabled>
-                              Loading counties...
-                            </SelectItem>
-                          ) : (
-                            apiCounties.map((county) => (
-                              <SelectItem key={county.name} value={county.name}>
-                                {county.name}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                  {loadingApi ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
                     </div>
-                    <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        value={formData.state}
-                        onChange={(e) =>
-                          setFormData({ ...formData, state: e.target.value })
-                        }
-                      />
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                      {apiCounties.map((county) => (
+                        <div key={county.name} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`county-${county.name}`}
+                            checked={selectedApiCounties.includes(county.name)}
+                            onCheckedChange={() => handleToggleApiCounty(county.name)}
+                          />
+                          <Label htmlFor={`county-${county.name}`} className="cursor-pointer">
+                            {county.name}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <Label htmlFor="slug">Slug</Label>
-                      <Input
-                        id="slug"
-                        value={formData.slug}
-                        onChange={(e) =>
-                          setFormData({ ...formData, slug: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sort_order">Sort Order</Label>
-                      <Input
-                        id="sort_order"
-                        type="number"
-                        value={formData.sort_order}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            sort_order: parseInt(e.target.value) || 0,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="hero_image_url">Hero Image URL</Label>
-                    <Input
-                      id="hero_image_url"
-                      value={formData.hero_image_url}
-                      onChange={(e) =>
-                        setFormData({ ...formData, hero_image_url: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                      rows={4}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured"
-                      checked={formData.featured}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, featured: checked })
-                      }
-                    />
-                    <Label htmlFor="featured">Featured</Label>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleSave}>
+                  )}
+                  <div className="flex gap-2 pt-4">
+                    <Button onClick={handleSave} disabled={selectedApiCounties.length === 0}>
                       <Save className="mr-2 h-4 w-4" />
-                      Save
+                      Add {selectedApiCounties.length} {selectedApiCounties.length === 1 ? 'County' : 'Counties'}
                     </Button>
                     <Button variant="outline" onClick={cancelEdit}>
                       <X className="mr-2 h-4 w-4" />
