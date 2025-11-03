@@ -73,12 +73,12 @@ const Index = () => {
       
       <main className="flex-1">
         <Hero />
+        <CTASection />
+        <ExploreListings />
+        <PropertyTypes />
         <Stats />
         <FeaturedProperties />
-        <CTASection />
-        <PropertyTypes />
         <PopularSearches />
-        <ExploreListings />
         <RecentBlogs />
         <FloridaResourceSection />
       </main>

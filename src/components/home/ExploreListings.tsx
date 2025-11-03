@@ -4,29 +4,14 @@ import { Button } from "@/components/ui/button";
 const ExploreListings = () => {
   const metros = [
     {
-      name: "Broward/Palm Beach Metro",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Fort%20Lauderdale"
-    },
-    {
-      name: "Florida Keys Metro",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Florida%20Keys"
-    },
-    {
-      name: "Jacksonville Metro",
-      image: "https://images.unsplash.com/photo-1566908829550-e6551b00979b?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Jacksonville"
-    },
-    {
       name: "Miami Metro",
       image: "https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=800&q=80",
       searchParams: "?city=Miami"
     },
     {
-      name: "Orlando Metro",
-      image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Orlando"
+      name: "Broward/Palm Beach Metro",
+      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Fort%20Lauderdale"
     },
     {
       name: "Port St Lucie Metro",
@@ -34,14 +19,9 @@ const ExploreListings = () => {
       searchParams: "?city=Port%20St%20Lucie"
     },
     {
-      name: "Sarasota Metro",
-      image: "https://images.unsplash.com/photo-1502472584811-0a2f2feb8968?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Sarasota"
-    },
-    {
-      name: "SW Florida Metro",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=800&q=80",
-      searchParams: "?city=Fort%20Myers"
+      name: "Orlando Metro",
+      image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=800&q=80",
+      searchParams: "?city=Orlando"
     },
     {
       name: "Tampa/St Pete Metro",

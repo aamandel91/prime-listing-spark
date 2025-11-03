@@ -25,8 +25,8 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20">
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto mb-8">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-black/30 backdrop-blur-sm border-0 h-auto p-1 gap-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-5xl mx-auto mb-8">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-black/30 backdrop-blur-sm border-0 h-auto p-1 gap-1">
             <TabsTrigger 
               value="buying" 
               className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4"
@@ -50,6 +50,12 @@ const Hero = () => {
               className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4"
             >
               Get Pre-Approved
+            </TabsTrigger>
+            <TabsTrigger 
+              value="instantoffer" 
+              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-white py-3 px-4"
+            >
+              Instant Offer
             </TabsTrigger>
           </TabsList>
 
@@ -116,6 +122,18 @@ const Hero = () => {
             </p>
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground h-14 px-12 text-lg">
               Start Application
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="instantoffer" className="mt-8 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+              Get an Instant Cash Offer
+            </h1>
+            <p className="text-xl text-white/90 mb-8">
+              Your terms and schedule, without the hassle
+            </p>
+            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground h-14 px-12 text-lg">
+              Get Started
             </Button>
           </TabsContent>
 
