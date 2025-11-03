@@ -13,11 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { blogUrl } = await req.json();
+    const { blogUrl, jobId } = await req.json();
     
-    if (!blogUrl) {
+    if (!blogUrl || !jobId) {
       return new Response(
-        JSON.stringify({ error: 'Blog URL is required' }),
+        JSON.stringify({ error: 'Blog URL and Job ID are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -29,120 +29,169 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const app = new FirecrawlApp({ apiKey: firecrawlKey });
 
-    console.log('Starting blog migration from:', blogUrl);
-
-    // Crawl the blog to get all post URLs
-    const crawlResult = await app.crawlUrl(blogUrl, {
-      limit: 200,
-      scrapeOptions: {
-        formats: ['markdown', 'html'],
-      }
-    });
-
-    if (!crawlResult.success) {
-      throw new Error('Failed to crawl blog');
-    }
-
-    console.log(`Found ${crawlResult.data?.length || 0} pages`);
-
-    const importedBlogs = [];
-    const errors = [];
-
-    // Process each blog post
-    for (const page of crawlResult.data || []) {
+    // Background task for processing
+    const processBlogs = async () => {
       try {
-        const url = page.metadata?.url || '';
-        
-        // Skip non-blog-post pages (listing page, categories, etc.)
-        if (!url.includes('/blog/') || url.endsWith('/blog') || url.includes('/category/')) {
-          continue;
+        console.log('Starting blog migration from:', blogUrl);
+
+        // Update job status to running
+        await supabase
+          .from('blog_migration_jobs')
+          .update({ status: 'running' })
+          .eq('id', jobId);
+
+        // Crawl the blog to get all post URLs
+        const crawlResult = await app.crawlUrl(blogUrl, {
+          limit: 200,
+          scrapeOptions: {
+            formats: ['markdown', 'html'],
+          }
+        });
+
+        if (!crawlResult.success) {
+          throw new Error('Failed to crawl blog');
         }
 
-        console.log('Processing:', url);
+        const totalPages = crawlResult.data?.length || 0;
+        console.log(`Found ${totalPages} pages`);
 
-        // Extract blog data from the page
-        const title = page.metadata?.title || '';
-        const description = page.metadata?.description || '';
-        const markdown = page.markdown || '';
-        const html = page.html || '';
-        
-        // Extract image from metadata or HTML
-        let featuredImage = page.metadata?.ogImage || page.metadata?.image || '';
-        if (!featuredImage && html) {
-          const imgMatch = html.match(/<img[^>]+src="([^">]+)"/);
-          if (imgMatch) featuredImage = imgMatch[1];
+        await supabase
+          .from('blog_migration_jobs')
+          .update({ total_pages: totalPages })
+          .eq('id', jobId);
+
+        const importedBlogs = [];
+        const errors = [];
+
+        // Process each blog post
+        for (const page of crawlResult.data || []) {
+          try {
+            const url = page.metadata?.url || '';
+            
+            // Skip non-blog-post pages (listing page, categories, etc.)
+            if (!url.includes('/blog/') || url.endsWith('/blog') || url.includes('/category/')) {
+              continue;
+            }
+
+            console.log('Processing:', url);
+
+            // Extract blog data from the page
+            const title = page.metadata?.title || '';
+            const description = page.metadata?.description || '';
+            const markdown = page.markdown || '';
+            const html = page.html || '';
+            
+            // Extract image from metadata or HTML
+            let featuredImage = page.metadata?.ogImage || page.metadata?.image || '';
+            if (!featuredImage && html) {
+              const imgMatch = html.match(/<img[^>]+src="([^">]+)"/);
+              if (imgMatch) featuredImage = imgMatch[1];
+            }
+
+            // Generate slug from URL
+            const slug = url.split('/blog/')[1]?.replace(/\/$/, '') || '';
+            
+            if (!slug || !title) {
+              console.log('Skipping page - missing slug or title:', url);
+              continue;
+            }
+
+            // Check if blog already exists
+            const { data: existing } = await supabase
+              .from('blogs')
+              .select('id')
+              .eq('slug', slug)
+              .single();
+
+            if (existing) {
+              console.log('Blog already exists:', slug);
+              continue;
+            }
+
+            // Get first user with admin role as author
+            const { data: adminRole } = await supabase
+              .from('user_roles')
+              .select('user_id')
+              .eq('role', 'admin')
+              .limit(1)
+              .single();
+
+            if (!adminRole) {
+              throw new Error('No admin user found');
+            }
+
+            // Insert blog post
+            const { data: blog, error } = await supabase
+              .from('blogs')
+              .insert({
+                title: title,
+                slug: slug,
+                excerpt: description,
+                content: markdown || html,
+                featured_image: featuredImage,
+                author_id: adminRole.user_id,
+                published: true,
+                published_at: new Date().toISOString(),
+              })
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error inserting blog:', error);
+              errors.push({ url, error: error.message });
+            } else {
+              console.log('Imported:', title);
+              importedBlogs.push({ title, slug, url });
+            }
+
+          } catch (error) {
+            console.error('Error processing page:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            errors.push({ url: page.metadata?.url, error: errorMsg });
+          }
         }
 
-        // Generate slug from URL
-        const slug = url.split('/blog/')[1]?.replace(/\/$/, '') || '';
-        
-        if (!slug || !title) {
-          console.log('Skipping page - missing slug or title:', url);
-          continue;
-        }
-
-        // Check if blog already exists
-        const { data: existing } = await supabase
-          .from('blogs')
-          .select('id')
-          .eq('slug', slug)
-          .single();
-
-        if (existing) {
-          console.log('Blog already exists:', slug);
-          continue;
-        }
-
-        // Get first user with admin role as author
-        const { data: adminRole } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'admin')
-          .limit(1)
-          .single();
-
-        if (!adminRole) {
-          throw new Error('No admin user found');
-        }
-
-        // Insert blog post
-        const { data: blog, error } = await supabase
-          .from('blogs')
-          .insert({
-            title: title,
-            slug: slug,
-            excerpt: description,
-            content: markdown || html,
-            featured_image: featuredImage,
-            author_id: adminRole.user_id,
-            published: true,
-            published_at: new Date().toISOString(),
+        // Update job with results
+        await supabase
+          .from('blog_migration_jobs')
+          .update({
+            status: 'completed',
+            imported_count: importedBlogs.length,
+            error_count: errors.length,
+            imported_blogs: importedBlogs,
+            error_details: errors,
+            completed_at: new Date().toISOString(),
           })
-          .select()
-          .single();
+          .eq('id', jobId);
 
-        if (error) {
-          console.error('Error inserting blog:', error);
-          errors.push({ url, error: error.message });
-        } else {
-          console.log('Imported:', title);
-          importedBlogs.push({ title, slug, url });
-        }
+        console.log('Migration completed successfully');
 
       } catch (error) {
-        console.error('Error processing page:', error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        errors.push({ url: page.metadata?.url, error: errorMsg });
+        console.error('Error in background task:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        // Update job with error
+        await supabase
+          .from('blog_migration_jobs')
+          .update({
+            status: 'failed',
+            error_message: errorMessage,
+            completed_at: new Date().toISOString(),
+          })
+          .eq('id', jobId);
       }
-    }
+    };
 
+    // Start background task
+    // @ts-ignore - Deno Deploy provides waitUntil
+    globalThis.waitUntil?.(processBlogs());
+
+    // Return immediate response
     return new Response(
       JSON.stringify({
         success: true,
-        imported: importedBlogs.length,
-        errors: errors.length,
-        blogs: importedBlogs,
-        errorDetails: errors,
+        jobId: jobId,
+        message: 'Migration started in background',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

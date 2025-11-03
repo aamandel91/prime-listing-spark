@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Download, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Download, CheckCircle2, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { z } from 'zod';
 
 const blogUrlSchema = z.string().url({ message: "Please enter a valid URL" }).min(1, { message: "URL is required" });
@@ -17,6 +18,8 @@ export default function BlogMigration() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<any>(null);
 
   const validateUrl = (url: string) => {
     try {
@@ -31,6 +34,43 @@ export default function BlogMigration() {
     }
   };
 
+  // Poll for job status
+  useEffect(() => {
+    if (!currentJobId) return;
+
+    const pollInterval = setInterval(async () => {
+      const { data, error } = await supabase
+        .from('blog_migration_jobs')
+        .select('*')
+        .eq('id', currentJobId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching job status:', error);
+        return;
+      }
+
+      setJobStatus(data);
+
+      if (data.status === 'completed' || data.status === 'failed') {
+        clearInterval(pollInterval);
+        setIsLoading(false);
+        if (data.status === 'completed') {
+          setResult({
+            imported: data.imported_count,
+            errors: data.error_count,
+            blogs: data.imported_blogs,
+            errorDetails: data.error_details,
+          });
+        } else {
+          setError(data.error_message || 'Migration failed');
+        }
+      }
+    }, 2000);
+
+    return () => clearInterval(pollInterval);
+  }, [currentJobId]);
+
   const handleMigration = async () => {
     if (!validateUrl(blogUrl)) {
       return;
@@ -39,22 +79,44 @@ export default function BlogMigration() {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setJobStatus(null);
 
     try {
       console.log('Starting blog migration for:', blogUrl);
       
-      const { data, error: invokeError } = await supabase.functions.invoke('migrate-blogs', {
-        body: { blogUrl: blogUrl.trim() },
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Create job record
+      const { data: job, error: jobError } = await supabase
+        .from('blog_migration_jobs')
+        .insert({
+          user_id: user.id,
+          blog_url: blogUrl.trim(),
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (jobError) throw jobError;
+
+      setCurrentJobId(job.id);
+      
+      // Start migration in background
+      const { error: invokeError } = await supabase.functions.invoke('migrate-blogs', {
+        body: { 
+          blogUrl: blogUrl.trim(),
+          jobId: job.id,
+        },
       });
 
       if (invokeError) throw invokeError;
 
-      console.log('Migration completed:', data);
-      setResult(data);
+      console.log('Migration job started:', job.id);
     } catch (err: any) {
       console.error('Migration error:', err);
-      setError(err.message || 'Failed to migrate blogs');
-    } finally {
+      setError(err.message || 'Failed to start migration');
       setIsLoading(false);
     }
   };
@@ -122,7 +184,7 @@ export default function BlogMigration() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Migrating Blogs...
+                {jobStatus?.status === 'running' ? 'Processing Blogs...' : 'Starting Migration...'}
               </>
             ) : (
               <>
@@ -132,6 +194,38 @@ export default function BlogMigration() {
             )}
           </Button>
         </Card>
+
+        {isLoading && jobStatus && (
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-5 h-5 text-blue-600 animate-pulse" />
+              <h2 className="text-lg font-semibold">Migration in Progress</h2>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Status: {jobStatus.status}</span>
+                  {jobStatus.total_pages > 0 && (
+                    <span>{jobStatus.imported_count} / {jobStatus.total_pages} processed</span>
+                  )}
+                </div>
+                {jobStatus.total_pages > 0 && (
+                  <Progress 
+                    value={(jobStatus.imported_count / jobStatus.total_pages) * 100} 
+                  />
+                )}
+              </div>
+              
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  The migration is running in the background. You can close this page and come back later to check the results.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </Card>
+        )}
 
         {error && (
           <Alert variant="destructive">

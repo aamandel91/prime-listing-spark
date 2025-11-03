@@ -41,6 +41,51 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_migration_jobs: {
+        Row: {
+          blog_url: string
+          completed_at: string | null
+          created_at: string
+          error_count: number | null
+          error_details: Json | null
+          error_message: string | null
+          id: string
+          imported_blogs: Json | null
+          imported_count: number | null
+          status: string
+          total_pages: number | null
+          user_id: string
+        }
+        Insert: {
+          blog_url: string
+          completed_at?: string | null
+          created_at?: string
+          error_count?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          imported_blogs?: Json | null
+          imported_count?: number | null
+          status?: string
+          total_pages?: number | null
+          user_id: string
+        }
+        Update: {
+          blog_url?: string
+          completed_at?: string | null
+          created_at?: string
+          error_count?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          imported_blogs?: Json | null
+          imported_count?: number | null
+          status?: string
+          total_pages?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       blogs: {
         Row: {
           author_id: string
