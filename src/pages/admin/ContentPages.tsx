@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, Save, FileText } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Save, FileText, Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
 
 export default function ContentPages() {
   const [pages, setPages] = useState<any[]>([]);
@@ -168,83 +170,184 @@ export default function ContentPages() {
                 Add Page
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingPage ? "Edit Page" : "Add New Page"}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              
+              {editingPage ? (
+                <Tabs defaultValue="details" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="details">Page Details</TabsTrigger>
+                    <TabsTrigger value="search">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search Criteria
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="details">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="title">Title *</Label>
+                          <Input
+                            id="title"
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="slug">Slug *</Label>
+                          <Input
+                            id="slug"
+                            value={formData.slug}
+                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                            placeholder="about-us"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="meta_description">Meta Description</Label>
+                        <Textarea
+                          id="meta_description"
+                          value={formData.meta_description}
+                          onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                          rows={2}
+                          placeholder="SEO description..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="content">Content *</Label>
+                        <Textarea
+                          id="content"
+                          value={formData.content}
+                          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                          rows={12}
+                          required
+                          placeholder="Page content (supports HTML)..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="featured_image">Featured Image URL</Label>
+                        <Input
+                          id="featured_image"
+                          value={formData.featured_image}
+                          onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div className="flex gap-6">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="published"
+                            checked={formData.published}
+                            onCheckedChange={(checked) =>
+                              setFormData({ ...formData, published: checked })
+                            }
+                          />
+                          <Label htmlFor="published">Published</Label>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button type="submit">
+                          <Save className="mr-2 h-4 w-4" />
+                          Update Page
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </TabsContent>
+                  
+                  <TabsContent value="search">
+                    <SearchCriteriaEditor 
+                      pageId={editingPage.id} 
+                      onSave={() => {
+                        toast({
+                          title: "Success",
+                          description: "Search criteria updated"
+                        });
+                      }}
+                    />
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="slug">Slug *</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        placeholder="about-us"
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    <Label htmlFor="meta_description">Meta Description</Label>
+                    <Textarea
+                      id="meta_description"
+                      value={formData.meta_description}
+                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                      rows={2}
+                      placeholder="SEO description..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="content">Content *</Label>
+                    <Textarea
+                      id="content"
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      rows={12}
                       required
+                      placeholder="Page content (supports HTML)..."
                     />
                   </div>
                   <div>
-                    <Label htmlFor="slug">Slug *</Label>
+                    <Label htmlFor="featured_image">Featured Image URL</Label>
                     <Input
-                      id="slug"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      placeholder="about-us"
+                      id="featured_image"
+                      value={formData.featured_image}
+                      onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                      placeholder="https://..."
                     />
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="meta_description">Meta Description</Label>
-                  <Textarea
-                    id="meta_description"
-                    value={formData.meta_description}
-                    onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                    rows={2}
-                    placeholder="SEO description..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="content">Content *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    rows={12}
-                    required
-                    placeholder="Page content (supports HTML)..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="featured_image">Featured Image URL</Label>
-                  <Input
-                    id="featured_image"
-                    value={formData.featured_image}
-                    onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="flex gap-6">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="published"
-                      checked={formData.published}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, published: checked })
-                      }
-                    />
-                    <Label htmlFor="published">Published</Label>
+                  <div className="flex gap-6">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="published"
+                        checked={formData.published}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, published: checked })
+                        }
+                      />
+                      <Label htmlFor="published">Published</Label>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit">
-                    <Save className="mr-2 h-4 w-4" />
-                    {editingPage ? "Update" : "Create"} Page
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </form>
+                  <div className="flex gap-2">
+                    <Button type="submit">
+                      <Save className="mr-2 h-4 w-4" />
+                      Create Page
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              )}
             </DialogContent>
           </Dialog>
         </div>

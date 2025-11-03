@@ -843,6 +843,140 @@ export type Database = {
         }
         Relationships: []
       }
+      page_search_criteria: {
+        Row: {
+          agent_id: string | null
+          area: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          city: string | null
+          county: string | null
+          created_at: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          max_acres: number | null
+          max_lot_size_sqft: number | null
+          max_price: number | null
+          max_sqft: number | null
+          max_year_built: number | null
+          min_acres: number | null
+          min_bathrooms: number | null
+          min_bedrooms: number | null
+          min_garage_spaces: number | null
+          min_lot_size_sqft: number | null
+          min_parking_spaces: number | null
+          min_price: number | null
+          min_sqft: number | null
+          min_year_built: number | null
+          name: string
+          neighborhood: string | null
+          office_id: string | null
+          page_id: string
+          polygon: Json | null
+          pool: boolean | null
+          property_class: string | null
+          property_type: string[] | null
+          radius: number | null
+          sort_by: string | null
+          state: string | null
+          status: string | null
+          updated_at: string | null
+          waterfront: boolean | null
+          zip: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          area?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          max_acres?: number | null
+          max_lot_size_sqft?: number | null
+          max_price?: number | null
+          max_sqft?: number | null
+          max_year_built?: number | null
+          min_acres?: number | null
+          min_bathrooms?: number | null
+          min_bedrooms?: number | null
+          min_garage_spaces?: number | null
+          min_lot_size_sqft?: number | null
+          min_parking_spaces?: number | null
+          min_price?: number | null
+          min_sqft?: number | null
+          min_year_built?: number | null
+          name: string
+          neighborhood?: string | null
+          office_id?: string | null
+          page_id: string
+          polygon?: Json | null
+          pool?: boolean | null
+          property_class?: string | null
+          property_type?: string[] | null
+          radius?: number | null
+          sort_by?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string | null
+          waterfront?: boolean | null
+          zip?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          area?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          max_acres?: number | null
+          max_lot_size_sqft?: number | null
+          max_price?: number | null
+          max_sqft?: number | null
+          max_year_built?: number | null
+          min_acres?: number | null
+          min_bathrooms?: number | null
+          min_bedrooms?: number | null
+          min_garage_spaces?: number | null
+          min_lot_size_sqft?: number | null
+          min_parking_spaces?: number | null
+          min_price?: number | null
+          min_sqft?: number | null
+          min_year_built?: number | null
+          name?: string
+          neighborhood?: string | null
+          office_id?: string | null
+          page_id?: string
+          polygon?: Json | null
+          pool?: boolean | null
+          property_class?: string | null
+          property_type?: string[] | null
+          radius?: number | null
+          sort_by?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string | null
+          waterfront?: boolean | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_search_criteria_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: true
+            referencedRelation: "content_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pages: {
         Row: {
           content: Json
