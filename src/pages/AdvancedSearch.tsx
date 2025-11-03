@@ -2,7 +2,10 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { EnhancedSearchBar } from "@/components/search/EnhancedSearchBar";
+import { BuildingsSearch } from "@/components/search/BuildingsSearch";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Home, Building2 } from "lucide-react";
 
 const AdvancedSearch = () => {
   return (
@@ -24,16 +27,35 @@ const AdvancedSearch = () => {
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold mb-4">Advanced Property Search</h1>
               <p className="text-lg text-muted-foreground">
-                Find your perfect Florida home with comprehensive search filters
+                Search for individual properties or browse entire buildings and condominiums
               </p>
             </div>
 
-            {/* Enhanced Search Bar with Property Type Selector */}
-            <Card className="mb-8">
-              <div className="p-6">
-                <EnhancedSearchBar variant="full" />
-              </div>
-            </Card>
+            {/* Tabbed Search Interface */}
+            <Tabs defaultValue="properties" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-8">
+                <TabsTrigger value="properties" className="flex items-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Search Properties
+                </TabsTrigger>
+                <TabsTrigger value="buildings" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Search Buildings
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="properties">
+                <Card className="mb-8">
+                  <div className="p-6">
+                    <EnhancedSearchBar variant="full" />
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="buildings">
+                <BuildingsSearch />
+              </TabsContent>
+            </Tabs>
 
             {/* Search Tips */}
             <div className="grid md:grid-cols-3 gap-6 mt-8">

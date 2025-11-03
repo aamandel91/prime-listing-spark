@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "./PropertyCard";
 import { useRepliers } from "@/hooks/useRepliers";
+import { useRepliersSimilar } from "@/hooks/useRepliersSimilar";
 import { RepliersProperty } from "@/types/repliers";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, Home } from "lucide-react";
+import { TrendingUp, Home, Sparkles } from "lucide-react";
 
 interface SimilarPropertiesProps {
   currentProperty: RepliersProperty;
@@ -15,11 +16,27 @@ interface SimilarPropertiesProps {
 
 export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPropertiesProps) => {
   const { searchListings } = useRepliers();
+  
+  // Try to use the Repliers Similar API first
+  const { listings: apiSimilarListings, loading: apiLoading } = useRepliersSimilar(currentProperty.mlsNumber);
+  
   const [similarActive, setSimilarActive] = useState<RepliersProperty[]>([]);
   const [soldComparables, setSoldComparables] = useState<RepliersProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [useApiResults, setUseApiResults] = useState(false);
+
+  // Check if API returned good results
+  useEffect(() => {
+    if (!apiLoading && apiSimilarListings.length > 0) {
+      setUseApiResults(true);
+      setLoading(false);
+    }
+  }, [apiLoading, apiSimilarListings]);
 
   useEffect(() => {
+    // If API didn't return results or is still loading, fall back to manual search
+    if (apiLoading || useApiResults) return;
+
     const fetchSimilarProperties = async () => {
       try {
         setLoading(true);
@@ -29,7 +46,7 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
           city: currentProperty.address.city,
           state: currentProperty.address.state,
           propertyType: currentProperty.details.propertyType,
-          minBeds: currentProperty.details.numBedrooms, // Same or more bedrooms
+          minBeds: currentProperty.details.numBedrooms,
           baths: currentProperty.details.numBathrooms,
           limit: 6,
         };
@@ -53,7 +70,7 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
         );
         setSimilarActive(filteredActive.slice(0, 6));
 
-        // Fetch sold comparables (last 6 months) - removed soldDateMin as not supported
+        // Fetch sold comparables
         const soldResponse = await searchListings({
           ...baseParams,
           status: "Sold",
@@ -70,7 +87,7 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
     };
 
     fetchSimilarProperties();
-  }, [currentProperty]);
+  }, [currentProperty, apiLoading, useApiResults]);
 
   if (loading) {
     return (
@@ -89,12 +106,27 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
     );
   }
 
+  // Use API results if available, otherwise use manual search results
+  const displayListings = useApiResults 
+    ? apiSimilarListings.filter(listing => listing.mlsNumber !== currentProperty.mlsNumber)
+    : similarActive;
+
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Similar Properties & Comparables</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          Similar Properties & Comparables
+          {useApiResults && (
+            <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
+              <Sparkles className="w-3 h-3" />
+              AI-Matched
+            </span>
+          )}
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Explore similar listings and recent sales in the area
+          {useApiResults 
+            ? "AI-powered similar property recommendations" 
+            : "Explore similar listings and recent sales in the area"}
         </p>
       </CardHeader>
       <CardContent>
@@ -102,7 +134,7 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="active" className="flex items-center gap-2">
               <Home className="w-4 h-4" />
-              Active Listings ({similarActive.length})
+              {useApiResults ? "Similar Listings" : "Active Listings"} ({displayListings.length})
             </TabsTrigger>
             <TabsTrigger value="sold" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
@@ -111,14 +143,14 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
-            {similarActive.length === 0 ? (
+            {displayListings.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                No similar active listings found
+                No similar listings found
               </p>
             ) : (
               <ScrollArea className="w-full">
                 <div className="flex gap-4 pb-4">
-                  {similarActive.map((property) => (
+                  {displayListings.map((property) => (
                     <div key={property.mlsNumber} className="flex-none w-[320px]">
                       <PropertyCard 
                         id={property.mlsNumber}
