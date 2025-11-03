@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,14 +12,46 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
-    console.log('Analyzing competitor:', url);
-
-    const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
+    const { analysisId } = await req.json();
     
-    if (!FIRECRAWL_API_KEY) {
-      throw new Error('FIRECRAWL_API_KEY not configured');
+    if (!analysisId) {
+      throw new Error('analysisId is required');
     }
+
+    console.log('Starting analysis for job:', analysisId);
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get the analysis job
+    const { data: job, error: jobError } = await supabase
+      .from('competitor_analyses')
+      .select('*')
+      .eq('id', analysisId)
+      .single();
+
+    if (jobError || !job) {
+      throw new Error('Analysis job not found');
+    }
+
+    const url = job.url;
+
+    // Update status to processing
+    await supabase
+      .from('competitor_analyses')
+      .update({ status: 'processing' })
+      .eq('id', analysisId);
+
+    // Define the background analysis task
+    const runAnalysis = async () => {
+      try {
+        const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
+        
+        if (!FIRECRAWL_API_KEY) {
+          throw new Error('FIRECRAWL_API_KEY not configured');
+        }
 
     // Use Firecrawl to scrape the competitor page
     console.log('Scraping with Firecrawl...');
@@ -109,14 +142,52 @@ serve(async (req) => {
       wordCount: words.length,
     };
 
-    console.log('Analysis complete');
+        console.log('Analysis complete for job:', analysisId);
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        // Save result to database
+        await supabase
+          .from('competitor_analyses')
+          .update({
+            status: 'completed',
+            result,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', analysisId);
+
+      } catch (error) {
+        console.error('Error in background analysis:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        // Update job with error
+        await supabase
+          .from('competitor_analyses')
+          .update({
+            status: 'failed',
+            error_message: errorMessage,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', analysisId);
+      }
+    };
+
+    // Run analysis in background using Promise
+    runAnalysis().catch(err => {
+      console.error('Background analysis failed:', err);
     });
 
+    // Return immediate response
+    return new Response(
+      JSON.stringify({ 
+        message: 'Analysis started',
+        analysisId 
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
+
   } catch (error) {
-    console.error('Error analyzing competitor:', error);
+    console.error('Error starting analysis:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),

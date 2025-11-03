@@ -191,6 +191,39 @@ export type Database = {
         }
         Relationships: []
       }
+      competitor_analyses: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          result: Json | null
+          status: string
+          updated_at: string | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          result?: Json | null
+          status?: string
+          updated_at?: string | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          result?: Json | null
+          status?: string
+          updated_at?: string | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_pages: {
         Row: {
           content: string
