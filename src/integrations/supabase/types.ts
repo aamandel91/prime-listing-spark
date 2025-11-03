@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          active: boolean | null
+          bio: string | null
+          created_at: string
+          email: string
+          featured: boolean | null
+          full_name: string
+          id: string
+          languages: string[] | null
+          license_number: string
+          phone: string | null
+          profile_image_url: string | null
+          social_links: Json | null
+          sort_order: number | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          bio?: string | null
+          created_at?: string
+          email: string
+          featured?: boolean | null
+          full_name: string
+          id?: string
+          languages?: string[] | null
+          license_number: string
+          phone?: string | null
+          profile_image_url?: string | null
+          social_links?: Json | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          featured?: boolean | null
+          full_name?: string
+          id?: string
+          languages?: string[] | null
+          license_number?: string
+          phone?: string | null
+          profile_image_url?: string | null
+          social_links?: Json | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       analytics_summary: {
         Row: {
           created_at: string
@@ -127,6 +187,59 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      content_pages: {
+        Row: {
+          content: string
+          created_at: string
+          featured_image: string | null
+          id: string
+          meta_description: string | null
+          page_type: string | null
+          parent_id: string | null
+          published: boolean | null
+          slug: string
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          page_type?: string | null
+          parent_id?: string | null
+          published?: boolean | null
+          slug: string
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          page_type?: string | null
+          parent_id?: string | null
+          published?: boolean | null
+          slug?: string
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_pages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "content_pages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_notifications: {
         Row: {
@@ -860,6 +973,56 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          agent_id: string | null
+          client_name: string
+          client_role: string | null
+          content: string
+          created_at: string
+          featured: boolean | null
+          id: string
+          property_address: string | null
+          published: boolean | null
+          rating: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          agent_id?: string | null
+          client_name: string
+          client_role?: string | null
+          content: string
+          created_at?: string
+          featured?: boolean | null
+          id?: string
+          property_address?: string | null
+          published?: boolean | null
+          rating?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          agent_id?: string | null
+          client_name?: string
+          client_role?: string | null
+          content?: string
+          created_at?: string
+          featured?: boolean | null
+          id?: string
+          property_address?: string | null
+          published?: boolean | null
+          rating?: number | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonials_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tour_requests: {
         Row: {
           comments: string | null
@@ -926,6 +1089,48 @@ export type Database = {
         }
         Relationships: []
       }
+      videos: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          id: string
+          published: boolean | null
+          sort_order: number | null
+          thumbnail_url: string | null
+          title: string
+          video_type: string | null
+          video_url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          published?: boolean | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title: string
+          video_type?: string | null
+          video_url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          published?: boolean | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          video_type?: string | null
+          video_url?: string
+        }
+        Relationships: []
+      }
       webhook_events: {
         Row: {
           created_at: string | null
@@ -970,7 +1175,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "editor" | "viewer"
+      app_role: "admin" | "editor" | "viewer" | "agent"
       lead_status:
         | "new"
         | "contacted"
@@ -1106,7 +1311,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "editor", "viewer"],
+      app_role: ["admin", "editor", "viewer", "agent"],
       lead_status: [
         "new",
         "contacted",

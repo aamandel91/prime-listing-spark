@@ -28,6 +28,11 @@ import ListingEnhancements from "./pages/admin/ListingEnhancements";
 import Analytics from "./pages/admin/Analytics";
 import RoleManagement from "./pages/admin/RoleManagement";
 import Leads from "./pages/admin/Leads";
+import AgentManagement from "./pages/admin/AgentManagement";
+import TestimonialsManagement from "./pages/admin/TestimonialsManagement";
+import VideosManagement from "./pages/admin/VideosManagement";
+import ContentPages from "./pages/admin/ContentPages";
+import AgentDetail from "./pages/AgentDetail";
 import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
 import CityPropertyType from "./pages/CityPropertyType";
@@ -77,10 +82,14 @@ const RecoveryRouter = () => {
           <Route path="seo-settings" element={<SEOSettings />} />
           <Route path="featured-cities" element={<FeaturedCities />} />
           <Route path="property-type-pages" element={<PropertyTypePages />} />
+          <Route path="content-pages" element={<ContentPages />} />
           <Route path="blog-migration" element={<BlogMigration />} />
+          <Route path="testimonials" element={<TestimonialsManagement />} />
+          <Route path="videos" element={<VideosManagement />} />
           <Route path="location-import" element={<LocationImport />} />
           <Route path="listing-data-extractor" element={<ListingDataExtractor />} />
           <Route path="listing-enhancements" element={<ListingEnhancements />} />
+          <Route path="agents" element={<AgentManagement />} />
           <Route path="leads" element={<Leads />} />
           <Route path="role-management" element={<RoleManagement />} />
           <Route path="analytics" element={<Analytics />} />
@@ -89,6 +98,7 @@ const RecoveryRouter = () => {
         </Route>
         
         {/* Public Routes - More specific routes first */}
+        <Route path="/agents/:agentId" element={<AgentDetail />} />
         <Route path="/cities" element={<Cities />} />
         <Route path="/cities/:citySlug/:propertyType" element={<CityPropertyType />} />
         <Route path="/cities/:citySlug" element={<CityTemplate />} />

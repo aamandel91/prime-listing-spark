@@ -1,368 +1,161 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useRepliers } from "@/hooks/useRepliers";
-import { RepliersProperty } from "@/types/repliers";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ArrowUpDown, User, Building2, Phone, Mail } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Search, Mail, Phone, Loader2, Star } from "lucide-react";
 
-interface AgentAggregate {
-  name: string;
-  phone?: string;
-  email?: string;
-  office?: string;
-  listingCount: number;
-  totalValue: number;
-  avgPrice: number;
-  propertyTypes: Set<string>;
-}
-
-type SortOption = "name-asc" | "name-desc" | "listings-asc" | "listings-desc" | "value-asc" | "value-desc";
-
-const AgentDirectory = () => {
-  const { searchListings } = useRepliers();
-  const [agents, setAgents] = useState<AgentAggregate[]>([]);
+export default function AgentDirectory() {
+  const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("listings-desc");
-  const [selectedAgent, setSelectedAgent] = useState<AgentAggregate | null>(null);
 
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        setLoading(true);
-        // Fetch active listings with agent data
-        const response = await searchListings({
-          status: "Active",
-          limit: 1000,
-        });
-
-        // Aggregate agent data from listings
-        const agentMap = new Map<string, AgentAggregate>();
-
-        response.listings?.forEach((listing: RepliersProperty) => {
-          // Get primary agent from agents array
-          const primaryAgent = listing.agents?.[0];
-          const agentName = primaryAgent?.name || "Unknown Agent";
-          const agentPhone = primaryAgent?.phones?.[0];
-          const agentEmail = primaryAgent?.email;
-          const office = listing.office?.brokerageName;
-          const propertyType = listing.details?.propertyType;
-
-          if (!agentMap.has(agentName)) {
-            agentMap.set(agentName, {
-              name: agentName,
-              phone: agentPhone,
-              email: agentEmail,
-              office: office,
-              listingCount: 0,
-              totalValue: 0,
-              avgPrice: 0,
-              propertyTypes: new Set(),
-            });
-          }
-
-          const agent = agentMap.get(agentName)!;
-          agent.listingCount++;
-          agent.totalValue += listing.listPrice || 0;
-          if (propertyType) {
-            agent.propertyTypes.add(propertyType);
-          }
-        });
-
-        // Calculate averages and convert to array
-        const agentList = Array.from(agentMap.values()).map(agent => ({
-          ...agent,
-          avgPrice: agent.listingCount > 0 ? agent.totalValue / agent.listingCount : 0,
-        }));
-
-        setAgents(agentList);
-        if (agentList.length > 0) {
-          setSelectedAgent(agentList[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching agents:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAgents();
   }, []);
 
-  const filteredAndSortedAgents = useMemo(() => {
-    let filtered = agents.filter(agent =>
-      agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.office?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const fetchAgents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("agents")
+        .select("*")
+        .eq("active", true)
+        .order("featured", { ascending: false })
+        .order("sort_order");
 
-    // Sort agents
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "listings-asc":
-          return a.listingCount - b.listingCount;
-        case "listings-desc":
-          return b.listingCount - a.listingCount;
-        case "value-asc":
-          return a.totalValue - b.totalValue;
-        case "value-desc":
-          return b.totalValue - a.totalValue;
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [agents, searchTerm, sortBy]);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+      if (error) throw error;
+      setAgents(data || []);
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const filteredAgents = agents.filter((agent) =>
+    agent.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.specialties?.some((s: string) => s.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
       <Helmet>
-        <title>Agent Directory - Find Top Real Estate Agents | Florida Real Estate</title>
-        <meta name="description" content="Browse our directory of top-performing real estate agents in Florida. View agent listings, performance metrics, and contact information." />
+        <title>Agent Directory - Find Top Real Estate Agents</title>
+        <meta
+          name="description"
+          content="Browse our directory of professional real estate agents. Find the perfect agent for your home buying or selling needs."
+        />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
 
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-grow container mx-auto px-4 py-12">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 text-foreground">Agent Directory</h1>
-            <p className="text-muted-foreground">
-              Discover top-performing real estate agents and their active listings
+            <h1 className="text-4xl font-bold mb-4">Our Real Estate Agents</h1>
+            <p className="text-muted-foreground text-lg">
+              Meet our team of experienced professionals ready to help you with all your real estate
+              needs.
             </p>
           </div>
 
-          {/* Search and Sort Controls */}
-          <div className="mb-6 flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <div className="mb-8">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
-                placeholder="Search agents by name or office..."
+                type="text"
+                placeholder="Search agents by name or specialty..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-              <SelectTrigger className="w-full md:w-64">
-                <ArrowUpDown className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="listings-desc">Most Listings</SelectItem>
-                <SelectItem value="listings-asc">Fewest Listings</SelectItem>
-                <SelectItem value="value-desc">Highest Portfolio Value</SelectItem>
-                <SelectItem value="value-asc">Lowest Portfolio Value</SelectItem>
-                <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Agent List */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    Agents ({filteredAndSortedAgents.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="max-h-[600px] overflow-y-auto">
-                    {loading ? (
-                      <div className="p-4 space-y-4">
-                        {[...Array(5)].map((_, i) => (
-                          <Skeleton key={i} className="h-20 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAgents.map((agent) => (
+              <Card key={agent.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    {agent.profile_image_url && (
+                      <img
+                        src={agent.profile_image_url}
+                        alt={agent.full_name}
+                        className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
+                      />
+                    )}
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <h3 className="text-xl font-semibold">{agent.full_name}</h3>
+                      {agent.featured && (
+                        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      )}
+                    </div>
+                    {agent.years_experience && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {agent.years_experience} years experience
+                      </p>
+                    )}
+                    {agent.specialties && agent.specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-2 justify-center mb-4">
+                        {agent.specialties.map((specialty: string, i: number) => (
+                          <span
+                            key={i}
+                            className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs"
+                          >
+                            {specialty}
+                          </span>
                         ))}
                       </div>
-                    ) : filteredAndSortedAgents.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No agents found</p>
-                      </div>
-                    ) : (
-                      filteredAndSortedAgents.map((agent) => (
-                        <button
-                          key={agent.name}
-                          onClick={() => setSelectedAgent(agent)}
-                          className={`w-full text-left p-4 border-b hover:bg-secondary/50 transition-colors ${
-                            selectedAgent?.name === agent.name
-                              ? "bg-secondary border-l-4 border-l-accent"
-                              : ""
-                          }`}
-                        >
-                          <div className="font-semibold text-foreground truncate">
-                            {agent.name}
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            {agent.listingCount} {agent.listingCount === 1 ? "listing" : "listings"}
-                          </div>
-                          {agent.office && (
-                            <div className="text-xs text-muted-foreground mt-1 truncate">
-                              {agent.office}
-                            </div>
-                          )}
-                        </button>
-                      ))
                     )}
+                    {agent.bio && <p className="text-sm mb-4 line-clamp-3">{agent.bio}</p>}
+                    <div className="flex flex-col gap-2">
+                      <Button variant="default" className="w-full" asChild>
+                        <Link to={`/agents/${agent.id}`}>View Profile & Listings</Link>
+                      </Button>
+                      <Button variant="outline" className="w-full" asChild>
+                        <a href={`mailto:${agent.email}`}>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Email
+                        </a>
+                      </Button>
+                      {agent.phone && (
+                        <Button variant="outline" className="w-full" asChild>
+                          <a href={`tel:${agent.phone}`}>
+                            <Phone className="mr-2 h-4 w-4" />
+                            Call
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Agent Detail Panel */}
-            <div className="lg:col-span-2">
-              {loading ? (
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-8 w-64" />
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                  </CardContent>
-                </Card>
-              ) : selectedAgent ? (
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-2xl mb-2">{selectedAgent.name}</CardTitle>
-                        {selectedAgent.office && (
-                          <p className="text-muted-foreground flex items-center gap-2">
-                            <Building2 className="w-4 h-4" />
-                            {selectedAgent.office}
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant="secondary" className="text-lg px-4 py-2">
-                        {selectedAgent.listingCount} Listings
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Contact Information */}
-                    {(selectedAgent.phone || selectedAgent.email) && (
-                      <div className="space-y-2">
-                        <h3 className="font-semibold text-foreground">Contact Information</h3>
-                        <div className="space-y-2">
-                          {selectedAgent.phone && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Phone className="w-4 h-4" />
-                              <span>{selectedAgent.phone}</span>
-                            </div>
-                          )}
-                          {selectedAgent.email && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Mail className="w-4 h-4" />
-                              <span>{selectedAgent.email}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Performance Metrics */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="text-sm text-muted-foreground mb-1">Active Listings</div>
-                          <div className="text-2xl font-bold text-foreground">
-                            {selectedAgent.listingCount}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="text-sm text-muted-foreground mb-1">Total Portfolio Value</div>
-                          <div className="text-2xl font-bold text-foreground">
-                            {formatCurrency(selectedAgent.totalValue)}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="text-sm text-muted-foreground mb-1">Avg. Listing Price</div>
-                          <div className="text-2xl font-bold text-foreground">
-                            {formatCurrency(selectedAgent.avgPrice)}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Property Types */}
-                    {selectedAgent.propertyTypes.size > 0 && (
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-3">Property Specializations</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {Array.from(selectedAgent.propertyTypes).map((type) => (
-                            <Badge key={type} variant="outline">
-                              {type}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* CTA Button */}
-                    <div className="pt-4">
-                      <Button 
-                        className="w-full"
-                        onClick={() => {
-                          // Navigate to listings filtered by this agent
-                          window.location.href = `/listings?agent=${encodeURIComponent(selectedAgent.name)}`;
-                        }}
-                      >
-                        View All Listings
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardContent className="p-12 text-center text-muted-foreground">
-                    <User className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p>Select an agent to view details</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            ))}
           </div>
+
+          {filteredAgents.length === 0 && !loading && (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <p>No agents found matching your search.</p>
+              </CardContent>
+            </Card>
+          )}
         </main>
 
         <Footer />
       </div>
     </>
   );
-};
-
-export default AgentDirectory;
+}

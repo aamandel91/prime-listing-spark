@@ -41,12 +41,14 @@ const menuSections = [
     ],
   },
   {
-    label: "Content & Pages",
+    label: "Manage Content",
     items: [
       { title: "Featured Cities", url: "/admin/featured-cities", icon: MapPin },
       { title: "Property Type Pages", url: "/admin/property-type-pages", icon: Home },
+      { title: "Content Pages", url: "/admin/content-pages", icon: FileText },
       { title: "Blog Posts", url: "/admin/blog-migration", icon: BookOpen },
-      { title: "Location Import", url: "/admin/location-import", icon: Upload },
+      { title: "Testimonials", url: "/admin/testimonials", icon: Star },
+      { title: "Videos", url: "/admin/videos", icon: FileText },
     ],
   },
   {
@@ -54,11 +56,13 @@ const menuSections = [
     items: [
       { title: "Extract Data", url: "/admin/listing-data-extractor", icon: Building2 },
       { title: "Enhancements", url: "/admin/listing-enhancements", icon: Star },
+      { title: "Location Import", url: "/admin/location-import", icon: Upload },
     ],
   },
   {
     label: "Users & Leads",
     items: [
+      { title: "Agents", url: "/admin/agents", icon: Users },
       { title: "Leads Management", url: "/admin/leads", icon: Mail },
       { title: "User Roles", url: "/admin/role-management", icon: Shield },
     ],
