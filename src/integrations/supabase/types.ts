@@ -231,6 +231,7 @@ export type Database = {
           featured_image: string | null
           id: string
           meta_description: string | null
+          modules: Json | null
           page_type: string | null
           parent_id: string | null
           published: boolean | null
@@ -245,6 +246,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           meta_description?: string | null
+          modules?: Json | null
           page_type?: string | null
           parent_id?: string | null
           published?: boolean | null
@@ -259,6 +261,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           meta_description?: string | null
+          modules?: Json | null
           page_type?: string | null
           parent_id?: string | null
           published?: boolean | null

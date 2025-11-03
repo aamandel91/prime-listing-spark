@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchCriteriaEditor } from "@/components/admin/SearchCriteriaEditor";
-import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { ModuleBuilder } from "@/components/admin/ModuleBuilder";
+import { ContentPageModule } from "@/types/contentModules";
 
 export default function ContentPages() {
   const [pages, setPages] = useState<any[]>([]);
@@ -34,6 +35,7 @@ export default function ContentPages() {
     page_type: "standard",
     published: false,
     sort_order: 0,
+    modules: [] as any[],
   });
   const { toast } = useToast();
 
@@ -107,6 +109,7 @@ export default function ContentPages() {
       page_type: page.page_type,
       published: page.published,
       sort_order: page.sort_order,
+      modules: page.modules || [],
     });
     setIsDialogOpen(true);
   };
@@ -139,6 +142,7 @@ export default function ContentPages() {
       page_type: "standard",
       published: false,
       sort_order: 0,
+      modules: [],
     });
   };
 
@@ -177,14 +181,33 @@ export default function ContentPages() {
               </DialogHeader>
               
               {editingPage ? (
-                <Tabs defaultValue="details" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="details">Page Details</TabsTrigger>
+                <Tabs defaultValue="modules" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="modules">Page Modules</TabsTrigger>
+                    <TabsTrigger value="details">Settings</TabsTrigger>
                     <TabsTrigger value="search">
                       <Search className="w-4 h-4 mr-2" />
                       Search Criteria
                     </TabsTrigger>
                   </TabsList>
+                  
+                  <TabsContent value="modules">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <ModuleBuilder
+                        modules={formData.modules as ContentPageModule[]}
+                        onChange={(modules) => setFormData({ ...formData, modules })}
+                      />
+                      <div className="flex gap-2">
+                        <Button type="submit">
+                          <Save className="mr-2 h-4 w-4" />
+                          Save Changes
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </TabsContent>
                   
                   <TabsContent value="details">
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -219,14 +242,6 @@ export default function ContentPages() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="content">Content *</Label>
-                        <RichTextEditor
-                          content={formData.content}
-                          onChange={(content) => setFormData({ ...formData, content })}
-                          placeholder="Start writing your content..."
-                        />
-                      </div>
-                      <div>
                         <Label htmlFor="featured_image">Featured Image URL</Label>
                         <Input
                           id="featured_image"
@@ -250,7 +265,7 @@ export default function ContentPages() {
                       <div className="flex gap-2">
                         <Button type="submit">
                           <Save className="mr-2 h-4 w-4" />
-                          Update Page
+                          Save Settings
                         </Button>
                         <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                           Cancel
@@ -304,14 +319,6 @@ export default function ContentPages() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="content">Content *</Label>
-                    <RichTextEditor
-                      content={formData.content}
-                      onChange={(content) => setFormData({ ...formData, content })}
-                      placeholder="Start writing your content..."
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="featured_image">Featured Image URL</Label>
                     <Input
                       id="featured_image"
@@ -332,6 +339,12 @@ export default function ContentPages() {
                       <Label htmlFor="published">Published</Label>
                     </div>
                   </div>
+                  
+                  <ModuleBuilder
+                    modules={formData.modules as ContentPageModule[]}
+                    onChange={(modules) => setFormData({ ...formData, modules })}
+                  />
+
                   <div className="flex gap-2">
                     <Button type="submit">
                       <Save className="mr-2 h-4 w-4" />
