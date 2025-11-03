@@ -7,6 +7,7 @@ import CountiesDropdown from "./CountiesDropdown";
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
 import { AdminMenu } from "./AdminMenu";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useContentPages } from "@/hooks/useContentPages";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -23,6 +24,7 @@ const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { data: settings } = useSiteSettings();
+  const { data: contentPages = [] } = useContentPages(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -66,8 +68,13 @@ const Navbar = () => {
   ];
 
   const rightLinks = [
-    { to: "/agents", label: "Agents" },
-    { to: "/blog", label: "Blog" },
+    { to: "/agents", label: "Agents", openInNewWindow: false },
+    { to: "/blog", label: "Blog", openInNewWindow: false },
+    ...contentPages.map(page => ({
+      to: `/pages/${page.slug}`,
+      label: page.title,
+      openInNewWindow: page.open_in === "new_window"
+    })),
   ];
 
   return (
@@ -114,11 +121,19 @@ const Navbar = () => {
           {/* Right Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
             {rightLinks.map((link) => (
-              <Link key={link.to} to={link.to}>
-                <Button variant="ghost" className="text-foreground hover:text-primary">
-                  {link.label}
-                </Button>
-              </Link>
+              link.openInNewWindow ? (
+                <a key={link.to} href={link.to} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" className="text-foreground hover:text-primary">
+                    {link.label}
+                  </Button>
+                </a>
+              ) : (
+                <Link key={link.to} to={link.to}>
+                  <Button variant="ghost" className="text-foreground hover:text-primary">
+                    {link.label}
+                  </Button>
+                </Link>
+              )
             ))}
             
             {!loading && (

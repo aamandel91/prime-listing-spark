@@ -46,6 +46,7 @@ import LocationImport from "./pages/admin/LocationImport";
 import ListingDataExtractor from "./pages/admin/ListingDataExtractor";
 import ZipCodePage from "./pages/ZipCodePage";
 import NeighborhoodPage from "./pages/NeighborhoodPage";
+import DynamicContentPage from "./pages/DynamicContentPage";
 import { useTrackingCodes } from "./hooks/useTrackingCodes";
 
 import { useEffect } from "react";
@@ -135,6 +136,9 @@ const RecoveryRouter = () => {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/accessibility" element={<Accessibility />} />
         <Route path="/dmca-notice" element={<DmcaNotice />} />
+        
+        {/* Dynamic Content Pages - must come before city routes */}
+        <Route path="/pages/:slug" element={<DynamicContentPage />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
