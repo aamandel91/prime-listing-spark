@@ -251,6 +251,111 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_neighborhoods: {
+        Row: {
+          avg_price: number | null
+          city: string | null
+          county: string | null
+          created_at: string
+          custom_content: Json | null
+          description: string | null
+          featured: boolean
+          hero_image_url: string | null
+          id: string
+          name: string
+          property_count: number | null
+          slug: string
+          sort_order: number | null
+          state: string
+          updated_at: string
+          zipcode: string | null
+        }
+        Insert: {
+          avg_price?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          hero_image_url?: string | null
+          id?: string
+          name: string
+          property_count?: number | null
+          slug: string
+          sort_order?: number | null
+          state?: string
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Update: {
+          avg_price?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          hero_image_url?: string | null
+          id?: string
+          name?: string
+          property_count?: number | null
+          slug?: string
+          sort_order?: number | null
+          state?: string
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Relationships: []
+      }
+      featured_zipcodes: {
+        Row: {
+          avg_price: number | null
+          city: string | null
+          county: string | null
+          created_at: string
+          custom_content: Json | null
+          description: string | null
+          featured: boolean
+          id: string
+          property_count: number | null
+          sort_order: number | null
+          state: string
+          updated_at: string
+          zipcode: string
+        }
+        Insert: {
+          avg_price?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          id?: string
+          property_count?: number | null
+          sort_order?: number | null
+          state?: string
+          updated_at?: string
+          zipcode: string
+        }
+        Update: {
+          avg_price?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          custom_content?: Json | null
+          description?: string | null
+          featured?: boolean
+          id?: string
+          property_count?: number | null
+          sort_order?: number | null
+          state?: string
+          updated_at?: string
+          zipcode?: string
+        }
+        Relationships: []
+      }
       global_site_settings: {
         Row: {
           created_at: string

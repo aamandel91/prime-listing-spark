@@ -32,6 +32,9 @@ import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
 import CityPropertyType from "./pages/CityPropertyType";
 import LocationImport from "./pages/admin/LocationImport";
+import ListingDataExtractor from "./pages/admin/ListingDataExtractor";
+import ZipCodePage from "./pages/ZipCodePage";
+import NeighborhoodPage from "./pages/NeighborhoodPage";
 
 import { useEffect } from "react";
 
@@ -74,12 +77,15 @@ const RecoveryRouter = () => {
         <Route path="/admin/site-layout-settings" element={<ProtectedRoute requireRole="admin"><SiteLayoutSettings /></ProtectedRoute>} />
         <Route path="/admin/featured-cities" element={<ProtectedRoute requireRole="admin"><FeaturedCities /></ProtectedRoute>} />
         <Route path="/admin/location-import" element={<ProtectedRoute requireRole="admin"><LocationImport /></ProtectedRoute>} />
+        <Route path="/admin/listing-data-extractor" element={<ProtectedRoute requireRole="admin"><ListingDataExtractor /></ProtectedRoute>} />
         
         {/* Public Routes - More specific routes first */}
         <Route path="/cities" element={<Cities />} />
         <Route path="/cities/:citySlug/:propertyType" element={<CityPropertyType />} />
         <Route path="/cities/:citySlug" element={<CityTemplate />} />
         <Route path="/counties" element={<Counties />} />
+        <Route path="/zip/:zipcode" element={<ZipCodePage />} />
+        <Route path="/neighborhood/:slug" element={<NeighborhoodPage />} />
         <Route path="/counties/:countySlug" element={<CityTemplate />} />
         
         {/* Old property URL format */}
