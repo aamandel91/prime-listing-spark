@@ -13,6 +13,15 @@ serve(async (req) => {
   }
 
   try {
+    const { blogUrl } = await req.json();
+    
+    if (!blogUrl) {
+      return new Response(
+        JSON.stringify({ error: 'Blog URL is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY')!;
@@ -20,10 +29,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const app = new FirecrawlApp({ apiKey: firecrawlKey });
 
-    console.log('Starting blog migration from floridahomefinder.com/blog');
+    console.log('Starting blog migration from:', blogUrl);
 
     // Crawl the blog to get all post URLs
-    const crawlResult = await app.crawlUrl('https://www.floridahomefinder.com/blog', {
+    const crawlResult = await app.crawlUrl(blogUrl, {
       limit: 200,
       scrapeOptions: {
         formats: ['markdown', 'html'],
