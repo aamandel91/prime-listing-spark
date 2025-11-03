@@ -12,6 +12,8 @@ import RecentBlogs from "@/components/home/RecentBlogs";
 import FloridaResourceSection from "@/components/home/FloridaResourceSection";
 
 const Index = () => {
+  console.log('Index page rendering');
+  
   // Structured data for Organization and WebSite
   const organizationSchema = {
     "@context": "https://schema.org",
