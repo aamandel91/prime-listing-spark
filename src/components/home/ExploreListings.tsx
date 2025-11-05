@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const ExploreListings = () => {
   const metros = [
@@ -44,10 +45,13 @@ const ExploreListings = () => {
               to={`/listings${metro.searchParams}`}
               className="group relative h-80 rounded-lg overflow-hidden hover-scale"
             >
-              <img
+              <OptimizedImage
                 src={metro.image}
                 alt={metro.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                width={640}
+                height={480}
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-white">

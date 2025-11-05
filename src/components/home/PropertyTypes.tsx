@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Home, Building2, Building, Warehouse, Trees, Castle, Hammer } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const PropertyTypes = () => {
   const propertyTypes = [
@@ -64,10 +65,13 @@ const PropertyTypes = () => {
               to={type.link}
               className="group relative overflow-hidden rounded-lg aspect-square hover-scale"
             >
-              <img
+              <OptimizedImage
                 src={type.image}
                 alt={type.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                width={320}
+                height={320}
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 14vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">

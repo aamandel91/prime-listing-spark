@@ -22,14 +22,20 @@ const OptimizedImage = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  // Generate srcset for responsive images if dimensions are provided
+  // Generate srcset for responsive images with optimized sizing
   const generateSrcSet = () => {
-    if (!width || !src.includes('unsplash.com')) return undefined;
+    if (!src.includes('unsplash.com')) return undefined;
     
-    const widths = [320, 640, 768, 1024, 1280, 1536];
+    const widths = [320, 480, 640, 768, 1024, 1280, 1536, 1920];
+    const maxWidth = width || 1920;
+    
     return widths
-      .filter(w => w <= (width || Infinity))
-      .map(w => `${src.replace(/w=\d+/, `w=${w}`)} ${w}w`)
+      .filter(w => w <= maxWidth)
+      .map(w => {
+        // Replace both w= parameter and increase quality slightly for smaller images
+        const quality = w <= 640 ? 85 : 80;
+        return `${src.replace(/w=\d+/, `w=${w}`).replace(/q=\d+/, `q=${quality}`)} ${w}w`;
+      })
       .join(', ');
   };
 

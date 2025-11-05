@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EnhancedSearchBar } from "@/components/search/EnhancedSearchBar";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const Hero = () => {
   const [activeTab, setActiveTab] = useState("buying");
@@ -10,14 +11,14 @@ const Hero = () => {
     <section className="relative min-h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=80"
+        <OptimizedImage
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=85"
           alt="Luxury modern home exterior"
           className="w-full h-full object-cover"
-          loading="eager"
-          decoding="async"
-          width="2000"
-          height="1333"
+          width={1920}
+          height={1080}
+          priority={true}
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
