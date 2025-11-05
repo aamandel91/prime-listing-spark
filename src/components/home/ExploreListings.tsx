@@ -26,7 +26,7 @@ const ExploreListings = () => {
     },
     {
       name: "Tampa/St Pete Metro",
-      image: "https://images.unsplash.com/photo-1605708613525-284002547674?auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1502472584811-0a2f2feb8968?auto=format&fit=crop&w=800&q=80",
       searchParams: "?city=Tampa"
     }
   ];

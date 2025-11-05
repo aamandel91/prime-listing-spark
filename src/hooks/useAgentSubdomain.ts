@@ -41,7 +41,7 @@ export const useAgentSubdomain = () => {
             .select('*')
             .eq('subdomain', subdomain)
             .eq('active', true)
-            .single();
+            .maybeSingle();
 
           if (error || !agent) {
             console.log('No agent found for subdomain:', subdomain);
