@@ -216,7 +216,10 @@ export const EnhancedSearchBar = ({
             </div>
             
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className={`${isHero ? 'h-12' : 'h-11'} w-full lg:w-40 bg-background`}>
+              <SelectTrigger 
+                className={`${isHero ? 'h-12' : 'h-11'} w-full lg:w-40 bg-background`}
+                aria-label="Property status filter"
+              >
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-background z-[100]">
@@ -289,6 +292,7 @@ export const EnhancedSearchBar = ({
               <button
                 onClick={filter.onRemove}
                 className="ml-1 rounded-full hover:bg-background/50 p-0.5"
+                aria-label={`Remove ${filter.label} filter`}
               >
                 <X className="w-3 h-3" />
               </button>

@@ -6,6 +6,7 @@ const CTASection = () => {
   return (
     <section className="py-16 bg-secondary/30">
       <div className="container mx-auto px-4">
+        <h2 className="sr-only">Get Started with Your Real Estate Journey</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Instant Offer */}
           <Card className="p-8 text-center hover:shadow-lg transition-shadow">

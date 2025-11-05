@@ -47,16 +47,32 @@ const Footer = () => {
               Your trusted partner in finding the perfect Florida home. Excellence in real estate since 2024.
             </p>
             <div className="flex space-x-3">
-              <a href="#" className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors"
+                aria-label="Visit our Facebook page"
+              >
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors"
+                aria-label="Visit our Twitter page"
+              >
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors"
+                aria-label="Visit our Instagram page"
+              >
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 rounded-full bg-primary-light hover:bg-accent flex items-center justify-center transition-colors"
+                aria-label="Visit our LinkedIn page"
+              >
                 <Linkedin className="w-4 h-4" />
               </a>
             </div>
