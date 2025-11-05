@@ -47,7 +47,7 @@ const Index = () => {
           name="description" 
           content="Search Florida homes, condos, and properties for sale. Browse MLS listings updated every 15 minutes across Miami, Tampa, Orlando, Jacksonville & all Florida metros. Your #1 Florida real estate resource." 
         />
-        <link rel="canonical" href={window.location.origin} />
+        <link rel="canonical" href={`${window.location.origin}/`} />
         
         {/* Open Graph tags */}
         <meta property="og:title" content="Florida Homes & Real Estate for Sale | FloridaHomeFinder.com" />
