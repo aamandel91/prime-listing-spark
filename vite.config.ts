@@ -46,6 +46,8 @@ export default defineConfig(({ mode }) => ({
     minify: mode === 'production' ? 'esbuild' : false,
     // Split chunks at 500KB for optimal caching
     chunkSizeWarningLimit: 500,
+    // Generate source maps for debugging in production
+    sourcemap: true,
   },
   // Optimize dependencies
   optimizeDeps: {
