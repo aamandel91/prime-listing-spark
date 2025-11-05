@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Calendar, ArrowRight, Search } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -310,10 +311,13 @@ const Blog = () => {
                   {paginatedBlogs.map((blog) => (
                 <Card key={blog.id} className="overflow-hidden hover-scale group">
                   <div className="relative h-56 overflow-hidden">
-                    <img
+                    <OptimizedImage
                       src={blog.image}
                       alt={blog.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="transition-transform duration-300 group-hover:scale-110"
+                      width={800}
+                      height={700}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     <div className="absolute top-4 left-4">
                       <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-semibold">

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Mail, Phone } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface TeamMembersRendererProps {
   module: TeamMembersModule;
@@ -37,10 +38,13 @@ export default function TeamMembersRenderer({ module }: TeamMembersRendererProps
           <Link key={agent.id} to={`/agents/${agent.id}`}>
             <Card className="h-full hover:shadow-lg transition-shadow">
               {agent.profile_image_url && (
-                <img
+                <OptimizedImage
                   src={agent.profile_image_url}
                   alt={agent.full_name}
-                  className="w-full h-64 object-cover rounded-t-lg"
+                  className="rounded-t-lg"
+                  width={800}
+                  height={1000}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               )}
               <CardContent className="pt-6">

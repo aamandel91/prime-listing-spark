@@ -1,12 +1,16 @@
+import OptimizedImage from "@/components/OptimizedImage";
+
 const FloridaResourceSection = () => {
   return (
     <section className="relative min-h-[800px] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img
+        <OptimizedImage
           src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=2000&q=80"
           alt="Luxury Florida home"
-          className="w-full h-full object-cover"
+          width={2000}
+          height={1333}
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/50" />
       </div>

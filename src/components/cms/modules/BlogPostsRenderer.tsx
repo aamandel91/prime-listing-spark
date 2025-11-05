@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface BlogPostsRendererProps {
   module: BlogPostsModule;
@@ -33,10 +34,13 @@ export default function BlogPostsRenderer({ module }: BlogPostsRendererProps) {
           <Link key={post.id} to={`/blog/${post.slug}`}>
             <Card className="h-full hover:shadow-lg transition-shadow">
               {post.featured_image && (
-                <img
+                <OptimizedImage
                   src={post.featured_image}
                   alt={post.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
+                  className="rounded-t-lg"
+                  width={800}
+                  height={600}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               )}
               <CardContent className="pt-6">

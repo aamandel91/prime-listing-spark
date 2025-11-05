@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { BedDouble, Bath, Square, MapPin } from "lucide-react";
 import { generatePropertyUrl } from "@/lib/propertyUrl";
 import { FavoriteButton } from "./FavoriteButton";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface PropertyCardProps {
   id: string;
@@ -95,17 +96,13 @@ const PropertyCard = ({
   const CardContent = (
     <>
       <div className="relative overflow-hidden aspect-square">
-        <img
+        <OptimizedImage
           src={image}
           alt={altText}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-          decoding="async"
-          width="800"
-          height="800"
-          onError={(e) => {
-            e.currentTarget.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
-          }}
+          className="group-hover:scale-105 transition-transform duration-500"
+          width={800}
+          height={800}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         
         {/* Hot Property Badge */}

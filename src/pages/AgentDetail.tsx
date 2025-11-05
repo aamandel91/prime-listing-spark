@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import OptimizedImage from "@/components/OptimizedImage";
 import { Loader2, Mail, Phone, Star } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -117,10 +118,13 @@ export default function AgentDetail() {
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-6">
               {agent.profile_image_url && (
-                <img
+                <OptimizedImage
                   src={agent.profile_image_url}
                   alt={agent.full_name}
-                  className="w-48 h-48 rounded-lg object-cover"
+                  className="rounded-lg"
+                  width={384}
+                  height={384}
+                  sizes="(max-width: 768px) 100vw, 384px"
                 />
               )}
               <div className="flex-1">

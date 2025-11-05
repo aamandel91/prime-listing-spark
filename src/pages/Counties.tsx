@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MapPin } from "lucide-react";
 import { useRepliers } from "@/hooks/useRepliers";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface CountyData {
   county_name: string;
@@ -167,10 +168,13 @@ export default function Counties() {
                     <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                       {county.hero_image_url && (
                         <div className="relative h-48 overflow-hidden">
-                          <img
+                          <OptimizedImage
                             src={county.hero_image_url}
                             alt={`${county.county_name}, ${county.state}`}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            className="transition-transform duration-300 group-hover:scale-110"
+                            width={800}
+                            height={600}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute bottom-4 left-4">

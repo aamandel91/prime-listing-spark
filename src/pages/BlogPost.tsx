@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Calendar, User, ArrowLeft, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const BlogPost = () => {
   const { id } = useParams();
@@ -233,10 +234,13 @@ const BlogPost = () => {
       <main className="flex-1">
         {/* Hero Image */}
         <div className="relative h-[50vh] md:h-[60vh] bg-muted">
-          <img
+          <OptimizedImage
             src={blog.image}
             alt={blog.title}
-            className="w-full h-full object-cover"
+            priority={true}
+            width={2000}
+            height={1200}
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
           
@@ -354,10 +358,13 @@ const BlogPost = () => {
                   <Link key={post.id} to={`/blog/${post.id}`}>
                     <Card className="overflow-hidden hover-scale group h-full">
                       <div className="relative h-48 overflow-hidden">
-                        <img
+                        <OptimizedImage
                           src={post.image}
                           alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="transition-transform duration-300 group-hover:scale-110"
+                          width={800}
+                          height={600}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </div>
                       <div className="p-4">

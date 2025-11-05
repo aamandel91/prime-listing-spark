@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Mail, Phone, Loader2, Star } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 export default function AgentDirectory() {
   const [agents, setAgents] = useState<any[]>([]);
@@ -90,10 +91,13 @@ export default function AgentDirectory() {
                 <CardContent className="pt-6">
                   <div className="text-center">
                     {agent.profile_image_url && (
-                      <img
+                      <OptimizedImage
                         src={agent.profile_image_url}
                         alt={agent.full_name}
-                        className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
+                        className="rounded-full mx-auto mb-4"
+                        width={128}
+                        height={128}
+                        sizes="128px"
                       />
                     )}
                     <div className="flex items-center justify-center gap-2 mb-1">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const RecentBlogs = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
@@ -54,10 +55,13 @@ const RecentBlogs = () => {
             blogs.map((blog) => (
               <Card key={blog.id} className="overflow-hidden hover-scale group">
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <OptimizedImage
                     src={blog.featured_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"}
                     alt={blog.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="transition-transform duration-300 group-hover:scale-110"
+                    width={800}
+                    height={600}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                 </div>
                 <CardHeader>

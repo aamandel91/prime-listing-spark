@@ -4,6 +4,7 @@ import { useRepliers } from "@/hooks/useRepliers";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface FeaturedPropertiesRendererProps {
   section: FeaturedPropertiesSection;
@@ -69,10 +70,13 @@ export function FeaturedPropertiesRenderer({ section, context }: FeaturedPropert
           >
             <div className="flex gap-3">
               {property.photos?.[0]?.href && (
-                <img
+                <OptimizedImage
                   src={property.photos[0].href}
                   alt={property.address?.full || 'Property'}
-                  className="w-24 h-24 object-cover rounded"
+                  className="rounded"
+                  width={96}
+                  height={96}
+                  sizes="96px"
                 />
               )}
               <div className="flex-1 min-w-0">

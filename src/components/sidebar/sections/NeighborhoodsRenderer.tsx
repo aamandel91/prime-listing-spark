@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface NeighborhoodsRendererProps {
   section: NeighborhoodsSection;
@@ -55,10 +56,13 @@ export function NeighborhoodsRenderer({ section, context }: NeighborhoodsRendere
             className="flex items-start gap-3 p-2 rounded hover:bg-muted transition-colors"
           >
             {section.showImages && neighborhood.hero_image_url ? (
-              <img
+              <OptimizedImage
                 src={neighborhood.hero_image_url}
                 alt={neighborhood.name}
-                className="w-16 h-16 object-cover rounded"
+                className="rounded"
+                width={64}
+                height={64}
+                sizes="64px"
               />
             ) : (
               <MapPin className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
