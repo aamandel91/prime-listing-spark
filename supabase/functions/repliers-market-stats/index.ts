@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Fetch active listings
     const activeParams = new URLSearchParams(baseParams);
-    activeParams.set('standardStatus', 'A');
+    activeParams.set('status', 'A');
     const activeResponse = await fetch(
       `https://api.repliers.io/listings?${activeParams.toString()}`,
       {
@@ -50,7 +50,7 @@ serve(async (req) => {
 
     // Fetch new listings (last 7 days)
     const newParams = new URLSearchParams(baseParams);
-    newParams.set('standardStatus', 'A');
+    newParams.set('status', 'A');
     newParams.set('listDate', `${formatDate(sevenDaysAgo)}..${formatDate(now)}`);
     const newResponse = await fetch(
       `https://api.repliers.io/listings?${newParams.toString()}`,
@@ -65,7 +65,7 @@ serve(async (req) => {
 
     // Fetch sold listings - 30 days
     const sold30Params = new URLSearchParams(baseParams);
-    sold30Params.set('standardStatus', 'C');
+    sold30Params.set('status', 'S');
     sold30Params.set('closeDate', `${formatDate(thirtyDaysAgo)}..${formatDate(now)}`);
     const sold30Response = await fetch(
       `https://api.repliers.io/listings?${sold30Params.toString()}`,
@@ -80,7 +80,7 @@ serve(async (req) => {
 
     // Fetch sold listings - 90 days
     const sold90Params = new URLSearchParams(baseParams);
-    sold90Params.set('standardStatus', 'C');
+    sold90Params.set('status', 'S');
     sold90Params.set('closeDate', `${formatDate(ninetyDaysAgo)}..${formatDate(now)}`);
     const sold90Response = await fetch(
       `https://api.repliers.io/listings?${sold90Params.toString()}`,
@@ -95,7 +95,7 @@ serve(async (req) => {
 
     // Fetch sold listings - 1 year
     const sold1yParams = new URLSearchParams(baseParams);
-    sold1yParams.set('standardStatus', 'C');
+    sold1yParams.set('status', 'S');
     sold1yParams.set('closeDate', `${formatDate(oneYearAgo)}..${formatDate(now)}`);
     const sold1yResponse = await fetch(
       `https://api.repliers.io/listings?${sold1yParams.toString()}`,
