@@ -46,6 +46,7 @@ const menuSections = [
     items: [
       { title: "Global Settings", url: "/admin/global-site-settings", icon: Settings },
       { title: "Layout Settings", url: "/admin/site-layout-settings", icon: Layout },
+      { title: "Property Detail Layout", url: "/admin/property-detail-layout", icon: Layout },
       { title: "SEO Settings", url: "/admin/seo-settings", icon: Search },
     ],
   },

@@ -1133,6 +1133,45 @@ export type Database = {
         }
         Relationships: []
       }
+      property_detail_layout: {
+        Row: {
+          created_at: string
+          default_open: boolean
+          display_order: number
+          id: string
+          is_collapsible: boolean
+          is_enabled: boolean
+          section_component: string
+          section_id: string
+          section_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_open?: boolean
+          display_order?: number
+          id?: string
+          is_collapsible?: boolean
+          is_enabled?: boolean
+          section_component: string
+          section_id: string
+          section_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_open?: boolean
+          display_order?: number
+          id?: string
+          is_collapsible?: boolean
+          is_enabled?: boolean
+          section_component?: string
+          section_id?: string
+          section_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       property_views: {
         Row: {
           created_at: string

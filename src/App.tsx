@@ -40,6 +40,7 @@ import AgentManagement from "./pages/admin/AgentManagement";
 import TestimonialsManagement from "./pages/admin/TestimonialsManagement";
 import VideosManagement from "./pages/admin/VideosManagement";
 import ContentPages from "./pages/admin/ContentPages";
+import PropertyDetailLayout from "./pages/admin/PropertyDetailLayout";
 import AgentDetail from "./pages/AgentDetail";
 import Sell from "./pages/Sell";
 import NotFound from "./pages/NotFound";
@@ -120,6 +121,7 @@ const RecoveryRouter = () => {
           <Route path="city-content" element={<CityContentGenerator />} />
           <Route path="sidebar-management" element={<SidebarManagement />} />
           <Route path="navigation-management" element={<NavigationManagement />} />
+          <Route path="property-detail-layout" element={<PropertyDetailLayout />} />
         </Route>
         
         {/* Public Routes - More specific routes first */}
