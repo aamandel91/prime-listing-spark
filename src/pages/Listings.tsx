@@ -590,8 +590,23 @@ const Listings = () => {
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
           {/* Map - Left Side (50%) */}
-          <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px]">
-            <PropertyMap properties={filteredProperties} />
+          <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px] border-r">
+            <PropertyMap 
+              properties={filteredProperties.map(p => ({
+                id: p.id,
+                title: p.title,
+                price: p.price,
+                address: p.address,
+                city: p.city,
+                state: p.state,
+                beds: p.beds,
+                baths: p.baths,
+                sqft: p.sqft,
+                lat: p.lat,
+                lng: p.lng,
+                image: p.image
+              }))}
+            />
           </div>
 
           {/* Results - Right Side (50%) */}

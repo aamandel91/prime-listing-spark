@@ -971,12 +971,32 @@ export default function PropertyDetail() {
 
           <Separator />
 
-          {/* Location & Map - Removed as PropertyMap doesn't support this interface */}
+          {/* Location & Map */}
           <div>
             <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
-            <Card className="p-4">
-              <p className="text-muted-foreground">Map view coming soon</p>
-            </Card>
+            <div className="rounded-lg overflow-hidden border h-[400px]">
+              <PropertyMap 
+                properties={[{
+                  id: listing.mlsNumber,
+                  title: property.title,
+                  price: property.price,
+                  address: property.address,
+                  city: property.city,
+                  state: property.state,
+                  beds: property.beds,
+                  baths: property.baths,
+                  sqft: property.sqft,
+                  lat: listing.map?.latitude,
+                  lng: listing.map?.longitude,
+                  image: property.images[0]
+                }]}
+                center={listing.map?.latitude && listing.map?.longitude ? {
+                  lat: listing.map.latitude,
+                  lng: listing.map.longitude
+                } : undefined}
+                zoom={15}
+              />
+            </div>
           </div>
 
           <Separator />
