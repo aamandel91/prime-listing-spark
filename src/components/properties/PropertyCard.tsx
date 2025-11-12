@@ -188,10 +188,14 @@ const PropertyCard = ({
           <span className="text-foreground">
             <span className="font-bold">{baths}</span> ba
           </span>
-          <span className="text-muted-foreground">|</span>
-          <span className="text-foreground">
-            <span className="font-bold">{sqft.toLocaleString()}</span> sqft
-          </span>
+          {sqft && (
+            <>
+              <span className="text-muted-foreground">|</span>
+              <span className="text-foreground">
+                <span className="font-bold">{sqft.toLocaleString()}</span> sqft
+              </span>
+            </>
+          )}
         </div>
 
         <div className="text-sm text-muted-foreground mb-2">
