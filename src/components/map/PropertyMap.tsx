@@ -15,9 +15,8 @@ interface PropertyMapProps {
 }
 
 const PropertyMap = ({ properties }: PropertyMapProps) => {
-  const [apiKey, setApiKey] = useState<string>('');
-  const [tokenEntered, setTokenEntered] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   // Default center to Florida
   const center = { lat: 27.6648, lng: -81.5158 };
@@ -29,42 +28,6 @@ const PropertyMap = ({ properties }: PropertyMapProps) => {
     return { lat: baseLatitude, lng: baseLongitude };
   };
 
-  if (!tokenEntered) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-muted p-8">
-        <div className="max-w-md w-full space-y-4 bg-background p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-bold">Google Maps API Key Required</h3>
-          <p className="text-sm text-muted-foreground">
-            To display the map, please enter your Google Maps API key. Get your key at{' '}
-            <a 
-              href="https://console.cloud.google.com/google/maps-apis" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Google Cloud Console
-            </a>
-          </p>
-          <div className="space-y-2">
-            <Label htmlFor="google-maps-key">Google Maps API Key</Label>
-            <Input
-              id="google-maps-key"
-              type="text"
-              placeholder="AIza..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={() => setTokenEntered(true)}
-            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Load Map
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <APIProvider apiKey={apiKey}>
