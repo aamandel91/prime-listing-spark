@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles, Loader2 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
+const ReactQuill = lazy(() => import('react-quill'));
 
 interface RichTextEditorProps {
   content: string;
@@ -164,15 +165,17 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       </div>
 
       {/* Editor Content */}
-      <ReactQuill
-        theme="snow"
-        value={content}
-        onChange={onChange}
-        modules={modules}
-        formats={formats}
-        placeholder={placeholder || 'Start writing your content...'}
-        className="min-h-[300px] quill-editor"
-      />
+      <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+        <ReactQuill
+          theme="snow"
+          value={content}
+          onChange={onChange}
+          modules={modules}
+          formats={formats}
+          placeholder={placeholder || 'Start writing your content...'}
+          className="min-h-[300px] quill-editor"
+        />
+      </Suspense>
 
       {/* AI Generate Dialog */}
       <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
