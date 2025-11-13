@@ -26,6 +26,9 @@ interface PropertyCardProps {
   onOpenModal?: (id: string) => void;
   officeId?: string;
   isHotProperty?: boolean;
+  daysOnMarket?: number;
+  originalPrice?: number;
+  listDate?: string;
 }
 
 const PropertyCard = ({
@@ -48,6 +51,9 @@ const PropertyCard = ({
   onOpenModal,
   officeId,
   isHotProperty,
+  daysOnMarket,
+  originalPrice,
+  listDate,
 }: PropertyCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -56,6 +62,39 @@ const PropertyCard = ({
       minimumFractionDigits: 0,
     }).format(price);
   };
+
+  // Determine badge to show (priority order)
+  const getBadgeInfo = () => {
+    // Check for New Listing (within 7 days)
+    if (listDate) {
+      const listingDate = new Date(listDate);
+      const daysSinceListing = Math.floor((Date.now() - listingDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSinceListing <= 7) {
+        return { type: 'new', label: '✨ New Listing', color: 'bg-blue-600 text-white' };
+      }
+    }
+
+    // Check for Price Reduced
+    if (originalPrice && originalPrice > price) {
+      const reduction = ((originalPrice - price) / originalPrice) * 100;
+      if (reduction >= 1) {
+        return { 
+          type: 'reduced', 
+          label: `💰 Price Reduced ${reduction.toFixed(0)}%`, 
+          color: 'bg-green-600 text-white' 
+        };
+      }
+    }
+
+    // Check for Hot Property (low days on market and high activity)
+    if (daysOnMarket !== undefined && daysOnMarket > 0 && daysOnMarket <= 5) {
+      return { type: 'hot', label: '🔥 Hot Property', color: 'bg-gradient-to-r from-orange-500 to-red-500 text-white animate-pulse' };
+    }
+
+    return null;
+  };
+
+  const badgeInfo = getBadgeInfo();
 
   // Determine if it's a good deal based on AVM
   const getAvmStatus = () => {
@@ -105,17 +144,17 @@ const PropertyCard = ({
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         
-        {/* Hot Property Badge */}
-        {isHotProperty && (
+        {/* Dynamic Property Badges - Priority Order */}
+        {badgeInfo && (
           <div className="absolute top-3 left-3">
-            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold shadow-md animate-pulse">
-              🔥 Hot Property
+            <Badge className={`${badgeInfo.color} font-semibold shadow-md`}>
+              {badgeInfo.label}
             </Badge>
           </div>
         )}
         
-        {/* Showcase Badge */}
-        {!isHotProperty && isShowcase && (
+        {/* Showcase Badge - Only if no other badge */}
+        {!badgeInfo && isShowcase && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-primary text-primary-foreground font-semibold shadow-md">
               Showcase
@@ -123,15 +162,15 @@ const PropertyCard = ({
           </div>
         )}
 
-        {/* Status Badges */}
-        {!isHotProperty && !isShowcase && status === "open-house" && (
+        {/* Status Badges - Only if no other badge */}
+        {!badgeInfo && !isShowcase && status === "open-house" && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-success text-success-foreground font-semibold shadow-md">
               Open House
             </Badge>
           </div>
         )}
-        {!isHotProperty && !isShowcase && status === "under-contract" && (
+        {!badgeInfo && !isShowcase && status === "under-contract" && (
           <div className="absolute top-3 left-3">
             <Badge className="bg-destructive text-destructive-foreground font-semibold shadow-md">
               Under Contract
