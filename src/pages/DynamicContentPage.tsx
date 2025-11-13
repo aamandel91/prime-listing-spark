@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { DynamicListingsSection } from "@/components/cms/DynamicListingsSection";
 import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
+import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
@@ -100,9 +101,10 @@ export default function DynamicContentPage() {
             
             {hasApiFilters && (
               <>
-                <div className="bg-card p-6 rounded-lg border shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">Refine Your Search</h3>
+                <div className="bg-card p-6 rounded-lg border shadow-sm space-y-4">
+                  <h3 className="text-lg font-semibold">Refine Your Search</h3>
                   <EnhancedSearchBarV2 />
+                  <ActiveFilterChips baseFilters={page.api_filters} />
                 </div>
                 
                 <DynamicListingsSection 
