@@ -4,7 +4,9 @@ import { Card } from "@/components/ui/card";
 import { BedDouble, Bath, Square, MapPin } from "lucide-react";
 import { generatePropertyUrl } from "@/lib/propertyUrl";
 import { FavoriteButton } from "./FavoriteButton";
+import { CompareButton } from "./CompareButton";
 import OptimizedImage from "@/components/OptimizedImage";
+import { RepliersProperty } from "@/types/repliers";
 
 interface PropertyCardProps {
   id: string;
@@ -29,6 +31,7 @@ interface PropertyCardProps {
   daysOnMarket?: number;
   originalPrice?: number;
   listDate?: string;
+  fullProperty?: RepliersProperty;
 }
 
 const PropertyCard = ({
@@ -54,6 +57,7 @@ const PropertyCard = ({
   daysOnMarket,
   originalPrice,
   listDate,
+  fullProperty,
 }: PropertyCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -178,22 +182,32 @@ const PropertyCard = ({
           </div>
         )}
 
-        {/* Favorite Button */}
-        <FavoriteButton
-          propertyMls={mlsNumber || id}
-          propertyData={{
-            address,
-            city,
-            state,
-            zipCode,
-            beds,
-            baths,
-            sqft,
-            title
-          }}
-          price={price}
-          className="absolute top-3 right-3 bg-background/90 hover:bg-background shadow-md"
-        />
+        {/* Action Buttons */}
+        <div className="absolute top-3 right-3 flex gap-2">
+          {fullProperty && (
+            <CompareButton
+              property={fullProperty}
+              variant="outline"
+              size="sm"
+              className="bg-background/90 hover:bg-background shadow-md"
+            />
+          )}
+          <FavoriteButton
+            propertyMls={mlsNumber || id}
+            propertyData={{
+              address,
+              city,
+              state,
+              zipCode,
+              beds,
+              baths,
+              sqft,
+              title
+            }}
+            price={price}
+            className="bg-background/90 hover:bg-background shadow-md"
+          />
+        </div>
       </div>
 
       <div className="p-4 flex flex-col flex-1">
