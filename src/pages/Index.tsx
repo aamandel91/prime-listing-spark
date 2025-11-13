@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
+import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import CTASection from "@/components/home/CTASection";
 import PropertyTypes from "@/components/home/PropertyTypes";
 import PopularSearches from "@/components/home/PopularSearches";

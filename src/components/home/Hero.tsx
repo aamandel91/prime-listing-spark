@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EnhancedSearchBar } from "@/components/search/EnhancedSearchBar";
+import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import OptimizedImage from "@/components/OptimizedImage";
 
 const Hero = () => {
@@ -71,10 +71,7 @@ const Hero = () => {
 
               {/* Search Form */}
               <div className="max-w-5xl mx-auto animate-fade-up">
-                <EnhancedSearchBar variant="hero" />
-                <Button variant="link" className="text-white hover:text-white/80 mt-4">
-                  Search Properties Near Me
-                </Button>
+                <EnhancedSearchBarV2 />
               </div>
 
               {/* Instant Cash Offer - Standalone */}
