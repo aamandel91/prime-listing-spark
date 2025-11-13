@@ -624,18 +624,25 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
-              className="flex-1"
+              className="flex-1 min-w-[120px]"
               onClick={handleSave}
             >
               <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
               {isFavorite ? 'Saved' : 'Save'}
             </Button>
+            {listing && (
+              <CompareButton
+                property={listing}
+                variant="outline"
+                className="flex-1 min-w-[120px]"
+              />
+            )}
             <Button 
               variant="outline" 
-              className="flex-1"
+              className="flex-1 min-w-[120px]"
               onClick={handleShare}
             >
               <Share2 className="w-4 h-4 mr-2" />
@@ -643,7 +650,7 @@ export default function PropertyDetail() {
             </Button>
             <Button 
               variant="outline" 
-              className="flex-1"
+              className="flex-1 min-w-[120px]"
               onClick={handleHide}
             >
               <XIcon className="w-4 h-4 mr-2" />
