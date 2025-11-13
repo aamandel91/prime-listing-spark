@@ -12,6 +12,7 @@ import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { DynamicListingsSection } from "@/components/cms/DynamicListingsSection";
 import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
+import { CityStatistics } from "@/components/cms/CityStatistics";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
@@ -101,6 +102,13 @@ export default function DynamicContentPage() {
             
             {hasApiFilters && (
               <>
+                <CityStatistics 
+                  city={page.api_filters?.city}
+                  state={page.api_filters?.state || 'FL'}
+                  neighborhood={page.api_filters?.neighborhood}
+                  title={`${page.title} Market Overview`}
+                />
+
                 <div className="bg-card p-6 rounded-lg border shadow-sm space-y-4">
                   <h3 className="text-lg font-semibold">Refine Your Search</h3>
                   <EnhancedSearchBarV2 />
