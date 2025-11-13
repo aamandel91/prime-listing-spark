@@ -35,10 +35,24 @@ export function ActiveFilterChips({ baseFilters = {} }: ActiveFilterChipsProps) 
         return `Min ${value} acres`;
       case 'maxLotSize':
         return `Max ${value} acres`;
+      case 'garage':
+        return `${value}+ Garage`;
+      case 'parking':
+        return `${value}+ Parking`;
       case 'pool':
         return 'Pool';
       case 'waterfront':
         return 'Waterfront';
+      case 'status':
+        if (value === 'A') return 'Active';
+        if (value === 'P') return 'Pending';
+        if (value === 'Closed') return 'Sold';
+        return value;
+      case 'city':
+      case 'location':
+        return `Location: ${value}`;
+      case 'state':
+        return `State: ${value}`;
       default:
         return value;
     }
@@ -48,7 +62,7 @@ export function ActiveFilterChips({ baseFilters = {} }: ActiveFilterChipsProps) 
     const filters: Array<{ key: string; value: string; label: string }> = [];
     
     searchParams.forEach((value, key) => {
-      if (value && key !== 'page') {
+      if (value && key !== 'page' && key !== 'sort') {
         filters.push({
           key,
           value,

@@ -8,15 +8,14 @@ import PropertyMap from "@/components/map/PropertyMap";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
-import { AdvancedSearchDialog } from "@/components/search/AdvancedSearchDialog";
+import { ComprehensiveFiltersDialog } from "@/components/search/ComprehensiveFiltersDialog";
 import { SavedSearchButton } from "@/components/search/SavedSearchButton";
+import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { X } from "lucide-react";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,13 +40,17 @@ const Listings = () => {
   
   // More filters states
   const [propertyTypes, setPropertyTypes] = useState<string[]>(() => {
-    const typeParam = searchParams.get("type");
-    return typeParam ? [typeParam] : [];
+    const typeParam = searchParams.get("propertyType");
+    return typeParam ? typeParam.split(',') : [];
   });
   const [minSqft, setMinSqft] = useState(searchParams.get("minSqft") || "");
   const [maxSqft, setMaxSqft] = useState(searchParams.get("maxSqft") || "");
   const [minYear, setMinYear] = useState(searchParams.get("minYearBuilt") || "");
   const [maxYear, setMaxYear] = useState(searchParams.get("maxYearBuilt") || "");
+  const [minLotSize, setMinLotSize] = useState(searchParams.get("minLotSize") || "");
+  const [maxLotSize, setMaxLotSize] = useState(searchParams.get("maxLotSize") || "");
+  const [pool, setPool] = useState(searchParams.get("pool") === "true");
+  const [waterfront, setWaterfront] = useState(searchParams.get("waterfront") === "true");
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "");
@@ -144,7 +147,7 @@ const Listings = () => {
     minPrice: debouncedMinPrice ? parseInt(debouncedMinPrice) : undefined,
     maxPrice: debouncedMaxPrice ? parseInt(debouncedMaxPrice) : undefined,
     bedrooms: minBeds && minBeds !== "any" ? parseInt(minBeds) : undefined,
-    bathrooms: minBaths && minBaths !== "any" ? parseInt(minBaths) : undefined,
+    bathrooms: minBaths && minBaths !== "any" ? parseFloat(minBaths) : undefined,
     minGarageSpaces: minGarage && minGarage !== "any" ? parseInt(minGarage) : undefined,
     minParkingSpaces: minParking && minParking !== "any" ? parseInt(minParking) : undefined,
     propertyTypeOrStyle: propertyTypes.length === 1 ? mapTypeToSynonyms(propertyTypes[0]) : undefined,
@@ -152,8 +155,11 @@ const Listings = () => {
     maxSqft: maxSqft ? parseInt(maxSqft) : undefined,
     minYearBuilt: minYear ? parseInt(minYear) : undefined,
     maxYearBuilt: maxYear ? parseInt(maxYear) : undefined,
+    minAcres: minLotSize ? parseFloat(minLotSize) : undefined,
+    maxAcres: maxLotSize ? parseFloat(maxLotSize) : undefined,
+    pool: pool || undefined,
+    waterfront: waterfront || undefined,
     standardStatus: mapStatusToStandard(listingStatus),
-    minLotSizeSqft: searchParams.get("minLotSizeSqft") ? parseInt(searchParams.get("minLotSizeSqft")!) : undefined,
     limit: pageSize,
     offset: (page - 1) * pageSize,
   });
@@ -161,7 +167,7 @@ const Listings = () => {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, minGarage, minParking, propertyTypes, minSqft, maxSqft, minYear, maxYear, listingStatus]);
+  }, [debouncedLocation, selectedState, minPrice, maxPrice, minBeds, minBaths, minGarage, minParking, propertyTypes, minSqft, maxSqft, minYear, maxYear, minLotSize, maxLotSize, pool, waterfront, listingStatus]);
 
   // Clear state filter if it's an unsupported state with no results
   useEffect(() => {
@@ -235,11 +241,15 @@ const Listings = () => {
     if (minBaths && minBaths !== "any") params.set("baths", minBaths);
     if (minGarage && minGarage !== "any") params.set("garage", minGarage);
     if (minParking && minParking !== "any") params.set("parking", minParking);
-    if (propertyTypes.length === 1) params.set("type", propertyTypes[0]);
+    if (propertyTypes.length > 0) params.set("propertyType", propertyTypes.join(','));
     if (minSqft) params.set("minSqft", minSqft);
     if (maxSqft) params.set("maxSqft", maxSqft);
     if (minYear) params.set("minYearBuilt", minYear);
     if (maxYear) params.set("maxYearBuilt", maxYear);
+    if (minLotSize) params.set("minLotSize", minLotSize);
+    if (maxLotSize) params.set("maxLotSize", maxLotSize);
+    if (pool) params.set("pool", "true");
+    if (waterfront) params.set("waterfront", "true");
     if (listingStatus) params.set("status", listingStatus);
     if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
     setSearchParams(params);
@@ -276,9 +286,14 @@ const Listings = () => {
     setMaxSqft("");
     setMinYear("");
     setMaxYear("");
+    setMinLotSize("");
+    setMaxLotSize("");
+    setPool(false);
+    setWaterfront(false);
     setFeatures([]);
     setSelectedCity("all");
     setSortBy("newest");
+    setListingStatus("A");
     setSearchParams(new URLSearchParams());
   };
 
@@ -559,102 +574,57 @@ const Listings = () => {
       <Navbar />
       
       <main className="flex-1 flex flex-col">
-        {/* Top Search Bar */}
+        {/* Top Search Bar with Filters */}
         <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-6">
-            <EnhancedSearchBarV2 />
-          </div>
-        </div>
-
-        {/* Active Filters Bar */}
-        {(location || minPrice || maxPrice || minBeds !== "" || minBaths !== "" || propertyTypes.length > 0 || features.length > 0) && (
-          <div className="bg-accent/50 border-b border-border">
-            <div className="container mx-auto px-4 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-muted-foreground">Active Filters:</span>
-                
-                {location && (
-                  <Badge variant="secondary" className="gap-1">
-                    Location: {location}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setLocation("")}
-                    />
-                  </Badge>
-                )}
-
-                {minPrice && (
-                  <Badge variant="secondary" className="gap-1">
-                    Min Price: ${parseInt(minPrice).toLocaleString()}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setMinPrice("")}
-                    />
-                  </Badge>
-                )}
-
-                {maxPrice && (
-                  <Badge variant="secondary" className="gap-1">
-                    Max Price: ${parseInt(maxPrice).toLocaleString()}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setMaxPrice("")}
-                    />
-                  </Badge>
-                )}
-
-                {minBeds && minBeds !== "" && (
-                  <Badge variant="secondary" className="gap-1">
-                    {minBeds}+ Beds
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setMinBeds("")}
-                    />
-                  </Badge>
-                )}
-
-                {minBaths && minBaths !== "" && (
-                  <Badge variant="secondary" className="gap-1">
-                    {minBaths}+ Baths
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setMinBaths("")}
-                    />
-                  </Badge>
-                )}
-
-                {propertyTypes.map((type) => (
-                  <Badge key={type} variant="secondary" className="gap-1">
-                    {type}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setPropertyTypes(propertyTypes.filter(t => t !== type))}
-                    />
-                  </Badge>
-                ))}
-
-                {features.map((feature) => (
-                  <Badge key={feature} variant="secondary" className="gap-1">
-                    {feature.charAt(0).toUpperCase() + feature.slice(1)}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => setFeatures(features.filter(f => f !== feature))}
-                    />
-                  </Badge>
-                ))}
-
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={clearFilters}
-                  className="text-xs h-7"
-                >
-                  Clear All
-                </Button>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <EnhancedSearchBarV2 />
+                </div>
+                <ComprehensiveFiltersDialog
+                  open={isFiltersOpen}
+                  onOpenChange={setIsFiltersOpen}
+                  listingStatus={listingStatus}
+                  onStatusChange={setListingStatus}
+                  propertyTypes={propertyTypes}
+                  onPropertyTypesChange={setPropertyTypes}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  onMinPriceChange={setMinPrice}
+                  onMaxPriceChange={setMaxPrice}
+                  minBeds={minBeds}
+                  onMinBedsChange={setMinBeds}
+                  minBaths={minBaths}
+                  onMinBathsChange={setMinBaths}
+                  minSqft={minSqft}
+                  maxSqft={maxSqft}
+                  onMinSqftChange={setMinSqft}
+                  onMaxSqftChange={setMaxSqft}
+                  minLotSize={minLotSize}
+                  maxLotSize={maxLotSize}
+                  onMinLotSizeChange={setMinLotSize}
+                  onMaxLotSizeChange={setMaxLotSize}
+                  minYear={minYear}
+                  maxYear={maxYear}
+                  onMinYearChange={setMinYear}
+                  onMaxYearChange={setMaxYear}
+                  minGarage={minGarage}
+                  onMinGarageChange={setMinGarage}
+                  minParking={minParking}
+                  onMinParkingChange={setMinParking}
+                  pool={pool}
+                  onPoolChange={setPool}
+                  waterfront={waterfront}
+                  onWaterfrontChange={setWaterfront}
+                  onApply={updateSearchParams}
+                  onClear={clearFilters}
+                />
               </div>
+              <ActiveFilterChips />
             </div>
           </div>
-        )}
+        </div>
 
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
