@@ -56,6 +56,7 @@ import NeighborhoodPage from "./pages/NeighborhoodPage";
 import DynamicContentPage from "./pages/DynamicContentPage";
 import BulkPageGenerator from "./pages/admin/BulkPageGenerator";
 import { useTrackingCodes } from "./hooks/useTrackingCodes";
+import { ComparisonBar } from "./components/properties/ComparisonBar";
 
 import { useEffect } from "react";
 
@@ -86,6 +87,7 @@ const RecoveryRouter = () => {
         </Helmet>
       )}
       <ScrollToTop />
+      <ComparisonBar />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/agents" element={<AgentDirectory />} />

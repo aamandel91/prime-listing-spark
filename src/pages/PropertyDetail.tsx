@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrafficSource } from "@/hooks/useTrafficSource";
 import { useRecentlyViewedProperties } from "@/hooks/useRecentlyViewedProperties";
+import { CompareButton } from "@/components/properties/CompareButton";
 import RegistrationModal from "@/components/auth/RegistrationModal";
 import OpenHouseSignIn from "@/components/properties/OpenHouseSignIn";
 import { Button } from "@/components/ui/button";
