@@ -13,6 +13,7 @@ import { DynamicListingsSection } from "@/components/cms/DynamicListingsSection"
 import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { CityStatistics } from "@/components/cms/CityStatistics";
+import { CityNeighborhoods } from "@/components/cms/CityNeighborhoods";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
@@ -107,6 +108,12 @@ export default function DynamicContentPage() {
                   state={page.api_filters?.state || 'FL'}
                   neighborhood={page.api_filters?.neighborhood}
                   title={`${page.title} Market Overview`}
+                />
+
+                <CityNeighborhoods 
+                  city={page.api_filters?.city}
+                  state={page.api_filters?.state || 'FL'}
+                  title={`Explore ${page.title} Neighborhoods`}
                 />
 
                 <div className="bg-card p-6 rounded-lg border shadow-sm space-y-4">
