@@ -26,12 +26,12 @@ export const useSchoolDistricts = () => {
     queryKey: ["school-districts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("school_districts")
+        .from("school_districts" as any)
         .select("*")
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data as SchoolDistrict[];
+      return data as unknown as SchoolDistrict[];
     },
   });
 };
@@ -43,7 +43,7 @@ export const useCreateSchoolDistrict = () => {
   return useMutation({
     mutationFn: async (district: any) => {
       const { data, error } = await supabase
-        .from("school_districts")
+        .from("school_districts" as any)
         .insert([district])
         .select()
         .single();
@@ -75,7 +75,7 @@ export const useUpdateSchoolDistrict = () => {
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<SchoolDistrict> & { id: string }) => {
       const { data, error } = await supabase
-        .from("school_districts")
+        .from("school_districts" as any)
         .update(updates)
         .eq("id", id)
         .select()
@@ -108,7 +108,7 @@ export const useDeleteSchoolDistrict = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("school_districts")
+        .from("school_districts" as any)
         .delete()
         .eq("id", id);
 
