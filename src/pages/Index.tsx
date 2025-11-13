@@ -11,6 +11,7 @@ import FeaturedProperties from "@/components/home/FeaturedProperties";
 import Stats from "@/components/home/Stats";
 import RecentBlogs from "@/components/home/RecentBlogs";
 import FloridaResourceSection from "@/components/home/FloridaResourceSection";
+import { RecentlyViewed } from "@/components/properties/RecentlyViewed";
 
 const Index = () => {
   // Structured data for Organization and WebSite
@@ -75,6 +76,9 @@ const Index = () => {
       <main className="flex-1">
         <Hero />
         <CTASection />
+        <div className="container mx-auto px-4 py-12">
+          <RecentlyViewed limit={5} />
+        </div>
         <ExploreListings />
         <PropertyTypes />
         <Stats />

@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrafficSource } from "@/hooks/useTrafficSource";
+import { useRecentlyViewedProperties } from "@/hooks/useRecentlyViewedProperties";
 import RegistrationModal from "@/components/auth/RegistrationModal";
 import OpenHouseSignIn from "@/components/properties/OpenHouseSignIn";
 import { Button } from "@/components/ui/button";
@@ -115,6 +116,27 @@ export default function PropertyDetail() {
   const { listing, loading, error } = useRepliersListing(propertyId || "");
   const { submitTourRequest } = useTourRequest();
   const { isPPC, loading: trafficLoading } = useTrafficSource();
+  const { addRecentlyViewed } = useRecentlyViewedProperties();
+
+  // Track recently viewed property
+  useEffect(() => {
+    if (listing) {
+      addRecentlyViewed({
+        id: listing.mlsNumber,
+        mlsNumber: listing.mlsNumber,
+        title: `${listing.address.streetNumber} ${listing.address.streetName}`,
+        price: listing.listPrice,
+        image: listing.images?.[0] || '/placeholder.svg',
+        beds: listing.details.numBedrooms,
+        baths: listing.details.numBathrooms,
+        sqft: typeof listing.details.sqft === 'number' ? listing.details.sqft : parseInt(listing.details.sqft) || 0,
+        address: `${listing.address.streetNumber} ${listing.address.streetName}`,
+        city: listing.address.city,
+        state: listing.address.state,
+        zipCode: listing.address.zip,
+      });
+    }
+  }, [listing, addRecentlyViewed]);
 
   // Track property view
   useEffect(() => {
