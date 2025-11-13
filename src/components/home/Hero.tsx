@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
+import SimpleSearchBar from "@/components/search/SimpleSearchBar";
 import OptimizedImage from "@/components/OptimizedImage";
 
 const Hero = () => {
@@ -71,7 +71,7 @@ const Hero = () => {
 
               {/* Search Form */}
               <div className="max-w-5xl mx-auto animate-fade-up">
-                <EnhancedSearchBarV2 />
+                <SimpleSearchBar />
               </div>
 
               {/* Instant Cash Offer - Standalone */}
