@@ -220,6 +220,9 @@ export function DynamicListingsSection({
               zipCode={property.address.zip}
               status={property.standardStatus === 'Active Under Contract' ? 'under-contract' : null}
               avm={property.avm?.value}
+              daysOnMarket={property.daysOnMarket}
+              originalPrice={property.originalPrice}
+              listDate={property.listDate}
             />
           ))}
         </div>
