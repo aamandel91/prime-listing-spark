@@ -14,6 +14,7 @@ import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { CityStatistics } from "@/components/cms/CityStatistics";
 import { CityNeighborhoods } from "@/components/cms/CityNeighborhoods";
+import { SavedSearchButton } from "@/components/search/SavedSearchButton";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
@@ -117,7 +118,13 @@ export default function DynamicContentPage() {
                 />
 
                 <div className="bg-card p-6 rounded-lg border shadow-sm space-y-4">
-                  <h3 className="text-lg font-semibold">Refine Your Search</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Refine Your Search</h3>
+                    <SavedSearchButton 
+                      searchCriteria={mergedFilters!}
+                      variant="default"
+                    />
+                  </div>
                   <EnhancedSearchBarV2 />
                   <ActiveFilterChips baseFilters={page.api_filters} />
                 </div>
