@@ -219,6 +219,7 @@ const Listings = () => {
         lng: listing.map?.longitude || 0,
         officeId: listingOfficeId,
         isHotProperty,
+        fullProperty: listing,
       };
     });
   }, [apiListings, siteSettings]);

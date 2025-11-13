@@ -223,6 +223,7 @@ export function DynamicListingsSection({
               daysOnMarket={property.daysOnMarket}
               originalPrice={property.originalPrice}
               listDate={property.listDate}
+              fullProperty={property}
             />
           ))}
         </div>
