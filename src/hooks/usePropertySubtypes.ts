@@ -22,12 +22,12 @@ export const usePropertySubtypes = () => {
     queryKey: ["property-subtypes"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("property_subtypes")
+        .from("property_subtypes" as any)
         .select("*")
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data as PropertySubtype[];
+      return data as unknown as PropertySubtype[];
     },
   });
 };
@@ -39,7 +39,7 @@ export const useCreatePropertySubtype = () => {
   return useMutation({
     mutationFn: async (subtype: any) => {
       const { data, error } = await supabase
-        .from("property_subtypes")
+        .from("property_subtypes" as any)
         .insert([subtype])
         .select()
         .single();
@@ -71,7 +71,7 @@ export const useUpdatePropertySubtype = () => {
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PropertySubtype> & { id: string }) => {
       const { data, error } = await supabase
-        .from("property_subtypes")
+        .from("property_subtypes" as any)
         .update(updates)
         .eq("id", id)
         .select()
@@ -104,7 +104,7 @@ export const useDeletePropertySubtype = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("property_subtypes")
+        .from("property_subtypes" as any)
         .delete()
         .eq("id", id);
 

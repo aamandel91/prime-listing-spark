@@ -54,6 +54,7 @@ import ListingDataExtractor from "./pages/admin/ListingDataExtractor";
 import ZipCodePage from "./pages/ZipCodePage";
 import NeighborhoodPage from "./pages/NeighborhoodPage";
 import DynamicContentPage from "./pages/DynamicContentPage";
+import BulkPageGenerator from "./pages/admin/BulkPageGenerator";
 import { useTrackingCodes } from "./hooks/useTrackingCodes";
 
 import { useEffect } from "react";
@@ -122,6 +123,7 @@ const RecoveryRouter = () => {
           <Route path="sidebar-management" element={<SidebarManagement />} />
           <Route path="navigation-management" element={<NavigationManagement />} />
           <Route path="property-detail-layout" element={<PropertyDetailLayout />} />
+          <Route path="bulk-page-generator" element={<BulkPageGenerator />} />
         </Route>
         
         {/* Public Routes - More specific routes first */}
