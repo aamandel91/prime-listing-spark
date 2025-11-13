@@ -9,6 +9,7 @@ import { ContentPageModule } from "@/types/contentModules";
 import { SidebarRenderer } from "@/components/sidebar/SidebarRenderer";
 import { Loader2 } from "lucide-react";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
+import { DynamicListingsSection } from "@/components/cms/DynamicListingsSection";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
@@ -77,6 +78,13 @@ export default function DynamicContentPage() {
             {modules.map((module) => (
               <ModuleRenderer key={module.id} module={module} />
             ))}
+            
+            {page.api_filters && Object.keys(page.api_filters).length > 0 && (
+              <DynamicListingsSection 
+                apiFilters={page.api_filters}
+                title={`Properties in ${page.title}`}
+              />
+            )}
           </div>
           
           {page.display_sidebar && page.sidebar_config && (
