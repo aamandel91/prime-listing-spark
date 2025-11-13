@@ -8,12 +8,15 @@ import PropertyMap from "@/components/map/PropertyMap";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import UnifiedSearchBar from "@/components/search/UnifiedSearchBar";
+import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 import { AdvancedSearchDialog } from "@/components/search/AdvancedSearchDialog";
+import { SavedSearchButton } from "@/components/search/SavedSearchButton";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { X } from "lucide-react";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -557,35 +560,100 @@ const Listings = () => {
       <main className="flex-1 flex flex-col">
         {/* Top Search Bar */}
         <div className="bg-background border-b border-border">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex gap-3 items-start">
-              <div className="flex-1">
-                <UnifiedSearchBar variant="inline" />
-              </div>
-              
-              <AdvancedSearchDialog
-                open={isFiltersOpen}
-                onOpenChange={setIsFiltersOpen}
-                listingStatus={listingStatus}
-                onStatusChange={setListingStatus}
-                minBeds={minBeds}
-                onMinBedsChange={setMinBeds}
-                minBaths={minBaths}
-                onMinBathsChange={setMinBaths}
-                minGarage={minGarage}
-                onMinGarageChange={setMinGarage}
-                minParking={minParking}
-                onMinParkingChange={setMinParking}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                onMinPriceChange={setMinPrice}
-                onMaxPriceChange={setMaxPrice}
-                onApply={handleSearch}
-                onClear={clearFilters}
-              />
-            </div>
+          <div className="container mx-auto px-4 py-6">
+            <EnhancedSearchBarV2 />
           </div>
         </div>
+
+        {/* Active Filters Bar */}
+        {(location || minPrice || maxPrice || minBeds !== "" || minBaths !== "" || propertyTypes.length > 0 || features.length > 0) && (
+          <div className="bg-accent/50 border-b border-border">
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Active Filters:</span>
+                
+                {location && (
+                  <Badge variant="secondary" className="gap-1">
+                    Location: {location}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setLocation("")}
+                    />
+                  </Badge>
+                )}
+
+                {minPrice && (
+                  <Badge variant="secondary" className="gap-1">
+                    Min Price: ${parseInt(minPrice).toLocaleString()}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setMinPrice("")}
+                    />
+                  </Badge>
+                )}
+
+                {maxPrice && (
+                  <Badge variant="secondary" className="gap-1">
+                    Max Price: ${parseInt(maxPrice).toLocaleString()}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setMaxPrice("")}
+                    />
+                  </Badge>
+                )}
+
+                {minBeds && minBeds !== "" && (
+                  <Badge variant="secondary" className="gap-1">
+                    {minBeds}+ Beds
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setMinBeds("")}
+                    />
+                  </Badge>
+                )}
+
+                {minBaths && minBaths !== "" && (
+                  <Badge variant="secondary" className="gap-1">
+                    {minBaths}+ Baths
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setMinBaths("")}
+                    />
+                  </Badge>
+                )}
+
+                {propertyTypes.map((type) => (
+                  <Badge key={type} variant="secondary" className="gap-1">
+                    {type}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setPropertyTypes(propertyTypes.filter(t => t !== type))}
+                    />
+                  </Badge>
+                ))}
+
+                {features.map((feature) => (
+                  <Badge key={feature} variant="secondary" className="gap-1">
+                    {feature.charAt(0).toUpperCase() + feature.slice(1)}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => setFeatures(features.filter(f => f !== feature))}
+                    />
+                  </Badge>
+                ))}
+
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearFilters}
+                  className="text-xs h-7"
+                >
+                  Clear All
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
@@ -616,23 +684,39 @@ const Listings = () => {
               
               <header className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{seoContent.h1}</h1>
-                <p className="text-muted-foreground">{filteredProperties.length} homes</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">{filteredProperties.length} homes</p>
+                  <SavedSearchButton 
+                    searchCriteria={{
+                      location,
+                      minPrice: minPrice || undefined,
+                      maxPrice: maxPrice || undefined,
+                      beds: minBeds || undefined,
+                      baths: minBaths || undefined,
+                      propertyType: propertyTypes.length > 0 ? propertyTypes : undefined,
+                      features: features.length > 0 ? features : undefined,
+                    }}
+                  />
+                </div>
               </header>
 
-              {/* Sort */}
-              <div className="mb-6 flex justify-between items-center">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="beds">Most Bedrooms</SelectItem>
-                    <SelectItem value="sqft">Largest Sq Ft</SelectItem>
-                  </SelectContent>
-                </Select>
+              {/* Sort and Results Count */}
+              <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Sort by:</span>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-48 bg-background">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      <SelectItem value="newest">Newest Listings</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="beds">Most Bedrooms</SelectItem>
+                      <SelectItem value="sqft">Largest Sq Ft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Property Cards - 2 Column Grid */}
