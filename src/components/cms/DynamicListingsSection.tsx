@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRepliers } from "@/hooks/useRepliers";
 import { RepliersProperty, RepliersSearchParams } from "@/types/repliers";
 import PropertyCard from "@/components/properties/PropertyCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpDown, Grid3x3, Map as MapIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import PropertyMap from "@/components/map/PropertyMap";
 
 interface DynamicListingsSectionProps {
   apiFilters: RepliersSearchParams;
@@ -19,6 +20,7 @@ interface DynamicListingsSectionProps {
 }
 
 type SortOption = 'date' | 'price-asc' | 'price-desc' | 'dom';
+type ViewMode = 'grid' | 'map';
 
 export function DynamicListingsSection({ 
   apiFilters, 
@@ -31,6 +33,7 @@ export function DynamicListingsSection({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState<SortOption>('date');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { searchListings } = useRepliers();
 
   const sortOptions = [
@@ -41,6 +44,24 @@ export function DynamicListingsSection({
   ];
 
   const currentSortLabel = sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort By';
+
+  // Transform listings for map view
+  const mapProperties = useMemo(() => {
+    return listings.map(property => ({
+      id: property.mlsNumber,
+      title: `${property.address.streetNumber} ${property.address.streetName}`,
+      price: property.listPrice,
+      address: `${property.address.streetNumber} ${property.address.streetName}`,
+      city: property.address.city,
+      state: property.address.state,
+      beds: property.details.numBedrooms,
+      baths: property.details.numBathrooms,
+      sqft: typeof property.details.sqft === 'number' ? property.details.sqft : parseInt(property.details.sqft) || 0,
+      lat: property.map?.latitude,
+      lng: property.map?.longitude,
+      image: property.images?.[0],
+    }));
+  }, [listings]);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -124,58 +145,87 @@ export function DynamicListingsSection({
           </p>
         </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="min-w-[200px] justify-between">
-              <span className="flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4" />
-                {currentSortLabel}
-              </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-lg p-1 bg-muted/50">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="h-8 px-3"
+            >
+              <Grid3x3 className="h-4 w-4 mr-2" />
+              Grid
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            className="w-[200px] bg-popover z-50"
-          >
-            {sortOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => {
-                  setSortBy(option.value);
-                  setCurrentPage(1);
-                }}
-                className="cursor-pointer"
-              >
-                {option.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Button
+              variant={viewMode === 'map' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('map')}
+              className="h-8 px-3"
+            >
+              <MapIcon className="h-4 w-4 mr-2" />
+              Map
+            </Button>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="min-w-[200px] justify-between">
+                <span className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  {currentSortLabel}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-[200px] bg-popover z-50"
+            >
+              {sortOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setCurrentPage(1);
+                  }}
+                  className="cursor-pointer"
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listings.map((property) => (
-          <PropertyCard
-            key={property.mlsNumber}
-            id={property.mlsNumber}
-            mlsNumber={property.mlsNumber}
-            title={`${property.address.streetNumber} ${property.address.streetName}`}
-            price={property.listPrice}
-            image={property.images?.[0] || '/placeholder.svg'}
-            beds={property.details.numBedrooms}
-            baths={property.details.numBathrooms}
-            sqft={typeof property.details.sqft === 'number' ? property.details.sqft : parseInt(property.details.sqft) || 0}
-            address={`${property.address.streetNumber} ${property.address.streetName}`}
-            city={property.address.city}
-            state={property.address.state}
-            zipCode={property.address.zip}
-            status={property.standardStatus === 'Active Under Contract' ? 'under-contract' : null}
-            avm={property.avm?.value}
-          />
-        ))}
-      </div>
+      {viewMode === 'map' ? (
+        <div className="h-[600px] rounded-lg overflow-hidden border shadow-sm">
+          <PropertyMap properties={mapProperties} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {listings.map((property) => (
+            <PropertyCard
+              key={property.mlsNumber}
+              id={property.mlsNumber}
+              mlsNumber={property.mlsNumber}
+              title={`${property.address.streetNumber} ${property.address.streetName}`}
+              price={property.listPrice}
+              image={property.images?.[0] || '/placeholder.svg'}
+              beds={property.details.numBedrooms}
+              baths={property.details.numBathrooms}
+              sqft={typeof property.details.sqft === 'number' ? property.details.sqft : parseInt(property.details.sqft) || 0}
+              address={`${property.address.streetNumber} ${property.address.streetName}`}
+              city={property.address.city}
+              state={property.address.state}
+              zipCode={property.address.zip}
+              status={property.standardStatus === 'Active Under Contract' ? 'under-contract' : null}
+              avm={property.avm?.value}
+            />
+          ))}
+        </div>
+      )}
 
-      {showPagination && totalPages > 1 && (
+      {showPagination && totalPages > 1 && viewMode === 'grid' && (
         <div className="flex items-center justify-center gap-4 pt-8">
           <Button
             variant="outline"
