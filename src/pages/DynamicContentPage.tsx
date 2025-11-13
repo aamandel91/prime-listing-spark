@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/layout/Navbar";
@@ -10,9 +10,11 @@ import { SidebarRenderer } from "@/components/sidebar/SidebarRenderer";
 import { Loader2 } from "lucide-react";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { DynamicListingsSection } from "@/components/cms/DynamicListingsSection";
+import EnhancedSearchBarV2 from "@/components/search/EnhancedSearchBarV2";
 
 export default function DynamicContentPage() {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -50,6 +52,23 @@ export default function DynamicContentPage() {
   }
 
   const modules: ContentPageModule[] = page.modules || [];
+  const hasApiFilters = page.api_filters && Object.keys(page.api_filters).length > 0;
+  
+  // Merge URL search params with page api_filters
+  const mergedFilters = hasApiFilters ? {
+    ...page.api_filters,
+    ...(searchParams.get('minPrice') && { minPrice: Number(searchParams.get('minPrice')) }),
+    ...(searchParams.get('maxPrice') && { maxPrice: Number(searchParams.get('maxPrice')) }),
+    ...(searchParams.get('beds') && { minBedrooms: Number(searchParams.get('beds')) }),
+    ...(searchParams.get('baths') && { minBathrooms: Number(searchParams.get('baths')) }),
+    ...(searchParams.get('propertyType') && { propertyType: searchParams.get('propertyType')?.split(',') }),
+    ...(searchParams.get('minSqft') && { minSqft: Number(searchParams.get('minSqft')) }),
+    ...(searchParams.get('maxSqft') && { maxSqft: Number(searchParams.get('maxSqft')) }),
+    ...(searchParams.get('minYearBuilt') && { minYearBuilt: Number(searchParams.get('minYearBuilt')) }),
+    ...(searchParams.get('maxYearBuilt') && { maxYearBuilt: Number(searchParams.get('maxYearBuilt')) }),
+    ...(searchParams.get('pool') && { pool: searchParams.get('pool') === 'true' }),
+    ...(searchParams.get('waterfront') && { waterfront: searchParams.get('waterfront') === 'true' }),
+  } : null;
 
   return (
     <>
@@ -79,11 +98,18 @@ export default function DynamicContentPage() {
               <ModuleRenderer key={module.id} module={module} />
             ))}
             
-            {page.api_filters && Object.keys(page.api_filters).length > 0 && (
-              <DynamicListingsSection 
-                apiFilters={page.api_filters}
-                title={`Properties in ${page.title}`}
-              />
+            {hasApiFilters && (
+              <>
+                <div className="bg-card p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-semibold mb-4">Refine Your Search</h3>
+                  <EnhancedSearchBarV2 />
+                </div>
+                
+                <DynamicListingsSection 
+                  apiFilters={mergedFilters!}
+                  title={`Properties in ${page.title}`}
+                />
+              </>
             )}
           </div>
           
