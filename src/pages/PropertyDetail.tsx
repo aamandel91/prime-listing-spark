@@ -14,13 +14,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { toast } from "sonner";
 import {
-  PropertyDetailHeader,
   PropertyPhotoGallery,
   PropertyDescription,
   PropertyKeyFacts,
-  PropertyFeatures,
+  PropertyFeaturesClean,
   PropertyLocation,
   PropertyContactForm,
+  PropertyAddressBar,
+  PropertyPriceStats,
 } from "@/components/property-detail";
 import { PropertyHistory } from "@/components/properties/PropertyHistory";
 import { SimilarProperties } from "@/components/properties/SimilarProperties";
@@ -281,37 +282,35 @@ export default function PropertyDetail() {
 
       <Navbar />
 
-      {/* Navigation */}
-      <PropertyNavigation
-        onNavigate={(sectionId) => {
-          const element = document.getElementById(sectionId);
-          element?.scrollIntoView({ behavior: 'smooth' });
-        }}
-      />
+      {/* Photo Gallery - Full Width at Top */}
+      <PropertyPhotoGallery images={property.images} address={property.address.full} />
 
-      {/* Header */}
-      <PropertyDetailHeader
+      {/* Address Bar - Below Gallery */}
+      <PropertyAddressBar
         property={property}
-        onRequestInfo={() => setIsContactDialogOpen(true)}
-        onScheduleShowing={() => setIsContactDialogOpen(true)}
         onShare={handleShare}
         onToggleFavorite={handleToggleFavorite}
         isFavorite={isFavorite}
       />
 
-      {/* Photo Gallery */}
-      <PropertyPhotoGallery images={property.images} address={property.address.full} />
+      {/* Price & Stats Section - Horizontal Layout */}
+      <PropertyPriceStats
+        property={property}
+        onRequestInfo={() => setIsContactDialogOpen(true)}
+        onScheduleShowing={() => setIsContactDialogOpen(true)}
+      />
 
-      {/* Breadcrumbs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <BreadcrumbSEO items={breadcrumbItems} />
-      </div>
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-6 py-0">
+        {/* Breadcrumbs */}
+        <div className="py-6">
+          <BreadcrumbSEO items={breadcrumbItems} />
+        </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Left Column - Main Content (2/3) */}
+          <div className="lg:col-span-2 space-y-0">
             {/* Description */}
             <div id="description">
               <PropertyDescription description={property.description} />
@@ -324,54 +323,71 @@ export default function PropertyDetail() {
 
             {/* Features */}
             <div id="features">
-              <PropertyFeatures property={property} />
+              <PropertyFeaturesClean property={property} />
             </div>
 
             {/* Market Statistics */}
-            <MarketStatistics
-              city={property.address.city}
-              state={property.address.state}
-              propertyType={property.propertyType}
-            />
+            <div className="py-6 border-t border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+                Market Statistics
+              </h2>
+              <MarketStatistics
+                city={property.address.city}
+                state={property.address.state}
+                propertyType={property.propertyType}
+              />
+            </div>
 
             {/* Nearby Places */}
-            <NearbyPlaces
-              latitude={property.location.latitude}
-              longitude={property.location.longitude}
-            />
-          </div>
+            <div className="py-6 border-t border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+                Nearby Amenities
+              </h2>
+              <NearbyPlaces
+                latitude={property.location.latitude}
+                longitude={property.location.longitude}
+              />
+            </div>
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            <PropertyContactForm property={property} />
-            
+            {/* Location & Map */}
             <div id="location">
               <PropertyLocation property={property} />
             </div>
           </div>
+
+          {/* Right Column - Sidebar (1/3) - Sticky */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              <PropertyContactForm property={property} />
+            </div>
+          </div>
         </div>
 
-        {/* Full Width Sections */}
+        {/* Full Width Sections Below */}
         <div className="mt-16 space-y-12">
           {/* Community Listings */}
           {property.address.city && (
-            <CommunityListings
-              city={property.address.city}
-              state={property.address.state}
-              currentMlsNumber={property.mlsNumber}
-            />
+            <div className="py-8 border-t-2 border-gray-200">
+              <CommunityListings
+                city={property.address.city}
+                state={property.address.state}
+                currentMlsNumber={property.mlsNumber}
+              />
+            </div>
           )}
 
           {/* Similar Properties */}
-          <div id="similar">
+          <div id="similar" className="py-8 border-t-2 border-gray-200">
             <SimilarProperties currentProperty={listing} />
           </div>
 
           {/* Related Pages */}
-          <RelatedPages
-            city={property.address.city}
-            state={property.address.state}
-          />
+          <div className="py-8 border-t-2 border-gray-200">
+            <RelatedPages
+              city={property.address.city}
+              state={property.address.state}
+            />
+          </div>
         </div>
       </div>
 

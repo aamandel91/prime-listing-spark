@@ -10,15 +10,13 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
   }
 
   return (
-    <div className="bg-background rounded-lg border shadow-sm overflow-hidden">
-      <div className="bg-muted/30 px-8 py-5 border-b">
-        <h2 className="text-2xl font-bold">About This Property</h2>
-      </div>
-      <div className="p-8">
-        <p className="text-lg text-foreground leading-relaxed whitespace-pre-wrap">
-          {description}
-        </p>
-      </div>
-    </div>
+    <section className="py-6">
+      <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+        About This Home
+      </h2>
+      <p className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
+        {description}
+      </p>
+    </section>
   );
 }
