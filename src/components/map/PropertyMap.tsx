@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
-import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { APIProvider, Map, AdvancedMarker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 import { Link } from 'react-router-dom';
-import { Bed, Bath, Square, MapPin, Loader2 } from 'lucide-react';
+import { Bed, Bath, Square, MapPin, Pencil, Trash2 } from 'lucide-react';
 import { generatePropertyUrl } from '@/lib/propertyUrl';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface PropertyMapProps {
   properties: Array<{
@@ -22,9 +24,108 @@ interface PropertyMapProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   className?: string;
+  enableDrawing?: boolean;
+  onBoundaryChange?: (boundary: google.maps.LatLngLiteral[] | null) => void;
 }
 
-const PropertyMap = ({ properties, center: customCenter, zoom = 10, className = "" }: PropertyMapProps) => {
+// Drawing manager component
+const DrawingManager = ({ onBoundaryChange }: { onBoundaryChange: (boundary: google.maps.LatLngLiteral[] | null) => void }) => {
+  const map = useMap();
+  const [drawingMode, setDrawingMode] = useState(false);
+  const [polygon, setPolygon] = useState<google.maps.Polygon | null>(null);
+
+  useEffect(() => {
+    if (!map) return;
+
+    const handlePolygonComplete = (poly: google.maps.Polygon) => {
+      // Remove previous polygon if exists
+      if (polygon) {
+        polygon.setMap(null);
+      }
+
+      setPolygon(poly);
+      setDrawingMode(false);
+
+      // Get polygon coordinates
+      const path = poly.getPath();
+      const coordinates: google.maps.LatLngLiteral[] = [];
+      for (let i = 0; i < path.getLength(); i++) {
+        const point = path.getAt(i);
+        coordinates.push({ lat: point.lat(), lng: point.lng() });
+      }
+
+      onBoundaryChange(coordinates);
+      toast.success("Boundary drawn! Properties filtered.");
+    };
+
+    if (drawingMode && map) {
+      // @ts-ignore - DrawingManager types
+      const drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.POLYGON,
+        drawingControl: false,
+        polygonOptions: {
+          fillColor: 'hsl(var(--primary))',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: 'hsl(var(--primary))',
+          editable: true,
+          draggable: true,
+        },
+      });
+
+      drawingManager.setMap(map);
+
+      google.maps.event.addListener(drawingManager, 'polygoncomplete', handlePolygonComplete);
+
+      return () => {
+        drawingManager.setMap(null);
+      };
+    }
+  }, [drawingMode, map, onBoundaryChange, polygon]);
+
+  const handleClearBoundary = () => {
+    if (polygon) {
+      polygon.setMap(null);
+      setPolygon(null);
+      onBoundaryChange(null);
+      toast.info("Boundary cleared");
+    }
+  };
+
+  return (
+    <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+      <Button
+        onClick={() => setDrawingMode(!drawingMode)}
+        variant={drawingMode ? "default" : "secondary"}
+        size="sm"
+        className="shadow-lg"
+      >
+        <Pencil className="w-4 h-4 mr-2" />
+        {drawingMode ? "Drawing..." : "Draw Boundary"}
+      </Button>
+      {polygon && (
+        <Button
+          onClick={handleClearBoundary}
+          variant="destructive"
+          size="sm"
+          className="shadow-lg"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Clear Boundary
+        </Button>
+      )}
+    </div>
+  );
+};
+
+const PropertyMap = ({ 
+  properties, 
+  center: customCenter, 
+  zoom = 10, 
+  className = "",
+  enableDrawing = false,
+  onBoundaryChange
+}: PropertyMapProps) => {
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -83,7 +184,7 @@ const PropertyMap = ({ properties, center: customCenter, zoom = 10, className = 
   }
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={['drawing']}>
       <Map
         center={mapCenter}
         zoom={mapZoom}
@@ -96,6 +197,9 @@ const PropertyMap = ({ properties, center: customCenter, zoom = 10, className = 
         streetViewControl={false}
         fullscreenControl={true}
       >
+        {enableDrawing && onBoundaryChange && (
+          <DrawingManager onBoundaryChange={onBoundaryChange} />
+        )}
         {properties.map((property) => {
           // Skip properties without valid coordinates
           if (!property.lat || !property.lng) return null;

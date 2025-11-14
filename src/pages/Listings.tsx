@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyMap from "@/components/map/PropertyMap";
+import { MapViewToggle } from "@/components/search/MapViewToggle";
 import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,8 @@ const Listings = () => {
   const { data: siteSettings } = useSiteSettings();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const { trackPropertySearch } = useFollowUpBoss();
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [drawnBoundary, setDrawnBoundary] = useState<google.maps.LatLngLiteral[] | null>(null);
   
   // Filter states - Initialize from URL params
   const [location, setLocation] = useState(searchParams.get("location") || searchParams.get("city") || "");
@@ -294,6 +297,7 @@ const Listings = () => {
     setSelectedCity("all");
     setSortBy("newest");
     setListingStatus("A");
+    setDrawnBoundary(null);
     setSearchParams(new URLSearchParams());
   };
 
@@ -314,6 +318,28 @@ const Listings = () => {
   // Filter and sort properties
   const filteredProperties = useMemo(() => {
     let filtered = [...allProperties];
+
+    // Check if point is inside polygon using ray casting algorithm
+    const isPointInPolygon = (point: { lat: number; lng: number }, polygon: google.maps.LatLngLiteral[]): boolean => {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].lng, yi = polygon[i].lat;
+        const xj = polygon[j].lng, yj = polygon[j].lat;
+        
+        const intersect = ((yi > point.lat) !== (yj > point.lat))
+          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    };
+
+    // Filter by drawn boundary FIRST (highest priority filter)
+    if (drawnBoundary && drawnBoundary.length > 0) {
+      filtered = filtered.filter(property => {
+        if (!property.lat || !property.lng) return false;
+        return isPointInPolygon({ lat: property.lat, lng: property.lng }, drawnBoundary);
+      });
+    }
 
     // First, separate hot properties from regular properties
     const hotProperties = filtered.filter(p => p.isHotProperty);
@@ -497,7 +523,7 @@ const Listings = () => {
 
     // Combine: hot properties first, then regular properties
     return [...sortProperties(filteredHot), ...sortProperties(filteredRegular)];
-  }, [location, selectedCity, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties]);
+  }, [location, selectedCity, minPrice, maxPrice, minBeds, minBaths, propertyTypes, minSqft, maxSqft, minYear, maxYear, features, sortBy, allProperties, drawnBoundary]);
 
   // Generate dynamic SEO content
   const seoContent = useMemo(() => {
@@ -628,8 +654,10 @@ const Listings = () => {
 
         {/* Map and Results Split View */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Map - Left Side (50%) */}
-          <div className="hidden lg:block w-1/2 h-[calc(100vh-180px)] sticky top-[180px] border-r">
+          {/* Map - Left Side (50% on desktop, full on mobile when map view) */}
+          <div className={`${
+            viewMode === "map" ? "block" : "hidden lg:block"
+          } w-full lg:w-1/2 h-[calc(100vh-180px)] sticky top-[180px] border-r`}>
             <PropertyMap 
               properties={filteredProperties.map(p => ({
                 id: p.id,
@@ -645,11 +673,15 @@ const Listings = () => {
                 lng: p.lng,
                 image: p.image
               }))}
+              enableDrawing={true}
+              onBoundaryChange={setDrawnBoundary}
             />
           </div>
 
-          {/* Results - Right Side (50%) */}
-          <div className="w-full lg:w-1/2 overflow-y-auto">
+          {/* Results - Right Side (50% on desktop, full on mobile when list view) */}
+          <div className={`${
+            viewMode === "list" ? "block" : "hidden lg:block"
+          } w-full lg:w-1/2 overflow-y-auto`}>
             <div className="p-6">
               <BreadcrumbSEO items={breadcrumbItems} />
               
@@ -671,11 +703,12 @@ const Listings = () => {
                 </div>
               </header>
 
-              {/* Sort and Results Count */}
+              {/* Sort, View Toggle, and Results Count */}
               <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Sort by:</span>
-                  <Select value={sortBy} onValueChange={setSortBy}>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Sort by:</span>
+                    <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="w-48 bg-background">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -687,6 +720,10 @@ const Listings = () => {
                       <SelectItem value="sqft">Largest Sq Ft</SelectItem>
                     </SelectContent>
                   </Select>
+                  </div>
+                  <div className="lg:hidden">
+                    <MapViewToggle view={viewMode} onViewChange={setViewMode} />
+                  </div>
                 </div>
               </div>
 
