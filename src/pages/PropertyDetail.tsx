@@ -583,7 +583,7 @@ export default function PropertyDetail() {
           }} />
 
           {/* Price and Basic Info */}
-          <div>
+          <div id="overview">
             <div className="flex items-baseline gap-4 mb-2">
               <h1 className="text-4xl md:text-5xl font-bold">{formatPrice(property.price)}</h1>
               <span className="text-xl text-muted-foreground">${property.pricePerSqFt}/sqft</span>
@@ -830,6 +830,7 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Interior Features */}
+          <div id="features">
           {listing.details && (
             <Collapsible defaultOpen={false}>
               <CollapsibleTrigger className="w-full">
@@ -867,9 +868,10 @@ export default function PropertyDetail() {
                 </div>
               </CollapsibleContent>
             </Collapsible>
-          )}
+           )}
 
           {listing.details && <Separator />}
+          </div>
 
           {/* Exterior Features */}
           {listing.details && (
@@ -1002,7 +1004,7 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Location & Map */}
-          <div>
+          <div id="map">
             <h2 className="text-2xl font-bold mb-4">Location of {property.address}, {property.city}, {property.state} {property.zip}</h2>
             <div className="rounded-lg overflow-hidden border h-[400px]">
               <PropertyMap 
@@ -1213,7 +1215,7 @@ export default function PropertyDetail() {
         </div>
 
         {/* Right Column - Contact Card (Sticky) */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1" id="request-showing">
           <div className="sticky top-4">
             <Card className="border-2">
               <div className="p-6">
