@@ -35,20 +35,22 @@ export function PropertyKeyFacts({ property }: PropertyKeyFactsProps) {
   }
 
   return (
-    <div className="bg-background rounded-lg border shadow-sm overflow-hidden">
-      <div className="bg-muted/30 px-8 py-5 border-b">
-        <h2 className="text-2xl font-bold">Property Facts</h2>
+    <section className="py-6 border-t border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+        Property Details
+      </h2>
+      
+      <div className="grid grid-cols-2 gap-x-12 gap-y-0">
+        {facts.map((fact, index) => (
+          <div 
+            key={index}
+            className="flex justify-between py-4 border-b border-gray-100"
+          >
+            <span className="text-sm font-medium text-gray-600">{fact.label}</span>
+            <span className="text-sm font-semibold text-gray-900">{fact.value}</span>
+          </div>
+        ))}
       </div>
-      <div className="p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-          {facts.map((fact, index) => (
-            <div key={index} className="flex flex-col">
-              <span className="text-sm text-muted-foreground mb-1">{fact.label}</span>
-              <span className="text-lg font-semibold">{fact.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

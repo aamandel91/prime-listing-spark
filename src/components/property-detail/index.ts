@@ -3,5 +3,8 @@ export { PropertyPhotoGallery } from './PropertyPhotoGallery';
 export { PropertyKeyFacts } from './PropertyKeyFacts';
 export { PropertyDescription } from './PropertyDescription';
 export { PropertyFeatures } from './PropertyFeatures';
+export { PropertyFeaturesClean } from './PropertyFeaturesClean';
 export { PropertyLocation } from './PropertyLocation';
 export { PropertyContactForm } from './PropertyContactForm';
+export { PropertyAddressBar } from './PropertyAddressBar';
+export { PropertyPriceStats } from './PropertyPriceStats';
