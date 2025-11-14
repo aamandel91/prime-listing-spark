@@ -138,16 +138,16 @@ const RecoveryRouter = () => {
         <Route path="/neighborhood/:slug" element={<NeighborhoodPage />} />
         <Route path="/counties/:countySlug" element={<CityTemplate />} />
         
-        {/* Old property URL format */}
+        {/* Old property URL format - backward compatibility */}
         <Route path="/property/:id" element={<PropertyDetail />} />
-        <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
+        <Route path="/home/:id/openhouse" element={<PropertyDetail />} />
         
         {/* City routes with filters */}
         <Route path="/:citySlug/:filter" element={<CityTemplate />} />
         <Route path="/:citySlug" element={<CityTemplate />} />
         
-        {/* New SEO-friendly property URL format - must come after city routes */}
-        <Route path="/:propertySlug/" element={<PropertyDetail />} />
+        {/* New SEO-friendly property URL format with /home/ prefix */}
+        <Route path="/home/:propertySlug/" element={<PropertyDetail />} />
         
         {/* Legal Pages */}
         <Route path="/terms-of-service" element={<TermsOfService />} />
