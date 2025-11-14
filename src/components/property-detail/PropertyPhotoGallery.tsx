@@ -32,11 +32,11 @@ export function PropertyPhotoGallery({ images, address }: PropertyPhotoGalleryPr
     <>
       <div className="relative w-full">
         {/* Main Image */}
-        <div className="relative w-full h-[500px] bg-black">
+        <div className="relative w-full h-[600px] lg:h-[700px] bg-gray-900">
           <img
             src={images[currentIndex]}
             alt={`${address} - Photo ${currentIndex + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
           
           {/* Navigation Arrows */}
@@ -45,35 +45,35 @@ export function PropertyPhotoGallery({ images, address }: PropertyPhotoGalleryPr
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-900 h-12 w-12 rounded-full shadow-lg"
                 onClick={handlePrevious}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-7 h-7" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-900 h-12 w-12 rounded-full shadow-lg"
                 onClick={handleNext}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-7 h-7" />
               </Button>
             </>
           )}
 
           {/* Photo Counter & Full Screen Button */}
           <div className="absolute bottom-4 left-0 right-0 flex items-center justify-between px-4">
-            <div className="bg-black/70 text-white px-3 py-1 rounded">
+            <div className="bg-white/90 text-gray-900 px-4 py-2 rounded-full font-semibold shadow-lg">
               {currentIndex + 1} / {images.length}
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="bg-black/50 hover:bg-black/70 text-white"
+              className="bg-white/90 hover:bg-white text-gray-900 px-6 rounded-full shadow-lg"
               onClick={() => setIsGalleryOpen(true)}
             >
-              <Maximize2 className="w-4 h-4 mr-2" />
-              View All Photos
+              <Maximize2 className="w-5 h-5 mr-2" />
+              View All {images.length} Photos
             </Button>
           </div>
         </div>
@@ -81,16 +81,16 @@ export function PropertyPhotoGallery({ images, address }: PropertyPhotoGalleryPr
         {/* Thumbnail Strip */}
         {images.length > 1 && (
           <div className="bg-background border-t">
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex gap-2 overflow-x-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex gap-3 overflow-x-auto">
                 {images.slice(0, 10).map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentIndex(index)}
-                    className={`flex-shrink-0 w-24 h-16 rounded overflow-hidden border-2 transition-all ${
+                    className={`flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden border-3 transition-all ${
                       index === currentIndex
-                        ? 'border-primary'
-                        : 'border-transparent opacity-60 hover:opacity-100'
+                        ? 'border-primary ring-2 ring-primary ring-offset-2'
+                        : 'border-transparent opacity-70 hover:opacity-100 hover:border-border'
                     }`}
                   >
                     <img
@@ -103,7 +103,7 @@ export function PropertyPhotoGallery({ images, address }: PropertyPhotoGalleryPr
                 {images.length > 10 && (
                   <button
                     onClick={() => setIsGalleryOpen(true)}
-                    className="flex-shrink-0 w-24 h-16 rounded border-2 border-dashed border-muted-foreground flex items-center justify-center text-sm text-muted-foreground hover:bg-muted"
+                    className="flex-shrink-0 w-32 h-20 rounded-lg border-2 border-dashed border-muted-foreground flex items-center justify-center text-sm font-medium text-muted-foreground hover:bg-muted hover:border-primary transition-colors"
                   >
                     +{images.length - 10} more
                   </button>

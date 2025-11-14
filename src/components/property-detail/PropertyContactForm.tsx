@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -56,91 +55,99 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
   };
 
   return (
-    <Card className="sticky top-24">
-      <CardHeader>
-        <CardTitle>Contact Agent</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {/* Agent Info */}
-        {property.agent && (
-          <div className="mb-6 p-4 bg-muted rounded-lg">
-            <h4 className="font-semibold mb-2">{property.agent.name}</h4>
-            {property.agent.brokerage && (
-              <p className="text-sm text-muted-foreground mb-2">{property.agent.brokerage}</p>
-            )}
+    <div className="bg-background rounded-lg border shadow-lg overflow-hidden sticky top-24">
+      <div className="bg-primary text-primary-foreground px-6 py-5">
+        <h3 className="text-xl font-bold">Contact Agent</h3>
+      </div>
+      
+      {property.agent && (
+        <div className="p-6 bg-muted/30 border-b">
+          <p className="font-semibold text-lg mb-1">{property.agent.name}</p>
+          {property.agent.brokerage && (
+            <p className="text-sm text-muted-foreground mb-3">{property.agent.brokerage}</p>
+          )}
+          <div className="space-y-2">
             {property.agent.phone && (
-              <div className="flex items-center gap-2 text-sm mb-1">
-                <Phone className="w-4 h-4" />
-                <a href={`tel:${property.agent.phone}`} className="hover:underline">
+              <p className="text-sm flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary" />
+                <a href={`tel:${property.agent.phone}`} className="hover:text-primary">
                   {property.agent.phone}
                 </a>
-              </div>
+              </p>
             )}
             {property.agent.email && (
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-4 h-4" />
-                <a href={`mailto:${property.agent.email}`} className="hover:underline">
+              <p className="text-sm flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary" />
+                <a href={`mailto:${property.agent.email}`} className="hover:text-primary">
                   {property.agent.email}
                 </a>
-              </div>
+              </p>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Contact Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Your name"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div>
+          <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 h-11"
+            required
+            placeholder="Your name"
+          />
+        </div>
 
-          <div>
-            <Label htmlFor="email">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="your@email.com"
-            />
-          </div>
+        <div>
+          <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1 h-11"
+            required
+            placeholder="your@email.com"
+          />
+        </div>
 
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(555) 123-4567"
-            />
-          </div>
+        <div>
+          <Label htmlFor="phone" className="text-sm font-medium">Phone</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="mt-1 h-11"
+            placeholder="(555) 555-5555"
+          />
+        </div>
 
-          <div>
-            <Label htmlFor="message">Message *</Label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              rows={4}
-              placeholder="Tell us about your interest..."
-            />
-          </div>
+        <div>
+          <Label htmlFor="message" className="text-sm font-medium">Message *</Label>
+          <Textarea
+            id="message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            className="mt-1"
+            required
+          />
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            <Send className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Sending...' : 'Send Message'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <Button type="submit" className="w-full h-11 text-base" disabled={isSubmitting}>
+          {isSubmitting ? (
+            'Sending...'
+          ) : (
+            <>
+              <Send className="w-4 h-4 mr-2" />
+              Send Message
+            </>
+          )}
+        </Button>
+      </form>
+    </div>
   );
 }

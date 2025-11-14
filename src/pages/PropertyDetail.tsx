@@ -303,15 +303,15 @@ export default function PropertyDetail() {
       <PropertyPhotoGallery images={property.images} address={property.address.full} />
 
       {/* Breadcrumbs */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <BreadcrumbSEO items={breadcrumbItems} />
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-12">
             {/* Description */}
             <div id="description">
               <PropertyDescription description={property.description} />
@@ -352,7 +352,7 @@ export default function PropertyDetail() {
         </div>
 
         {/* Full Width Sections */}
-        <div className="mt-12 space-y-12">
+        <div className="mt-16 space-y-12">
           {/* Community Listings */}
           {property.address.city && (
             <CommunityListings

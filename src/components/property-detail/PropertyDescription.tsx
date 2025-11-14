@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 
 interface PropertyDescriptionProps {
   description: string;
@@ -10,15 +10,15 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Property Description</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+    <div className="bg-background rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-muted/30 px-8 py-5 border-b">
+        <h2 className="text-2xl font-bold">About This Property</h2>
+      </div>
+      <div className="p-8">
+        <p className="text-lg text-foreground leading-relaxed whitespace-pre-wrap">
           {description}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
