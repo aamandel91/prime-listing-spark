@@ -140,7 +140,7 @@ const RecoveryRouter = () => {
         
         {/* Old property URL format - backward compatibility */}
         <Route path="/property/:id" element={<PropertyDetail />} />
-        <Route path="/home/:id/openhouse" element={<PropertyDetail />} />
+        <Route path="/property/:id/openhouse" element={<PropertyDetail />} />
         
         {/* City routes with filters */}
         <Route path="/:citySlug/:filter" element={<CityTemplate />} />
@@ -148,6 +148,8 @@ const RecoveryRouter = () => {
         
         {/* New SEO-friendly property URL format with /home/ prefix */}
         <Route path="/home/:propertySlug/" element={<PropertyDetail />} />
+        <Route path="/home/:propertySlug" element={<PropertyDetail />} />
+        <Route path="/home/:id/openhouse" element={<PropertyDetail />} />
         
         {/* Legal Pages */}
         <Route path="/terms-of-service" element={<TermsOfService />} />

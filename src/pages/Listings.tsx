@@ -17,6 +17,7 @@ import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useFollowUpBoss } from "@/hooks/useFollowUpBoss";
 import { useRepliersListings } from "@/hooks/useRepliers";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { generatePropertyUrl } from "@/lib/propertyUrl";
 
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -544,7 +545,13 @@ const Listings = () => {
       "@type": "RealEstateListing",
       "position": index + 1,
       "name": property.title,
-      "url": `${window.location.origin}/property/${property.id}`,
+      "url": `${window.location.origin}${generatePropertyUrl({
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        zip: property.zipCode,
+        mlsNumber: property.id
+      })}`,
       "address": {
         "@type": "PostalAddress",
         "streetAddress": property.address,

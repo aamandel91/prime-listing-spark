@@ -36,17 +36,21 @@ export default function PropertyDetail() {
   const { id, propertySlug } = useParams();
   const location = useLocation();
   
-  // Parse the URL to get MLS number
-  let mlsNumber = id;
-  if (!id && propertySlug) {
-    const cleanedSlug = propertySlug.replace(/^\/|\/$/g, '');
-    const endMatch = cleanedSlug.match(/(?:^|-)(?:MLS)?([A-Z0-9]{6,})$/i);
-    if (endMatch) {
-      mlsNumber = endMatch[1];
-    } else {
-      mlsNumber = "";
+  // Parse the URL to get MLS number with robust extraction
+  let mlsNumber = id || '';
+  if (!mlsNumber && propertySlug) {
+    const cleaned = decodeURIComponent(propertySlug).replace(/^\/|\/$/g, '');
+    // Try to match "MLS" prefix followed by MLS number (may contain hyphens)
+    const m1 = cleaned.match(/(?:^|-)MLS([A-Z0-9-]+)$/i);
+    // If not found, try to match a generic MLS token at the end (1-4 letters, optional hyphen, then 5+ digits)
+    const m2 = !m1 && cleaned.match(/([A-Z]{1,4}-?\d{5,})$/i);
+    mlsNumber = (m1?.[1] || m2?.[1] || '').toUpperCase();
+    
+    if (!mlsNumber) {
+      console.warn('Failed to extract MLS from slug:', propertySlug);
     }
-  } else if (!id && !propertySlug) {
+  }
+  if (!mlsNumber) {
     mlsNumber = extractMlsFromOldUrl(location.pathname) || "";
   }
 
