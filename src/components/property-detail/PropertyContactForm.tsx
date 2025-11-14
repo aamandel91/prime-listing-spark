@@ -55,13 +55,13 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
   };
 
   return (
-    <div className="bg-background rounded-lg border shadow-lg overflow-hidden sticky top-24">
-      <div className="bg-primary text-primary-foreground px-6 py-5">
+    <div className="bg-white rounded-lg border-2 border-gray-300 shadow-sm overflow-hidden sticky top-24">
+      <div className="bg-blue-600 text-white px-6 py-5">
         <h3 className="text-xl font-bold">Contact Agent</h3>
       </div>
       
       {property.agent && (
-        <div className="p-6 bg-muted/30 border-b">
+        <div className="p-6 bg-gray-50 border-b border-gray-200">
           <p className="font-semibold text-lg mb-1">{property.agent.name}</p>
           {property.agent.brokerage && (
             <p className="text-sm text-muted-foreground mb-3">{property.agent.brokerage}</p>
@@ -69,16 +69,16 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
           <div className="space-y-2">
             {property.agent.phone && (
               <p className="text-sm flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary" />
-                <a href={`tel:${property.agent.phone}`} className="hover:text-primary">
+                <Phone className="w-4 h-4 text-blue-600" />
+                <a href={`tel:${property.agent.phone}`} className="hover:text-blue-800 text-blue-600">
                   {property.agent.phone}
                 </a>
               </p>
             )}
             {property.agent.email && (
               <p className="text-sm flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                <a href={`mailto:${property.agent.email}`} className="hover:text-primary">
+                <Mail className="w-4 h-4 text-blue-600" />
+                <a href={`mailto:${property.agent.email}`} className="hover:text-blue-800 text-blue-600">
                   {property.agent.email}
                 </a>
               </p>
@@ -94,7 +94,7 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 h-11"
+            className="mt-1 h-12 border-gray-300"
             required
             placeholder="Your name"
           />
@@ -107,7 +107,7 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 h-11"
+            className="mt-1 h-12 border-gray-300"
             required
             placeholder="your@email.com"
           />
@@ -120,7 +120,7 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="mt-1 h-11"
+            className="mt-1 h-12 border-gray-300"
             placeholder="(555) 555-5555"
           />
         </div>
@@ -132,12 +132,12 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
-            className="mt-1"
+            className="mt-1 border-gray-300 resize-none min-h-[120px]"
             required
           />
         </div>
 
-        <Button type="submit" className="w-full h-11 text-base" disabled={isSubmitting}>
+        <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
           {isSubmitting ? (
             'Sending...'
           ) : (

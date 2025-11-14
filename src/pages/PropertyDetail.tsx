@@ -301,7 +301,7 @@ export default function PropertyDetail() {
       />
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-6 py-0">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Breadcrumbs */}
         <div className="py-6">
           <BreadcrumbSEO items={breadcrumbItems} />
