@@ -36,7 +36,7 @@ export const generatePropertyUrl = (property: PropertyUrlData): string => {
     .replace(/-+/g, '-') // Replace multiple hyphens with single
     .trim();
 
-  return `/${slug}/`;
+  return `/home/${slug}/`;
 };
 
 /**
