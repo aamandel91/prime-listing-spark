@@ -147,7 +147,7 @@ export default function OpenHouseSignIn({
 
       // Redirect to property detail page after 2 seconds
       setTimeout(() => {
-        navigate(`/property/${propertyId}`);
+        navigate(`/home/${propertyId}/openhouse`);
       }, 2000);
     } catch (error: any) {
       console.error("Error submitting open house sign-in:", error);

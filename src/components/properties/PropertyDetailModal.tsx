@@ -476,7 +476,13 @@ export const PropertyDetailModal = ({ isOpen, onClose, propertyId }: PropertyDet
         <meta property="og:title" content={`${property.address} - ${property.city}, ${property.state}`} />
         <meta property="og:description" content={`${property.beds} bed, ${property.baths} bath home for sale. ${property.sqft} sqft listed at ${formatPrice(property.price)}`} />
         <meta property="og:image" content={property.images[0]} />
-        <meta property="og:url" content={`${window.location.origin}/property/${propertyId}`} />
+        <meta property="og:url" content={`${window.location.origin}${generatePropertyUrl({
+          address: property.address,
+          city: property.city,
+          state: property.state,
+          zip: property.zip,
+          mlsNumber: property.mlsId
+        })}`} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
