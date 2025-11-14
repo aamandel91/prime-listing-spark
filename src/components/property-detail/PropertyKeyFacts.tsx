@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { NormalizedProperty } from '@/lib/propertyMapper';
 
 interface PropertyKeyFactsProps {
@@ -36,20 +35,20 @@ export function PropertyKeyFacts({ property }: PropertyKeyFactsProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Property Facts</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-background rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-muted/30 px-8 py-5 border-b">
+        <h2 className="text-2xl font-bold">Property Facts</h2>
+      </div>
+      <div className="p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
           {facts.map((fact, index) => (
-            <div key={index} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-              <span className="text-muted-foreground font-medium">{fact.label}</span>
-              <span className="font-semibold">{fact.value}</span>
+            <div key={index} className="flex flex-col">
+              <span className="text-sm text-muted-foreground mb-1">{fact.label}</span>
+              <span className="text-lg font-semibold">{fact.value}</span>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

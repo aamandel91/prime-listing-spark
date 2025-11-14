@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share2, Heart, MapPin, Bed, Bath, Square, Calendar, Home } from 'lucide-react';
+import { Share2, Heart, MapPin, Bed, Bath, Maximize, Calendar, Home, Trees, Mail } from 'lucide-react';
 import type { NormalizedProperty } from '@/lib/propertyMapper';
 
 interface PropertyDetailHeaderProps {
@@ -29,107 +29,111 @@ export function PropertyDetailHeader({
   };
 
   return (
-    <div className="bg-background border-b sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-6">
-        {/* Address & Status */}
-        <div className="flex items-start justify-between mb-4">
+    <div className="bg-background border-b shadow-sm sticky top-0 z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Status & Days on Market */}
+        <div className="flex items-center gap-4 mb-4">
+          <Badge className={`${getStatusColor(property.status)} text-sm px-4 py-1.5`}>
+            {property.status}
+          </Badge>
+          <span className="text-muted-foreground">
+            {property.daysOnMarket} days on market
+          </span>
+        </div>
+        
+        {/* Address & Price Row */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Badge className={`${getStatusColor(property.status)} text-white`}>
-                {property.status}
-              </Badge>
-              {property.daysOnMarket > 0 && (
-                <span className="text-sm text-muted-foreground">
-                  {property.daysOnMarket} days on market
-                </span>
-              )}
-            </div>
-            <h1 className="text-3xl font-bold mb-2">{property.address.street}</h1>
-            <p className="text-xl text-muted-foreground flex items-center gap-2">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              {property.address.street}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground flex items-center gap-2">
               <MapPin className="w-5 h-5" />
               {property.address.city}, {property.address.state} {property.address.zip}
             </p>
           </div>
-          
-          <div className="text-right">
-            <div className="text-4xl font-bold text-primary mb-1">
+          <div className="text-left lg:text-right">
+            <div className="text-4xl md:text-5xl font-bold text-primary mb-1">
               {property.priceFormatted}
             </div>
             {property.pricePerSqft && (
-              <div className="text-sm text-muted-foreground">
-                ${property.pricePerSqft}/sqft
+              <div className="text-base text-muted-foreground">
+                ${property.pricePerSqft} per sqft
               </div>
             )}
           </div>
         </div>
-
-        {/* Key Stats */}
-        <div className="flex flex-wrap items-center gap-6 mb-6">
-          <div className="flex items-center gap-2">
-            <Bed className="w-5 h-5 text-muted-foreground" />
-            <span className="text-lg font-semibold">{property.beds}</span>
-            <span className="text-muted-foreground">Beds</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Bath className="w-5 h-5 text-muted-foreground" />
-            <span className="text-lg font-semibold">{property.baths}</span>
-            <span className="text-muted-foreground">Baths</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Square className="w-5 h-5 text-muted-foreground" />
-            <span className="text-lg font-semibold">{property.sqft.toLocaleString()}</span>
-            <span className="text-muted-foreground">Sqft</span>
-          </div>
-          
-          {property.acres && (
-            <div className="flex items-center gap-2">
-              <Home className="w-5 h-5 text-muted-foreground" />
-              <span className="text-lg font-semibold">{property.acres}</span>
-              <span className="text-muted-foreground">Acres</span>
+        
+        {/* Stats Grid - Clean & Scannable */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 pb-6 border-b">
+          <div className="flex items-center gap-3">
+            <Bed className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-2xl font-bold">{property.beds}</div>
+              <div className="text-sm text-muted-foreground">Bedrooms</div>
             </div>
-          )}
-          
-          {property.yearBuilt && (
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-muted-foreground" />
-              <span className="text-lg font-semibold">{property.yearBuilt}</span>
-              <span className="text-muted-foreground">Built</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Bath className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-2xl font-bold">{property.baths}</div>
+              <div className="text-sm text-muted-foreground">Bathrooms</div>
             </div>
-          )}
-          
-          <div className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-muted-foreground" />
-            <span className="text-lg font-semibold">{property.propertyType}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Maximize className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-2xl font-bold">{property.sqft.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">Sqft</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Trees className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-2xl font-bold">
+                {property.acres ? `${property.acres}` : 'N/A'}
+              </div>
+              <div className="text-sm text-muted-foreground">Acres</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-2xl font-bold">{property.yearBuilt || 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">Built</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Home className="w-6 h-6 text-primary" />
+            <div>
+              <div className="text-lg font-bold">{property.propertyType}</div>
+              <div className="text-sm text-muted-foreground">Type</div>
+            </div>
           </div>
         </div>
-
+        
         {/* CTA Buttons */}
         <div className="flex flex-wrap items-center gap-3">
-          <Button size="lg" onClick={onRequestInfo} className="flex-1 sm:flex-none">
+          <Button size="lg" onClick={onRequestInfo} className="flex-1 sm:flex-none px-8">
+            <Mail className="w-5 h-5 mr-2" />
             Request Info
           </Button>
-          <Button size="lg" variant="outline" onClick={onScheduleShowing} className="flex-1 sm:flex-none">
+          <Button size="lg" variant="outline" onClick={onScheduleShowing} className="flex-1 sm:flex-none px-8">
+            <Calendar className="w-5 h-5 mr-2" />
             Schedule Showing
           </Button>
-          
           <div className="flex gap-2 ml-auto">
-            {onToggleFavorite && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={onToggleFavorite}
-                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-              </Button>
-            )}
-            {onShare && (
-              <Button size="icon" variant="outline" onClick={onShare} aria-label="Share listing">
-                <Share2 className="w-5 h-5" />
-              </Button>
-            )}
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={onToggleFavorite}
+              className={isFavorite ? 'text-red-500' : ''}
+            >
+              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+            </Button>
+            <Button size="icon" variant="outline" onClick={onShare}>
+              <Share2 className="w-5 h-5" />
+            </Button>
           </div>
         </div>
       </div>
