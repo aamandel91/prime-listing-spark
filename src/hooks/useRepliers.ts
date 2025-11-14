@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { 
   RepliersProperty, 
@@ -43,12 +43,13 @@ export const useRepliers = () => {
 
   const getListingById = async (id: string): Promise<RepliersProperty | null> => {
     try {
+      // Use the dedicated single listing endpoint for better performance
       const requestBody: RepliersProxyRequest = {
-        endpoint: `/listings`,
-        params: { mlsNumber: id },
+        endpoint: `/listings/${id}`,
+        params: {},
       };
 
-      const { data, error } = await supabase.functions.invoke<RepliersAPIResponse<RepliersProperty>>(
+      const { data, error } = await supabase.functions.invoke(
         'repliers-proxy',
         { body: requestBody }
       );
@@ -58,12 +59,11 @@ export const useRepliers = () => {
         throw error;
       }
 
-      // Extract first listing from response
-      const listing = data?.listings?.[0] || data?.[0] || null;
-      return listing;
+      // Single listing endpoint returns the listing object directly
+      return data || null;
     } catch (error) {
       console.error('Error in getListingById:', error);
-      throw error;
+      return null;
     }
   };
 
@@ -121,27 +121,35 @@ export const useRepliersListing = (id: string) => {
   const [error, setError] = useState<Error | null>(null);
   const { getListingById } = useRepliers();
 
-  useEffect(() => {
-    const fetchListing = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        console.log('Fetching property details for MLS:', id);
-        const data = await getListingById(id);
-        console.log('Property detail data received:', data);
-        setListing(data);
-      } catch (err) {
-        setError(err as Error);
-        console.error('Error fetching listing:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchListing();
+  const fetchListing = useCallback(async () => {
+    if (!id) {
+      setLoading(false);
+      return;
     }
-  }, [id]);
 
-  return { listing, loading, error };
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Fetching property details for MLS:', id);
+      const data = await getListingById(id);
+      console.log('Property detail data received:', data);
+      setListing(data);
+    } catch (err) {
+      console.error('Error fetching listing:', err);
+      setError(err as Error);
+      setListing(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, getListingById]);
+
+  useEffect(() => {
+    fetchListing();
+  }, [fetchListing]);
+
+  const retry = useCallback(() => {
+    fetchListing();
+  }, [fetchListing]);
+
+  return { listing, loading, error, retry };
 };

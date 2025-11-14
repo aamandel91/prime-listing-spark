@@ -226,6 +226,8 @@ export type Database = {
       }
       content_pages: {
         Row: {
+          api_filters: Json | null
+          category: string | null
           content: string
           created_at: string
           default_image: string | null
@@ -257,6 +259,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          api_filters?: Json | null
+          category?: string | null
           content: string
           created_at?: string
           default_image?: string | null
@@ -288,6 +292,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          api_filters?: Json | null
+          category?: string | null
           content?: string
           created_at?: string
           default_image?: string | null
@@ -1172,6 +1178,51 @@ export type Database = {
         }
         Relationships: []
       }
+      property_subtypes: {
+        Row: {
+          api_filters: Json
+          created_at: string
+          description: string | null
+          featured: boolean
+          icon: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          api_filters?: Json
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          icon?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          api_filters?: Json
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          icon?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       property_views: {
         Row: {
           created_at: string
@@ -1271,6 +1322,63 @@ export type Database = {
           sms_notifications?: boolean | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      school_districts: {
+        Row: {
+          boundaries: Json | null
+          city: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          rating: number | null
+          slug: string
+          sort_order: number | null
+          state: string
+          total_schools: number | null
+          updated_at: string
+        }
+        Insert: {
+          boundaries?: Json | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          rating?: number | null
+          slug: string
+          sort_order?: number | null
+          state?: string
+          total_schools?: number | null
+          updated_at?: string
+        }
+        Update: {
+          boundaries?: Json | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          rating?: number | null
+          slug?: string
+          sort_order?: number | null
+          state?: string
+          total_schools?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
