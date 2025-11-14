@@ -81,20 +81,26 @@ serve(async (req) => {
     }
 
     // Map status values to Repliers API format
-    // Note: 'status' uses single letters (A, U, S, X, C, H)
-    // 'standardStatus' uses full names (Active, Closed, Pending, etc.) - no mapping needed
+    // IMPORTANT: API only accepts 'A' (Active) and 'U' (Under Contract/Pending)
+    // Sold properties should be filtered client-side using standardStatus instead
     const statusMap: Record<string, string> = {
       'Active': 'A',
       'Pending': 'U',
-      'Sold': 'S',
-      'Expired': 'X',
-      'Cancelled': 'C',
-      'Hold': 'H',
+      'Under Contract': 'U',
     };
     
     // Only map the 'status' parameter (standardStatus should use full names)
+    // Remove invalid status values that API doesn't support
     if (queryParams.status) {
-      queryParams.status = statusMap[queryParams.status] || queryParams.status;
+      const mapped = statusMap[queryParams.status] || queryParams.status;
+      // Only include if it's a valid status (A or U)
+      if (mapped === 'A' || mapped === 'U') {
+        queryParams.status = mapped;
+      } else {
+        // Remove invalid status to prevent API errors
+        console.warn(`Invalid status value removed: ${queryParams.status}`);
+        delete queryParams.status;
+      }
     }
 
     // Ensure endpoint starts with /
@@ -135,6 +141,25 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Repliers API error:', response.status, errorText);
+      
+      // For 404 errors on similar endpoint, return empty results instead of error
+      if (response.status === 404 && endpoint.includes('/similar/')) {
+        console.log('Similar listings not found, returning empty results');
+        return new Response(
+          JSON.stringify({ listings: [], count: 0 }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // For 403 errors on places endpoint, return empty results
+      if (response.status === 403 && endpoint.includes('/places')) {
+        console.log('Places API access forbidden, returning empty results');
+        return new Response(
+          JSON.stringify({ places: [] }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'API request failed', details: errorText }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

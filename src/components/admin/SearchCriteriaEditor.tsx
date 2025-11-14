@@ -81,11 +81,9 @@ const propertyClasses = [
 
 const statusOptions = [
   { value: 'A', label: 'Active' },
-  { value: 'P', label: 'Pending' },
-  { value: 'S', label: 'Sold' },
-  { value: 'Closed', label: 'Closed' },
-  { value: 'Expired', label: 'Expired' },
-  { value: 'Withdrawn', label: 'Withdrawn' },
+  { value: 'U', label: 'Pending/Under Contract' },
+  // Note: API only supports 'A' (Active) and 'U' (Under Contract/Pending)
+  // For sold/closed properties, filter by standardStatus on client-side
 ];
 
 export function SearchCriteriaEditor({ pageId, entityType = 'content_page', entityId, onSave }: SearchCriteriaEditorProps) {

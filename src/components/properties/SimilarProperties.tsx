@@ -70,15 +70,22 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
         );
         setSimilarActive(filteredActive.slice(0, 6));
 
-        // Fetch sold comparables
+        // Fetch sold comparables - Note: API doesn't support 'S' status
+        // Filter by standardStatus='Closed' on the client-side instead
         const soldResponse = await searchListings({
           ...baseParams,
-          status: "Sold",
+          // status: "Sold", // Removed - not supported by API
           minPrice,
           maxPrice,
         });
+        
+        // Filter for sold/closed properties from the response
+        const soldListings = (soldResponse.listings || []).filter(
+          (listing) => listing.standardStatus?.toLowerCase().includes('closed') || 
+                      listing.standardStatus?.toLowerCase().includes('sold')
+        );
 
-        setSoldComparables((soldResponse.listings || []).slice(0, 6));
+        setSoldComparables(soldListings.slice(0, 6));
       } catch (error) {
         console.error("Error fetching similar properties:", error);
       } finally {
