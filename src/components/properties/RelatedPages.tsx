@@ -17,7 +17,7 @@ export const RelatedPages = ({ city, state, className = "" }: RelatedPagesProps)
     { label: `${city} Homes for Sale`, href: `/listings?city=${city}&state=${state}&propertyType=Residential` },
     { label: `${city} Condos`, href: `/listings?city=${city}&state=${state}&propertyType=Condominium` },
     { label: `${city} Waterfront Homes`, href: `/listings?city=${city}&state=${state}&waterfront=true` },
-    { label: `Sold in ${city}`, href: `/listings?city=${city}&state=${state}&status=S` },
+    // Note: "Sold" status removed - API only supports Active (A) and Under Contract (U)
   ];
 
   return (
