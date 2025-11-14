@@ -80,47 +80,58 @@ serve(async (req) => {
       });
     }
 
-    // Map status values to Repliers API format
-    // IMPORTANT: API only accepts 'A' (Active) and 'U' (Under Contract/Pending)
-    // Sold properties should be filtered client-side using standardStatus instead
-    const statusMap: Record<string, string> = {
-      'Active': 'A',
-      'Pending': 'U',
-      'Under Contract': 'U',
-    };
-    
-    // Only map the 'status' parameter (standardStatus should use full names)
-    // Remove invalid status values that API doesn't support
-    if (queryParams.status) {
-      const mapped = statusMap[queryParams.status] || queryParams.status;
-      // Only include if it's a valid status (A or U)
-      if (mapped === 'A' || mapped === 'U') {
-        queryParams.status = mapped;
-      } else {
-        // Remove invalid status to prevent API errors
-        console.warn(`Invalid status value removed: ${queryParams.status}`);
-        delete queryParams.status;
-      }
-    }
-
     // Ensure endpoint starts with /
     if (endpoint && !endpoint.startsWith('/')) {
       endpoint = `/${endpoint}`;
     }
 
-    // Build search params, supporting array values by repeating keys
-    const searchParams = new URLSearchParams();
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => searchParams.append(key, String(v)));
-      } else if (value !== undefined && value !== null && value !== '') {
-        searchParams.append(key, String(value));
-      }
-    });
-
-    const apiUrl = `https://api.repliers.io${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    // Check if this is a single listing request (e.g., /listings/MLS123456)
+    const isSingleListing = endpoint.match(/^\/listings\/[A-Z0-9]+$/i);
     
-    console.log('Fetching from Repliers API:', apiUrl, 'Method:', httpMethod);
+    let apiUrl: string;
+    
+    if (isSingleListing) {
+      // Single listing endpoint - no query params needed
+      apiUrl = `https://api.repliers.io${endpoint}`;
+      console.log('Fetching single listing from Repliers API:', apiUrl);
+    } else {
+      // Search listings endpoint - apply status mapping and build query params
+      // Map status values to Repliers API format
+      // IMPORTANT: API only accepts 'A' (Active) and 'U' (Under Contract/Pending)
+      // Sold properties should be filtered client-side using standardStatus instead
+      const statusMap: Record<string, string> = {
+        'Active': 'A',
+        'Pending': 'U',
+        'Under Contract': 'U',
+      };
+      
+      // Only map the 'status' parameter (standardStatus should use full names)
+      // Remove invalid status values that API doesn't support
+      if (queryParams.status) {
+        const mapped = statusMap[queryParams.status] || queryParams.status;
+        // Only include if it's a valid status (A or U)
+        if (mapped === 'A' || mapped === 'U') {
+          queryParams.status = mapped;
+        } else {
+          // Remove invalid status to prevent API errors
+          console.warn(`Invalid status value removed: ${queryParams.status}`);
+          delete queryParams.status;
+        }
+      }
+
+      // Build search params, supporting array values by repeating keys
+      const searchParams = new URLSearchParams();
+      Object.entries(queryParams).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((v) => searchParams.append(key, String(v)));
+        } else if (value !== undefined && value !== null && value !== '') {
+          searchParams.append(key, String(value));
+        }
+      });
+
+      apiUrl = `https://api.repliers.io${endpoint}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+      console.log('Fetching from Repliers API:', apiUrl, 'Method:', httpMethod);
+    }
 
     // Prepare fetch options
     const fetchOptions: RequestInit = {
