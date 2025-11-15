@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { BedDouble, Bath, Square, MapPin } from "lucide-react";
-import { generatePropertyUrl } from "@/lib/propertyUrl";
+import { generateDirectPropertyUrl } from "@/lib/propertyUrl";
 import { FavoriteButton } from "./FavoriteButton";
 import { CompareButton } from "./CompareButton";
 import OptimizedImage from "@/components/OptimizedImage";
@@ -127,14 +127,8 @@ const PropertyCard = ({
     }
   };
 
-  // Generate SEO-friendly URL
-  const propertyUrl = generatePropertyUrl({
-    address,
-    city,
-    state,
-    zip: zipCode || '',
-    mlsNumber: mlsNumber || id,
-  });
+  // Generate direct property URL using MLS number
+  const propertyUrl = mlsNumber ? generateDirectPropertyUrl(mlsNumber) : generateDirectPropertyUrl(id);
 
   const CardContent = (
     <>

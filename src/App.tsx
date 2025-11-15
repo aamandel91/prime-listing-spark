@@ -138,6 +138,9 @@ const RecoveryRouter = () => {
         <Route path="/neighborhood/:slug" element={<NeighborhoodPage />} />
         <Route path="/counties/:countySlug" element={<CityTemplate />} />
         
+        {/* Direct MLS number routing - primary format */}
+        <Route path="/listing/:mlsNumber" element={<PropertyDetail />} />
+        
         {/* Old property URL format - backward compatibility */}
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property/:id/openhouse" element={<PropertyDetail />} />

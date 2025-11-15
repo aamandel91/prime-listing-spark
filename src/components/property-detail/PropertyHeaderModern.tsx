@@ -20,12 +20,13 @@ export function PropertyHeaderModern({
   onScheduleTour,
   isFavorite = false,
 }: PropertyHeaderModernProps) {
-  const getStatusColor = () => {
-    const status = property.status.toLowerCase();
-    if (status.includes('active')) return 'bg-green-100 text-green-800 border-green-300';
-    if (status.includes('pending')) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-    if (status.includes('sold')) return 'bg-gray-100 text-gray-800 border-gray-300';
-    return 'bg-blue-100 text-blue-800 border-blue-300';
+  const getStatusColor = (): string => {
+    const normalizedStatus = property.status.toLowerCase();
+    if (normalizedStatus.includes('active')) return 'bg-green-500 text-white hover:bg-green-600';
+    if (normalizedStatus.includes('pending')) return 'bg-yellow-500 text-white hover:bg-yellow-600';
+    if (normalizedStatus.includes('sold')) return 'bg-gray-500 text-white hover:bg-gray-600';
+    if (normalizedStatus.includes('contract')) return 'bg-orange-500 text-white hover:bg-orange-600';
+    return 'bg-blue-500 text-white hover:bg-blue-600';
   };
 
   return (
