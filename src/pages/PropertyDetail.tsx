@@ -44,7 +44,9 @@ export default function PropertyDetail() {
     const m1 = cleaned.match(/(?:^|-)MLS([A-Z0-9-]+)$/i);
     // If not found, try to match a generic MLS token at the end (1-4 letters, optional hyphen, then 5+ digits)
     const m2 = !m1 && cleaned.match(/([A-Z]{1,4}-?\d{5,})$/i);
-    mlsNumber = (m1?.[1] || m2?.[1] || '').toUpperCase();
+    // If not found, try to match pure numeric MLS at the end (5+ digits)
+    const m3 = !m1 && !m2 && cleaned.match(/(\d{5,})$/);
+    mlsNumber = (m1?.[1] || m2?.[1] || m3?.[1] || '').toUpperCase();
     
     if (!mlsNumber) {
       console.warn('Failed to extract MLS from slug:', propertySlug);
