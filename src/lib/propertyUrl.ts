@@ -25,7 +25,7 @@ export const generatePropertyUrl = (property: PropertyUrlData): string => {
 
   // Add MLS number if available
   if (property.mlsNumber) {
-    parts.push(`MLS${property.mlsNumber}`);
+    parts.push(property.mlsNumber);
   }
 
   const slug = parts
