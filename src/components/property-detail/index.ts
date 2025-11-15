@@ -8,3 +8,4 @@ export { PropertyLocation } from './PropertyLocation';
 export { PropertyContactForm } from './PropertyContactForm';
 export { PropertyAddressBar } from './PropertyAddressBar';
 export { PropertyPriceStats } from './PropertyPriceStats';
+export { PropertyHeaderModern } from './PropertyHeaderModern';

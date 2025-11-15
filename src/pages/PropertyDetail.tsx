@@ -20,8 +20,7 @@ import {
   PropertyFeaturesClean,
   PropertyLocation,
   PropertyContactForm,
-  PropertyAddressBar,
-  PropertyPriceStats,
+  PropertyHeaderModern,
 } from "@/components/property-detail";
 import { PropertyHistory } from "@/components/properties/PropertyHistory";
 import { SimilarProperties } from "@/components/properties/SimilarProperties";
@@ -291,30 +290,24 @@ export default function PropertyDetail() {
       {/* Photo Gallery - Full Width at Top */}
       <PropertyPhotoGallery images={property.images} address={property.address.full} />
 
-      {/* Address Bar - Below Gallery */}
-      <PropertyAddressBar
+      {/* Modern Property Header - Full Width */}
+      <PropertyHeaderModern
         property={property}
         onShare={handleShare}
         onToggleFavorite={handleToggleFavorite}
+        onRequestInfo={() => setIsContactDialogOpen(true)}
+        onScheduleTour={() => setIsContactDialogOpen(true)}
         isFavorite={isFavorite}
       />
 
-      {/* Price & Stats Section - Horizontal Layout */}
-      <PropertyPriceStats
-        property={property}
-        onRequestInfo={() => setIsContactDialogOpen(true)}
-        onScheduleShowing={() => setIsContactDialogOpen(true)}
-      />
-
-      {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Breadcrumbs */}
-        <div className="py-6">
+      {/* Main Container with Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
           <BreadcrumbSEO items={breadcrumbItems} />
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Two Column Layout: 2/3 Content + 1/3 Sticky Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content (2/3) */}
           <div className="lg:col-span-2 space-y-0">
             {/* Description */}
@@ -332,21 +325,14 @@ export default function PropertyDetail() {
               <PropertyFeaturesClean property={property} />
             </div>
 
-            {/* Market Statistics */}
-            <div className="py-6 border-t border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
-                Market Statistics
-              </h2>
-              <MarketStatistics
-                city={property.address.city}
-                state={property.address.state}
-                propertyType={property.propertyType}
-              />
+            {/* Location & Map */}
+            <div id="location">
+              <PropertyLocation property={property} />
             </div>
 
             {/* Nearby Places */}
-            <div className="py-6 border-t border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+            <div className="bg-white rounded-lg p-8 shadow-sm border mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-6">
                 Nearby Amenities
               </h2>
               <NearbyPlaces
@@ -355,45 +341,48 @@ export default function PropertyDetail() {
               />
             </div>
 
-            {/* Location & Map */}
-            <div id="location">
-              <PropertyLocation property={property} />
+            {/* Market Statistics */}
+            <div className="bg-white rounded-lg p-8 shadow-sm border mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                Market Statistics
+              </h2>
+              <MarketStatistics
+                city={property.address.city}
+                state={property.address.state}
+                propertyType={property.propertyType}
+              />
             </div>
           </div>
 
           {/* Right Column - Sidebar (1/3) - Sticky */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4">
-              <PropertyContactForm property={property} />
-            </div>
+            <PropertyContactForm property={property} />
           </div>
         </div>
+      </div>
 
-        {/* Full Width Sections Below */}
-        <div className="mt-16 space-y-12">
-          {/* Community Listings */}
-          {property.address.city && (
-            <div className="py-8 border-t-2 border-gray-200">
-              <CommunityListings
-                city={property.address.city}
-                state={property.address.state}
-                currentMlsNumber={property.mlsNumber}
-              />
-            </div>
-          )}
+      {/* Full Width Sections - Outside Container */}
+      {/* Similar Properties */}
+      <div id="similar">
+        <SimilarProperties currentProperty={listing} />
+      </div>
 
-          {/* Similar Properties */}
-          <div id="similar" className="py-8 border-t-2 border-gray-200">
-            <SimilarProperties currentProperty={listing} />
-          </div>
+      {/* Community Listings */}
+      {property.address.city && (
+        <CommunityListings
+          city={property.address.city}
+          state={property.address.state}
+          currentMlsNumber={property.mlsNumber}
+        />
+      )}
 
-          {/* Related Pages */}
-          <div className="py-8 border-t-2 border-gray-200">
-            <RelatedPages
-              city={property.address.city}
-              state={property.address.state}
-            />
-          </div>
+      {/* Related Pages */}
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <RelatedPages
+            city={property.address.city}
+            state={property.address.state}
+          />
         </div>
       </div>
 
@@ -401,7 +390,7 @@ export default function PropertyDetail() {
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Contact About This Property</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Contact About This Property</DialogTitle>
           </DialogHeader>
           <PropertyContactForm property={property} />
         </DialogContent>

@@ -55,98 +55,103 @@ export function PropertyContactForm({ property }: PropertyContactFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg border-2 border-gray-300 shadow-sm overflow-hidden sticky top-24">
-      <div className="bg-blue-600 text-white px-6 py-5">
-        <h3 className="text-xl font-bold">Contact Agent</h3>
+    <div className="bg-white rounded-lg border shadow-lg overflow-hidden sticky top-24 h-fit">
+      <div className="bg-primary text-primary-foreground px-6 py-6">
+        <h3 className="text-2xl font-bold">Request Information</h3>
+        <p className="text-sm mt-1 opacity-90">Get more details about this property</p>
       </div>
       
       {property.agent && (
-        <div className="p-6 bg-gray-50 border-b border-gray-200">
-          <p className="font-semibold text-lg mb-1">{property.agent.name}</p>
+        <div className="p-6 bg-muted/50 border-b">
+          <p className="font-bold text-xl mb-1 text-foreground">{property.agent.name}</p>
           {property.agent.brokerage && (
-            <p className="text-sm text-muted-foreground mb-3">{property.agent.brokerage}</p>
+            <p className="text-sm text-muted-foreground mb-4">{property.agent.brokerage}</p>
           )}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {property.agent.phone && (
-              <p className="text-sm flex items-center gap-2">
-                <Phone className="w-4 h-4 text-blue-600" />
-                <a href={`tel:${property.agent.phone}`} className="hover:text-blue-800 text-blue-600">
-                  {property.agent.phone}
-                </a>
-              </p>
+              <a href={`tel:${property.agent.phone}`} className="flex items-center gap-3 text-sm hover:text-primary transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Phone className="w-4 h-4 text-primary" />
+                </div>
+                <span className="font-medium">{property.agent.phone}</span>
+              </a>
             )}
             {property.agent.email && (
-              <p className="text-sm flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-600" />
-                <a href={`mailto:${property.agent.email}`} className="hover:text-blue-800 text-blue-600">
-                  {property.agent.email}
-                </a>
-              </p>
+              <a href={`mailto:${property.agent.email}`} className="flex items-center gap-3 text-sm hover:text-primary transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Mail className="w-4 h-4 text-primary" />
+                </div>
+                <span className="font-medium">{property.agent.email}</span>
+              </a>
             )}
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="p-6 space-y-5">
         <div>
-          <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+          <Label htmlFor="name" className="text-base font-semibold text-foreground">Name *</Label>
           <Input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 h-12 border-gray-300"
+            className="mt-2 h-12"
             required
             placeholder="Your name"
           />
         </div>
 
         <div>
-          <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+          <Label htmlFor="email" className="text-base font-semibold text-foreground">Email *</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 h-12 border-gray-300"
+            className="mt-2 h-12"
             required
             placeholder="your@email.com"
           />
         </div>
 
         <div>
-          <Label htmlFor="phone" className="text-sm font-medium">Phone</Label>
+          <Label htmlFor="phone" className="text-base font-semibold text-foreground">Phone</Label>
           <Input
             id="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="mt-1 h-12 border-gray-300"
+            className="mt-2 h-12"
             placeholder="(555) 555-5555"
           />
         </div>
 
         <div>
-          <Label htmlFor="message" className="text-sm font-medium">Message *</Label>
+          <Label htmlFor="message" className="text-base font-semibold text-foreground">Message *</Label>
           <Textarea
             id="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            className="mt-1 border-gray-300 resize-none min-h-[120px]"
+            rows={5}
+            className="mt-2 resize-none"
             required
           />
         </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
+        <Button type="submit" className="w-full h-14 text-base font-bold" disabled={isSubmitting}>
           {isSubmitting ? (
             'Sending...'
           ) : (
             <>
-              <Send className="w-4 h-4 mr-2" />
+              <Send className="w-5 h-5 mr-2" />
               Send Message
             </>
           )}
         </Button>
+
+        <p className="text-xs text-center text-muted-foreground mt-4">
+          By submitting, you agree to our terms. We respect your privacy.
+        </p>
       </form>
     </div>
   );
