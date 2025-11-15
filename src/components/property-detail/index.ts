@@ -9,3 +9,5 @@ export { PropertyContactForm } from './PropertyContactForm';
 export { PropertyAddressBar } from './PropertyAddressBar';
 export { PropertyPriceStats } from './PropertyPriceStats';
 export { PropertyHeaderModern } from './PropertyHeaderModern';
+export { PropertyHistory } from './PropertyHistory';
+export { PropertyDetailSkeleton } from './PropertyDetailSkeleton';

@@ -1,42 +1,49 @@
-import { useParams, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Helmet } from "react-helmet-async";
-import { Loader2 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import { supabase } from "@/integrations/supabase/client";
-import { useTrafficSource } from "@/hooks/useTrafficSource";
-import { useRecentlyViewedProperties } from "@/hooks/useRecentlyViewedProperties";
-import { useRepliersListing } from "@/hooks/useRepliers";
-import { normalizeProperty } from "@/lib/propertyMapper";
-import { extractMlsFromOldUrl } from "@/lib/propertyUrl";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BreadcrumbSEO } from "@/components/ui/breadcrumb-seo";
-import { toast } from "sonner";
-import {
-  PropertyPhotoGallery,
-  PropertyDescription,
+import { useParams, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { Loader2 } from 'lucide-react';
+import Navbar from '@/components/layout/Navbar';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { 
+  PropertyPhotoGallery, 
+  PropertyDescription, 
   PropertyKeyFacts,
   PropertyFeaturesClean,
   PropertyLocation,
   PropertyContactForm,
   PropertyHeaderModern,
-} from "@/components/property-detail";
-import { PropertyHistory } from "@/components/properties/PropertyHistory";
-import { SimilarProperties } from "@/components/properties/SimilarProperties";
-import { CommunityListings } from "@/components/properties/CommunityListings";
-import { RelatedPages } from "@/components/properties/RelatedPages";
-import { PropertyPrevNext } from "@/components/properties/PropertyPrevNext";
-import { PropertyNavigation } from "@/components/properties/PropertyNavigation";
-import { NearbyPlaces } from "@/components/properties/NearbyPlaces";
-import { MarketStatistics } from "@/components/properties/MarketStatistics";
+  PropertyDetailSkeleton
+} from '@/components/property-detail';
+import { PropertyHistory } from '@/components/property-detail/PropertyHistory';
+import { PropertyPrevNext } from '@/components/properties/PropertyPrevNext';
+import { SimilarProperties } from '@/components/properties/SimilarProperties';
+import { CommunityListings } from '@/components/properties/CommunityListings';
+import { RelatedPages } from '@/components/properties/RelatedPages';
+import { NearbyPlaces } from '@/components/properties/NearbyPlaces';
+import { MarketStatistics } from '@/components/properties/MarketStatistics';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useRepliersListing } from '@/hooks/useRepliers';
+import { normalizeProperty } from '@/lib/propertyMapper';
+import { supabase } from '@/integrations/supabase/client';
+import { useRecentlyViewedProperties } from '@/hooks/useRecentlyViewedProperties';
+import { useTrafficSource } from '@/hooks/useTrafficSource';
+import { useFavoriteProperties } from '@/hooks/useFavoriteProperties';
+import { extractMlsFromOldUrl } from '@/lib/propertyUrl';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { BreadcrumbSEO } from '@/components/ui/breadcrumb-seo';
 
 export default function PropertyDetail() {
-  const { id, propertySlug } = useParams();
+  // Get property ID from URL - multiple formats supported
+  const { id, propertySlug, mlsNumber: mlsParam } = useParams();
   const location = useLocation();
   
-  // Parse the URL to get MLS number with robust extraction
-  let mlsNumber = id || '';
+  // Try to extract MLS number from the URL in priority order:
+  // 1. Direct mlsNumber param from /listing/:mlsNumber (primary format)
+  // 2. Direct ID from /property/:id route (old format)
+  // 3. Last segment of slugified URL (contains MLS at end)
+  // 4. Query parameter
+  let mlsNumber = mlsParam || id || '';
+  
   if (!mlsNumber && propertySlug) {
     const cleaned = decodeURIComponent(propertySlug).replace(/^\/|\/$/g, '');
     // Try to match "MLS" prefix followed by MLS number (may contain hyphens)

@@ -57,6 +57,14 @@ export const parsePropertyUrl = (urlSlug: string): { zip: string; fullSlug: stri
 };
 
 /**
+ * Generates a direct MLS number URL (primary format)
+ * Format: /listing/10133166
+ */
+export const generateDirectPropertyUrl = (mlsNumber: string): string => {
+  return `/listing/${mlsNumber}`;
+};
+
+/**
  * Extracts MLS number from URL if it's in the old format
  */
 export const extractMlsFromOldUrl = (path: string): string | null => {
