@@ -35,19 +35,19 @@ export function PropertyKeyFacts({ property }: PropertyKeyFactsProps) {
   }
 
   return (
-    <section className="py-6 border-t border-gray-200">
-      <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+    <section className="bg-white rounded-lg p-8 shadow-sm border mb-8">
+      <h2 className="text-3xl font-bold text-foreground mb-6">
         Property Details
       </h2>
       
-      <div className="grid grid-cols-2 gap-x-12 gap-y-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {facts.map((fact, index) => (
           <div 
             key={index}
-            className="flex justify-between py-4 border-b border-gray-100"
+            className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border hover:bg-muted/50 transition-colors"
           >
-            <span className="text-sm font-medium text-gray-600">{fact.label}</span>
-            <span className="text-sm font-semibold text-gray-900">{fact.value}</span>
+            <span className="text-base font-medium text-muted-foreground">{fact.label}</span>
+            <span className="text-base font-bold text-foreground">{fact.value}</span>
           </div>
         ))}
       </div>

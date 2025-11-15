@@ -10,11 +10,11 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
   }
 
   return (
-    <section className="py-6">
-      <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-3 mb-6">
+    <section className="bg-white rounded-lg p-8 shadow-sm border mb-8">
+      <h2 className="text-3xl font-bold text-foreground mb-6">
         About This Home
       </h2>
-      <p className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
+      <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
         {description}
       </p>
     </section>

@@ -98,18 +98,16 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle>Similar Properties</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-64 w-full" />
+      <section className="py-12 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-foreground mb-8">Similar Properties</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-96 w-full rounded-lg" />
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     );
   }
 
@@ -118,102 +116,103 @@ export const SimilarProperties = ({ currentProperty, className = "" }: SimilarPr
     ? apiSimilarListings.filter(listing => listing.mlsNumber !== currentProperty.mlsNumber)
     : similarActive;
 
+  if (displayListings.length === 0 && soldComparables.length === 0) {
+    return null;
+  }
+
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Similar Properties & Comparables
-          {useApiResults && (
-            <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
-              <Sparkles className="w-3 h-3" />
-              AI-Matched
-            </span>
-          )}
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {useApiResults 
-            ? "AI-powered similar property recommendations" 
-            : "Explore similar listings and recent sales in the area"}
-        </p>
-      </CardHeader>
-      <CardContent>
+    <section className="py-12 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              Similar Properties
+              {useApiResults && (
+                <span className="inline-flex items-center gap-1 ml-2 text-base font-normal text-primary">
+                  <Sparkles className="w-4 h-4" />
+                  AI-Matched
+                </span>
+              )}
+            </h2>
+            <p className="text-base text-muted-foreground">
+              {useApiResults 
+                ? "AI-powered similar property recommendations" 
+                : "Explore similar listings and recent sales in the area"}
+            </p>
+          </div>
+        </div>
+
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active" className="flex items-center gap-2">
+          <TabsList className="mb-6">
+            <TabsTrigger value="active" className="flex items-center gap-2 px-6">
               <Home className="w-4 h-4" />
               {useApiResults ? "Similar Listings" : "Active Listings"} ({displayListings.length})
             </TabsTrigger>
-            <TabsTrigger value="sold" className="flex items-center gap-2">
+            <TabsTrigger value="sold" className="flex items-center gap-2 px-6">
               <TrendingUp className="w-4 h-4" />
               Sold Comparables ({soldComparables.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="active" className="mt-6">
-            {displayListings.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No similar listings found
-              </p>
+          <TabsContent value="active">
+            {displayListings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {displayListings.map((property) => (
+                  <PropertyCard
+                    key={property.mlsNumber}
+                    id={property.mlsNumber}
+                    title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                    price={property.listPrice}
+                    image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
+                    beds={property.details.numBedrooms}
+                    baths={property.details.numBathrooms}
+                    sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
+                    address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                    city={property.address.city}
+                    state={property.address.state}
+                    zipCode={property.address.zip}
+                    mlsNumber={property.mlsNumber}
+                  />
+                ))}
+              </div>
             ) : (
-              <ScrollArea className="w-full">
-                <div className="flex gap-4 pb-4">
-                  {displayListings.map((property) => (
-                    <div key={property.mlsNumber} className="flex-none w-[320px]">
-                      <PropertyCard 
-                        id={property.mlsNumber}
-                        title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
-                        price={property.listPrice}
-                        image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
-                        beds={property.details.numBedrooms}
-                        baths={property.details.numBathrooms}
-                        sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
-                        address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
-                        city={property.address.city}
-                        state={property.address.state}
-                        zipCode={property.address.zip}
-                        mlsNumber={property.mlsNumber}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              <div className="text-center py-12 text-muted-foreground">
+                <Home className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No similar active listings found at this time.</p>
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="sold" className="mt-6">
-            {soldComparables.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No sold comparables found
-              </p>
+          <TabsContent value="sold">
+            {soldComparables.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {soldComparables.map((property) => (
+                  <PropertyCard
+                    key={property.mlsNumber}
+                    id={property.mlsNumber}
+                    title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                    price={property.listPrice}
+                    image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
+                    beds={property.details.numBedrooms}
+                    baths={property.details.numBathrooms}
+                    sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
+                    address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
+                    city={property.address.city}
+                    state={property.address.state}
+                    zipCode={property.address.zip}
+                    mlsNumber={property.mlsNumber}
+                  />
+                ))}
+              </div>
             ) : (
-              <ScrollArea className="w-full">
-                <div className="flex gap-4 pb-4">
-                  {soldComparables.map((property) => (
-                    <div key={property.mlsNumber} className="flex-none w-[320px]">
-                      <PropertyCard 
-                        id={property.mlsNumber}
-                        title={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
-                        price={property.listPrice}
-                        image={property.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"}
-                        beds={property.details.numBedrooms}
-                        baths={property.details.numBathrooms}
-                        sqft={typeof property.details.sqft === 'string' ? parseInt(property.details.sqft) : property.details.sqft}
-                        address={property.address.fullAddress || `${property.address.streetNumber} ${property.address.streetName}`}
-                        city={property.address.city}
-                        state={property.address.state}
-                        zipCode={property.address.zip}
-                        mlsNumber={property.mlsNumber}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              <div className="text-center py-12 text-muted-foreground">
+                <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No recently sold comparables found at this time.</p>
+              </div>
             )}
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 };
